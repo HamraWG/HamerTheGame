@@ -1,0 +1,38 @@
+body
+{
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #171513;
+  /* #1d1b19 */
+}
+
+#game
+{
+  position: relative;
+}
+
+.name-field
+{
+  position: absolute;
+  right: 53px;
+  top: 148px;
+
+  box-sizing: border-box;
+  width: 318px;
+  height: 30px;
+
+  font: 300 12px 'Exo', sans-serif;
+  padding: 0 10px;
+  background: #000;
+  color: #fff;
+  border: 0;
+}
+
+.name-field:focus
+{
+  outline: 1px solid #4c220e;
+}
