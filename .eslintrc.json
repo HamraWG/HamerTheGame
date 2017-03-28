@@ -2,7 +2,10 @@
   "extends": "standard",
   "rules": {
     "semi": ["error", "always"],
-    "brace-style": ["error", "allman"]
+    "brace-style": ["error", "allman", { "allowSingleLine": true }]
+  },
+  "env": {
+    "browser": true
   },
   "parserOptions": {
     "ecmaVersion": 6,

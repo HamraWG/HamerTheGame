@@ -45,6 +45,7 @@ export default class extends Phaser.State
   {
     let nameField = document.createElement('input');
     nameField.setAttribute('type', 'text');
+    nameField.setAttribute('id', 'name-field');
     nameField.setAttribute('placeholder', 'Twój wspaniały pseudonim');
     nameField.setAttribute('maxlength', 16);
     nameField.classList.add('name-field');
@@ -76,14 +77,14 @@ export default class extends Phaser.State
 
   goToGames ()
   {
-    if (this.nameField.value.length > 2 && this.nameField.value.length <= 16)
+    if (this.nameField.value.length < 3 || this.nameField.value.length > 16)
     {
-      console.log('Go to the GameList!');
-      // this.start.start('GameList');
+      return this.createFieldError('Wprowadź swój tajemniczy pseudonim!');
     }
-    else
+
+    if (this.game.currentUser.create(this.nameField.value) === false)
     {
-      this.createFieldError('Wprowadź swój tajemniczy pseudonim!');
+      this.game.currentUser.name = this.nameField.value;
     }
   }
 }
