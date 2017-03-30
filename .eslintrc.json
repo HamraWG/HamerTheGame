@@ -2,7 +2,10 @@
   "extends": "standard",
   "rules": {
     "semi": ["error", "always"],
-    "brace-style": ["error", "allman", { "allowSingleLine": true }]
+    "brace-style": ["error", "allman", {
+      "allowSingleLine": true,
+      "allowSingleLineArrowFunctions": true
+    }]
   },
   "env": {
     "browser": true

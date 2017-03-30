@@ -45,7 +45,7 @@ export default class extends Phaser.State
   {
     let nameField = document.createElement('input');
     nameField.setAttribute('type', 'text');
-    nameField.setAttribute('id', 'name-field');
+    nameField.id = 'name-field';
     nameField.setAttribute('placeholder', 'Twój wspaniały pseudonim');
     nameField.setAttribute('maxlength', 16);
     nameField.classList.add('name-field');
@@ -55,18 +55,18 @@ export default class extends Phaser.State
     document.querySelector('#game').appendChild(nameField);
   }
 
-  createFieldError (errorText)
+  createErrorField (text)
   {
     if (this.fieldError)
     {
-      this.fieldError.setText(errorText);
+      this.fieldError.setText(text);
       return;
     }
 
     this.fieldError = this.game.add.text(
       this.game.camera.width - 53,
       210,
-      errorText,
+      text.toString(),
       {
         font: '400 12px Exo',
         fill: '#fd5151'
@@ -79,12 +79,14 @@ export default class extends Phaser.State
   {
     if (this.nameField.value.length < 3 || this.nameField.value.length > 16)
     {
-      return this.createFieldError('Wprowadź swój tajemniczy pseudonim!');
+      return this.createErrorField('Wprowadź swój tajemniczy pseudonim!');
     }
 
     if (this.game.currentUser.create(this.nameField.value) === false)
     {
       this.game.currentUser.name = this.nameField.value;
     }
+
+    this.state.start('LobbiesList');
   }
 }

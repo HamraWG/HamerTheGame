@@ -22,6 +22,7 @@ export default class extends Phaser.State
     });
 
     // Assets
+    this.load.image('m-logo', 'assets/images/m-logo.png');
     this.load.image('logo', 'assets/images/logo.png');
     this.load.spritesheet('menu__join-button', 'assets/images/menu/join-button.png', 318, 50);
 
@@ -41,7 +42,8 @@ export default class extends Phaser.State
 
   render ()
   {
-    if (this.fontsReady) this.state.start('Menu');
+    // FIXME(Ivan): Go to the Menu!
+    if (this.fontsReady) this.state.start('LobbiesList');
   }
 
   fontsLoaded ()

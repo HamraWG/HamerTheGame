@@ -2,8 +2,7 @@ class User
 {
   constructor (database)
   {
-    this._db = database;
-    this._dbRef = 'users';
+    this._dbRef = database.ref('users');
     this._fbUserStorageRef = 'firebase.user';
 
     this._key = null;
@@ -24,23 +23,20 @@ class User
 
   set name (name)
   {
-    if (name === undefined) throw new TypeError('`name` cannot be undefined');
+    if (typeof name !== 'string') throw new TypeError('name must be a non-empty string.');
 
-    // TODO(Ivan): Check if user exists
-
-    this._db.ref(`${this._dbRef}/${this._key}`).set({
+    this._dbRef.child(this._key).set({
       name: name.toString()
     });
   }
 
   create (name)
   {
-    if (name === undefined) throw new TypeError('`name` cannot be undefined');
-    // TODO(Ivan): Check if user exists properly
+    if (typeof name !== 'string') throw new TypeError('name must be a non-empty string.');
     if (this._key !== null) return false;
 
-    let user = this._db.ref(this._dbRef).push({
-      name: name.toString()
+    let user = this._dbRef.push({
+      name: name
     });
 
     this._key = user.key;
@@ -53,11 +49,12 @@ class User
     let key = localStorage.getItem(this._fbUserStorageRef);
     if (key === null) return false;
 
-    this._db.ref(`${this._dbRef}/${key}`).once('value').then(snapshot =>
-    {
+    this._dbRef.child(key).once('value').then(snapshot => {
       if (snapshot.val() === null) return false;
+      let data = snapshot.val();
 
-      this._key = snapshot.val().name;
+      this._key = key;
+      this._name = data.name;
       return true;
     });
   }

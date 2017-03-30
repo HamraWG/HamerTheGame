@@ -1,0 +1,83 @@
+.lobbies-box::-webkit-scrollbar
+{
+  position: absolute;
+  left: 5px;
+  width: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.lobbies-box::-webkit-scrollbar-thumb
+{
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.lobbies-box
+{
+  box-sizing: border-box;
+  width: 65%;
+  height: 100%;
+  padding-right: 10px;
+  margin-right: 10px;
+  overflow-y: auto;
+}
+
+.lobbies
+{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  font-family: 'Exo', sans-serif;
+  color: #fff;
+}
+
+.lobby
+{
+  margin-top: 10px;
+  padding: 6px 10px;
+  background: #181820;
+  will-change: background;
+  transition: 0.2s background linear;
+  animation: fadeInBottom 0.3s cubic-bezier(0.39, 0.575, 0.565, 1);
+}
+
+.lobby:first-of-type
+{
+  margin-top: 0;
+}
+
+.lobby:hover
+{
+  cursor: pointer;
+  background: #222220;
+}
+
+
+.lobby__name
+{
+  margin: 0;
+  font: 300 18px 'Exo', sans-serif;
+}
+
+.lobby__players
+{
+  margin: 5px 0 0 0;
+  font-size: 12px;
+}
+
+@keyframes fadeInBottom
+{
+  from
+  {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to
+  {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

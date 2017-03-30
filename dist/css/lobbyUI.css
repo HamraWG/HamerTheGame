@@ -1,0 +1,85 @@
+#lobby-ui
+{
+  box-sizing: border-box;
+  position: absolute;
+  overflow: hidden;
+
+  background: #0b0400;
+  padding: 20px;
+  display: flex;
+}
+
+.lobby-form
+{
+  width: 35%;
+}
+
+.header
+{
+  position: relative;
+  font: 400 16px 'Exo', sans-serif;
+  color: #fff;
+  margin: 0 0 20px 0;
+}
+
+.header:after
+{
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -7px;
+  width: 45%;
+  height: 1px;
+  background: #444;
+}
+
+
+.lobby-form input
+{
+  box-sizing: border-box;
+  height: 30px;
+  width: 100%;
+  padding: 0 10px;
+  background: #171513;
+  color: #fff;
+  border: 0;
+  font: 400 12px 'Exo', sans-serif;
+}
+
+.lobby-form input:focus
+{
+  outline: 1px solid #4c220e;
+}
+
+.lobby-form button
+{
+  box-sizing: border-box;
+  height: 35px;
+  width: 100%;
+  background: #171513;
+  color: #fff;
+  border: 0;
+  margin-top: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+.lobby-form button:focus
+{
+  outline: 0;
+  background: #1f1d1b;
+}
+
+.lobby-form button:hover
+{
+  background: #1f1d1b;
+}
+
+.error-field
+{
+  font: 400 12px 'Exo', sans-serif;
+  color: #fd5151;
+  text-align: right;
+  margin: 10px 0 0 0;
+}
