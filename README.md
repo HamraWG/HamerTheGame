@@ -11,4 +11,4 @@ Simple multiplayer shooter.
 - Web Font Loader.
 
 ## Compatibility, assist
-It's just adapted and tested on Google Chrome v57 and inaccessible for assistive technology
+It's just adapted and tested on Google Chrome v57 and inaccessible for assistive technology.

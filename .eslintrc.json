@@ -3,8 +3,7 @@
   "rules": {
     "semi": ["error", "always"],
     "brace-style": ["error", "allman", {
-      "allowSingleLine": true,
-      "allowSingleLineArrowFunctions": true
+      "allowSingleLine": true
     }]
   },
   "env": {

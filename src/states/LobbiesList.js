@@ -3,8 +3,6 @@ import config from './../config';
 
 import Lobbies from './../utils/Lobbies';
 
-'use strict';
-
 export default class extends Phaser.State
 {
   init ()
@@ -114,8 +112,16 @@ export default class extends Phaser.State
     let lobbiesList = document.createElement('ul');
     lobbiesList.classList.add('lobbies');
 
-    this.lobbies.on('create', (lobby) => {
+    this.lobbies.on('create', (lobby) =>
+    {
       lobbiesList.appendChild(this._createLobbyElement(lobby));
+    });
+
+    this.lobbies.on('remove', (lobby) =>
+    {
+      // TODO(Ivan): Add animation for removing lobby
+      let lobbyElement = lobbiesList.querySelector(`#lobby-${lobby.key}`);
+      lobbiesList.removeChild(lobbyElement);
     });
 
     return lobbiesList;
@@ -129,7 +135,6 @@ export default class extends Phaser.State
 
     lobbyElement.appendChild(this._createLobbyName(lobby.name));
     lobbyElement.appendChild(this._createLobbyPlayers(lobby.players, lobby.owner));
-
     return lobbyElement;
   }
 
@@ -155,7 +160,7 @@ export default class extends Phaser.State
     {
       let player = document.createElement('span');
       player.innerHTML = players[key];
-      player.classList.add('lobby__player')
+      player.classList.add('lobby__player');
       if (key === owner) player.classList.add('lobby__player--owner');
 
       if (lobbyPlayers.childElementCount !== 0) lobbyPlayers.innerHTML += ', ';

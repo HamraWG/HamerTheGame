@@ -1,5 +1,4 @@
 import Lobby from './Lobby';
-import User from './User';
 
 class Lobbies
 {
@@ -19,9 +18,9 @@ class Lobbies
   }
 
   /**
-   * Creates new lobby instance.
+   * Creates new Lobby instance.
    *
-   * @param {string} name
+   * @param {String} name
    * @param {User} owner
    * @returns {Lobbies}
    */
@@ -48,7 +47,7 @@ class Lobbies
   /**
    * .forEach invoked on Map of lobbies (Lobby.key, Lobby)
    *
-   * @param callback
+   * @param {Function} callback
    * @return void
    */
   forEach (callback)
@@ -64,7 +63,8 @@ class Lobbies
 
   _onNewLobby ()
   {
-    this._dbRef.on('child_added', (snapshot) => {
+    this._dbRef.on('child_added', (snapshot) =>
+    {
       let lobby = new Lobby(snapshot.ref);
       this._lobbies.set(snapshot.key, lobby);
 
@@ -74,14 +74,16 @@ class Lobbies
 
   _onRemoveLobby ()
   {
-    this._dbRef.on('child_removed', (snapshot) => {
-      this._lobbies.delete(snapshot.key);
+    this._dbRef.on('child_removed', (snapshot) =>
+    {
+      if (this._eventsStorage['remove']) this._eventsStorage['remove'].forEach((event) => event(this._lobbies.get(snapshot.key)));
 
-      if (this._eventsStorage['remove']) this._eventsStorage['remove'].forEach((event) => event(snapshot.key));
+      this._lobbies.delete(snapshot.key);
     });
   }
 
-  on (type, callback) {
+  on (type, callback)
+  {
     if (typeof type !== 'string' || !type) throw new TypeError('Type of event must be a non-empty string.');
     if (typeof callback !== 'function') throw new TypeError('Callback must be a function.');
 
@@ -102,7 +104,7 @@ class Lobbies
 
     let index = this._eventsStorage[type].indexOf(callback);
 
-    if (index == -1)
+    if (index === -1)
     {
       return null;
     }

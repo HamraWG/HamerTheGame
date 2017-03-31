@@ -24,8 +24,12 @@ class Lobby
 
   _onChange ()
   {
-    this._dbRef.on('value', (snapshot) => {
-      if (snapshot.exists() === false) return;
+    this._dbRef.on('value', (snapshot) =>
+    {
+      if (snapshot.exists() === false)
+      {
+        return;
+      }
 
       let data = snapshot.val();
       this._key = snapshot.key;
@@ -73,7 +77,8 @@ class Lobby
     return this._players;
   }
 
-  on (type, callback) {
+  on (type, callback)
+  {
     if (typeof type !== 'string' || !type) throw new TypeError('Type of event must be a non-empty string.');
     if (typeof callback !== 'function') throw new TypeError('Callback must be a function.');
 
@@ -94,14 +99,13 @@ class Lobby
 
     let index = this._eventsStorage[type].indexOf(callback);
 
-    if (index == -1)
+    if (index === -1)
     {
       return null;
     }
 
     this._eventsStorage[type].splice(index, 1);
   }
-
 }
 
 export default Lobby;
