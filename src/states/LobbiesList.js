@@ -135,6 +135,19 @@ export default class extends Phaser.State
 
     lobbyElement.appendChild(this._createLobbyName(lobby.name));
     lobbyElement.appendChild(this._createLobbyPlayers(lobby.players, lobby.owner));
+
+    lobby.on('change', (data) =>
+    {
+      let lobbyName = lobbyElement.querySelector('.lobby__name');
+      lobbyName.innerHTML = data.name;
+
+      let lobbyPlayers = lobbyElement.querySelector('.lobby__players');
+      for (let child of lobbyPlayers.children)child.remove();
+
+      let lobbyPlayersItems = this._createLobbyPlayersItems(data.players, data.owner);
+      lobbyPlayersItems.forEach((item) => lobbyPlayers.appendChild(item));
+    });
+
     return lobbyElement;
   }
 
@@ -153,21 +166,30 @@ export default class extends Phaser.State
   {
     if (typeof players !== 'object') throw new TypeError('players must be an object');
 
-    let lobbyPlayers = document.createElement('p');
+    let lobbyPlayers = document.createElement('ul');
     lobbyPlayers.classList.add('lobby__players');
+
+    let playersItems = this._createLobbyPlayersItems(players, owner);
+    playersItems.forEach((item) => lobbyPlayers.appendChild(item));
+
+    return lobbyPlayers;
+  }
+
+  _createLobbyPlayersItems (players, owner)
+  {
+    let playersList = new Set();
 
     for (let key in players)
     {
-      let player = document.createElement('span');
+      let player = document.createElement('li');
       player.innerHTML = players[key];
       player.classList.add('lobby__player');
       if (key === owner) player.classList.add('lobby__player--owner');
 
-      if (lobbyPlayers.childElementCount !== 0) lobbyPlayers.innerHTML += ', ';
-      lobbyPlayers.appendChild(player);
+      playersList.add(player);
     }
 
-    return lobbyPlayers;
+    return playersList;
   }
 
   createLobby (evt)

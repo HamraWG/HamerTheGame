@@ -63,8 +63,33 @@
 
 .lobby__players
 {
+  list-style: none;
   margin: 5px 0 0 0;
+  padding: 0;
+
+  display: flex;
+
   font-size: 12px;
+}
+
+.lobby__player
+{
+  color: #aaa;
+}
+
+.lobby__player--owner
+{
+  color: #fff;
+}
+
+.lobby__player:before
+{
+  content: ',  ';
+}
+
+.lobby__player:first-of-type:before
+{
+  content: none;
 }
 
 @keyframes fadeInBottom
