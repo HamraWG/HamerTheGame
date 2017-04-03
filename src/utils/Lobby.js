@@ -1,7 +1,10 @@
+/**
+ * Class representing a Lobby.
+ */
 class Lobby
 {
   /**
-   * @param {firebase.database.Reference}dbRef
+   * @param {Firebase.Database.Reference} dbRef
    */
   constructor (dbRef)
   {

@@ -1,26 +1,50 @@
+/**
+ * Class representing a User.
+ */
 class User
 {
+  /**
+   * Creates user instance
+   *
+   * @param {Firbase.Database} database The firebase database
+   */
   constructor (database)
   {
     this._dbRef = database.ref('users');
-    this._fbUserStorageRef = 'firebase.user';
+    this._dbKeyStorageRef = 'firebase.user';
 
     this._key = null;
     this._name = null;
 
-    this.getIfExists();
+    this.getOrCreateDbKey();
   }
 
+  /**
+   * Gets user key.
+   *
+   * @readonly
+   * @returns {String|null}
+   */
   get key ()
   {
     return this._key;
   }
 
+  /**
+   * Gets user name.
+   *
+   * @returns {String|null}
+   */
   get name ()
   {
     return this._name;
   }
 
+  /**
+   * Set user name.
+   *
+   * @param {String|null} name
+   */
   set name (name)
   {
     if (typeof name !== 'string') throw new TypeError('name must be a non-empty string.');
@@ -30,33 +54,43 @@ class User
     });
   }
 
-  create (name)
+  /**
+   * Gets or create database key.
+   *
+   * @returns {undefined}
+   */
+  getOrCreateDbKey ()
   {
-    if (typeof name !== 'string') throw new TypeError('name must be a non-empty string.');
-    if (this._key !== null) return false;
+    let storeKey = localStorage.getItem(this._dbKeyStorageRef);
 
-    let user = this._dbRef.push({
-      name: name
-    });
-
-    this._key = user.key;
-    localStorage.setItem(this._fbUserStorageRef, this._key);
-    return true;
+    if (storeKey)
+    {
+      this._dbRef.child(storeKey).once('value').then(snapshot =>
+      {
+        if (snapshot.exists() === false)
+        {
+          this.createNewKey();
+        }
+        else
+        {
+          this._key = snapshot.key;
+          this._name = snapshot.val().name;
+        }
+      });
+    }
   }
 
-  getIfExists ()
+  /**
+   * Creates new user in database and push reference key into localStorage.
+   *
+   * @returns {User}
+   */
+  createNewKey ()
   {
-    let key = localStorage.getItem(this._fbUserStorageRef);
-    if (key === null) return false;
+    this._key = this._dbRef.push().key;
+    localStorage.setItem(this._dbKeyStorageRef, this._key);
 
-    this._dbRef.child(key).once('value').then(snapshot => {
-      if (snapshot.val() === null) return false;
-      let data = snapshot.val();
-
-      this._key = key;
-      this._name = data.name;
-      return true;
-    });
+    return this;
   }
 }
 
