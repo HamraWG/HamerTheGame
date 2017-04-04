@@ -23,8 +23,8 @@ module.exports = {
   devtool: 'cheap-source-map',
   output: {
     pathinfo: true,
-    path: path.resolve(__dirname, 'dist/js'),
-    publicPath: './dist/js',
+    path: path.resolve(__dirname, 'public/js'),
+    publicPath: './public/js',
     filename: 'bundle.js'
   },
   watch: true,
@@ -38,7 +38,7 @@ module.exports = {
       host: process.env.IP || 'localhost',
       port: process.env.PORT || 3000,
       server: {
-        baseDir: ['./dist']
+        baseDir: ['./public']
       }
     })
   ],
