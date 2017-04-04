@@ -1,12 +1,14 @@
+'use strict';
+
 /**
  * Class representing a Lobby.
  */
 class Lobby
 {
   /**
-   * Creates lobby instance
+   * Creates lobby instance.
    *
-   * @param {Firebase.Database} dbRef The firebase database
+   * @param {firebase.Database} dbRef The firebase database
    */
   constructor (dbRef)
   {

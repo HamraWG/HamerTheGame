@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Class representing a User.
  */
@@ -6,7 +8,7 @@ class User
   /**
    * Creates user instance.
    *
-   * @param {Firebase.Database} database Firebase database
+   * @param {firebase.database} database Firebase database
    */
   constructor (database)
   {

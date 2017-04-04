@@ -1,10 +1,16 @@
+'use strict';
+
 import Lobby from './Lobby';
 
+/**
+ * Class representing Lobbies.
+ */
 class Lobbies
 {
   /**
+   * Creates Lobbies instance.
    *
-   * @param {firebase.database.Reference} database
+   * @param {firebase.Database.Reference} database
    */
   constructor (database)
   {
@@ -20,8 +26,8 @@ class Lobbies
   /**
    * Creates new Lobby instance.
    *
-   * @param {String} name
-   * @param {User} owner
+   * @param {string} name Lobby's name.
+   * @param {User} owner User instance.
    * @returns {Lobbies}
    */
   createLobby (name, owner)
@@ -44,13 +50,19 @@ class Lobbies
     return lobby;
   }
 
+  /**
+   * Gets Lobby instance.
+   *
+   * @param {string} key Lobby's key.
+   * @returns {Lobby|undefined}
+   */
   get (key)
   {
     return this._lobbies.get(key);
   }
 
   /**
-   * .forEach invoked on Map of lobbies (Lobby.key, Lobby)
+   * .forEach invoked on Map of lobbies (Lobby.key, Lobby).
    *
    * @param {Function} callback
    * @return void
@@ -60,12 +72,22 @@ class Lobbies
     this._lobbies.forEach((value, key, map) => callback);
   }
 
+  /**
+   * Executes all events listeners.
+   *
+   * @private
+   */
   _addEventsListeners ()
   {
     this._onNewLobby();
     this._onRemoveLobby();
   }
 
+  /**
+   * Adds new lobby to _lobbies and executes 'create' event.
+   *
+   * @private
+   */
   _onNewLobby ()
   {
     this._dbRef.on('child_added', (snapshot) =>
@@ -77,6 +99,11 @@ class Lobbies
     });
   }
 
+  /**
+   * Executes 'remove' event and removes lobby from _lobbies.
+   *
+   * @private
+   */
   _onRemoveLobby ()
   {
     this._dbRef.on('child_removed', (snapshot) =>
@@ -87,6 +114,13 @@ class Lobbies
     });
   }
 
+  /**
+   * Adds new event listener.
+   *
+   * @param {string} type Event's type.
+   * @param {function} callback Function that executes on event.
+   * @returns {Lobbies}
+   */
   on (type, callback)
   {
     if (typeof type !== 'string' || !type) throw new TypeError('Type of event must be a non-empty string.');
@@ -102,6 +136,13 @@ class Lobbies
     return this;
   }
 
+  /**
+   * Removes event listener.
+   *
+   * @param {string} type Event's type.
+   * @param {function} callback Function that will be remove.
+   * @returns {Lobbies}
+   */
   off (type, callback)
   {
     if (typeof type !== 'string' || !type) throw new TypeError('Type of event must be a non-empty string.');
