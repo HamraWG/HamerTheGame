@@ -12,9 +12,6 @@ export default class extends Phaser.State
     this.stage.backgroundColor = '#1d1b19';
   }
 
-  preload ()
-  {}
-
   create ()
   {
     let logo = this.game.add.image(

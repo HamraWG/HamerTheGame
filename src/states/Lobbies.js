@@ -11,7 +11,6 @@ export default class extends Phaser.State
   {
     this.lobbyUI = null;
     this.lobbies = new Lobbies(this.game.database);
-    this.game.lobbies = this.lobbies;
   }
 
   create ()
@@ -132,7 +131,6 @@ export default class extends Phaser.State
 
     this.lobbies.on('remove', (lobby) =>
     {
-      // TODO(Ivan): Add animation for removing lobby
       let lobbyElement = lobbiesList.querySelector(`#lobby-${lobby.key}`);
       lobbiesList.removeChild(lobbyElement);
     });

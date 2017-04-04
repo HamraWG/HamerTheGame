@@ -15,9 +15,7 @@ class Lobbies
   constructor (database)
   {
     this._dbRef = database.ref('lobbies');
-
     this._lobbies = new Map();
-
     this._eventsStorage = {};
 
     this._addEventsListeners();

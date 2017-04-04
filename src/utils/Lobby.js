@@ -13,13 +13,12 @@ class Lobby
   constructor (dbRef)
   {
     this._dbRef = dbRef;
+    this._eventsStorage = {};
 
     this._key = this._dbRef.key;
     this._name = this._dbRef.name;
     this._owner = this._dbRef.owner;
     this._players = this._dbRef.players;
-
-    this._eventsStorage = {};
 
     this._addEventsListeners();
   }
