@@ -1,6 +1,9 @@
 'use strict';
 const functions = require('firebase-functions');
 
+/**
+ * Removes lobby if last player left.
+ */
 exports.removeLobbyOnNonePlayers = functions.database.ref('/lobbies/{lobbyId}/players').onWrite((event) =>
 {
   if (event.data.exists() === false)

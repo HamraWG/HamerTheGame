@@ -4,9 +4,9 @@
 class User
 {
   /**
-   * Creates user instance
+   * Creates user instance.
    *
-   * @param {firebase.database} database The firebase database
+   * @param {Firebase.Database} database Firebase database
    */
   constructor (database)
   {
@@ -23,7 +23,7 @@ class User
    * Gets user key.
    *
    * @readonly
-   * @returns {String|null}
+   * @returns {string|null}
    */
   get key ()
   {
@@ -33,7 +33,7 @@ class User
   /**
    * Gets user name.
    *
-   * @returns {String|null}
+   * @returns {string|null}
    */
   get name ()
   {
@@ -43,12 +43,12 @@ class User
   /**
    * Set user name.
    *
-   * @param {String|null} name
+   * @param {string|null} name User name.
    */
   set name (name)
   {
     if (typeof name !== 'string') throw new TypeError('name must be a non-empty string.');
-    
+
     this._name = name;
     this._dbRef.child(this._key).set({
       name: name.toString()

@@ -115,6 +115,8 @@ class Lobbies
     }
 
     this._eventsStorage[type].splice(index, 1);
+
+    return this;
   }
 }
 

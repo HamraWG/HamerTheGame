@@ -7,8 +7,8 @@ export default class extends Phaser.State
   {
     this.lobby = lobby;
 
-    this.lobby.addPlayer(this.game.currentUser.key, this.game.currentUser.name);
-    this.lobby.removePlayerOnDisconnect(this.game.currentUser.key);
+    this.lobby.addPlayer(this.game.currentUser);
+    this.lobby.removePlayerOnDisconnect(this.game.currentUser);
   }
 
   create ()
@@ -18,7 +18,6 @@ export default class extends Phaser.State
 
   shutdown ()
   {
-
     this.lobbyUI.remove();
   }
 
@@ -36,7 +35,6 @@ export default class extends Phaser.State
 
   _createLobbyName ()
   {
-    let lobbyName = document.createElement('h2');
-    lobbyName.classList
+    // let lobbyName = document.createElement('h2');
   }
 }

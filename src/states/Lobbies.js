@@ -147,7 +147,8 @@ export default class extends Phaser.State
     lobbyElement.appendChild(this._createLobbyName(lobby.name));
     lobbyElement.appendChild(this._createLobbyPlayers(lobby.players, lobby.owner));
 
-    lobbyElement.addEventListener('click', () => {
+    lobbyElement.addEventListener('click', () =>
+    {
       this.joinLobby(lobby.key);
     });
 

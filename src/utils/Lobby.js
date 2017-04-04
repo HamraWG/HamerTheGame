@@ -1,7 +1,12 @@
+/**
+ * Class representing a Lobby.
+ */
 class Lobby
 {
   /**
-   * @param {Firebase.Database.Reference} dbRef
+   * Creates lobby instance
+   *
+   * @param {Firebase.Database} dbRef The firebase database
    */
   constructor (dbRef)
   {
@@ -17,11 +22,88 @@ class Lobby
     this._addEventsListeners();
   }
 
+  /**
+   * Gets lobby's key.
+   *
+   * @returns {string}
+   */
+  get key ()
+  {
+    return this._key;
+  }
+
+  /**
+   * Gets lobby's name.
+   *
+   * @returns {string}
+   */
+  get name ()
+  {
+    return this._name;
+  }
+
+  /**
+   * Sets lobby's name.
+   *
+   * @param {string} name Lobby's name.
+   */
+  set name (name)
+  {
+    if (typeof name !== 'string' || !name) throw new TypeError('name must be a non-empty string');
+
+    this._name = name;
+    this._dbRef.set({name: name});
+  }
+
+  /**
+   * Gets lobby's owner key.
+   *
+   * @returns {string}
+   */
+  get owner ()
+  {
+    return this._owner;
+  }
+
+  /**
+   * Sets lobby's owner.
+   *
+   * @param {string} ownerKey User's key.
+   */
+  set owner (ownerKey)
+  {
+    if (typeof ownerKey !== 'string' || !ownerKey) throw new TypeError('ownerKey must be a non-empty string.');
+
+    this._owner = ownerKey;
+    this._dbRef.set({owner: ownerKey});
+  }
+
+  /**
+   * Gets players in lobby.
+   *
+   * @readonly
+   * @returns {array}
+   */
+  get players ()
+  {
+    return this._players;
+  }
+
+  /**
+   * Executes all events listeners.
+   *
+   * @private
+   */
   _addEventsListeners ()
   {
     this._onChange();
   }
 
+  /**
+   * Replaces all lobby variables and executes 'change' event.
+   *
+   * @private
+   */
   _onChange ()
   {
     this._dbRef.on('value', (snapshot) =>
@@ -41,58 +123,53 @@ class Lobby
     });
   }
 
-  get key ()
+  /**
+   * Adds player to the lobby.
+   *
+   * @param {User} player User instance.
+   * @returns {Lobby}
+   */
+  addPlayer (player)
   {
-    return this._key;
+    this._players[player.key] = player.name;
+    this._dbRef.child('players').update({[player.key]: player.name});
+
+    return this;
   }
 
-  get name ()
+  /**
+   * Removes player from lobby if he leaves.
+   *
+   * @param {User} player User instance.
+   * @returns {Lobby}
+   */
+  removePlayerOnDisconnect (player)
   {
-    return this._name;
+    this._dbRef.child(`players/${player.key}`).onDisconnect().remove();
+
+    return this;
   }
 
-  set name (name)
+  /**
+   * Removes player from lobby.
+   *
+   * @param {User} player User instance.
+   * @returns {Lobby}
+   */
+  removePlayer (player)
   {
-    if (typeof name !== 'string' || !name) throw new TypeError('name must be a non-empty string');
+    this._dbRef.child(`players/${player.key}`).remove();
 
-    this._name = name;
-    this._dbRef.set({name: name});
+    return this;
   }
 
-  get owner ()
-  {
-    return this._owner;
-  }
-
-  set owner (ownerKey)
-  {
-    if (typeof ownerKey !== 'string' || !ownerKey) throw new TypeError('ownerKey must be a non-empty string.');
-
-    this._owner = ownerKey;
-    this._dbRef.set({owner: ownerKey});
-  }
-
-  get players ()
-  {
-    return this._players;
-  }
-
-  addPlayer (key, name)
-  {
-    this._players[key] = name;
-    this._dbRef.child('players').update({[key]: name});
-  }
-
-  removePlayerOnDisconnect (key)
-  {
-    this._dbRef.child(`players/${key}`).onDisconnect().remove();
-  }
-
-  removePlayer (key)
-  {
-    this._dbRef.child(`players/${key}`).remove();
-  }
-
+  /**
+   * Adds new event listener.
+   *
+   * @param {string} type Event's type.
+   * @param {function} callback Function that executes on event.
+   * @returns {Lobby}
+   */
   on (type, callback)
   {
     if (typeof type !== 'string' || !type) throw new TypeError('Type of event must be a non-empty string.');
@@ -108,6 +185,13 @@ class Lobby
     return this;
   }
 
+  /**
+   * Removes event listener.
+   *
+   * @param {string} type Event's type.
+   * @param {function} callback Function that will be remove.
+   * @returns {Lobby}
+   */
   off (type, callback)
   {
     if (typeof type !== 'string' || !type) throw new TypeError('Type of event must be a non-empty string.');
@@ -121,6 +205,8 @@ class Lobby
     }
 
     this._eventsStorage[type].splice(index, 1);
+
+    return this;
   }
 }
 
