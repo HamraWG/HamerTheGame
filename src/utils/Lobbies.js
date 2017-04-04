@@ -41,7 +41,12 @@ class Lobbies
 
     this._lobbies.set(lobby.key, new Lobby(lobby));
 
-    return this;
+    return lobby;
+  }
+
+  get (key)
+  {
+    return this._lobbies.get(key);
   }
 
   /**

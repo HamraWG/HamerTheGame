@@ -1,6 +1,3 @@
-/**
- * Class representing a Lobby.
- */
 class Lobby
 {
   /**
@@ -78,6 +75,22 @@ class Lobby
   get players ()
   {
     return this._players;
+  }
+
+  addPlayer (key, name)
+  {
+    this._players[key] = name;
+    this._dbRef.child('players').update({[key]: name});
+  }
+
+  removePlayerOnDisconnect (key)
+  {
+    this._dbRef.child(`players/${key}`).onDisconnect().remove();
+  }
+
+  removePlayer (key)
+  {
+    this._dbRef.child(`players/${key}`).remove();
   }
 
   on (type, callback)

@@ -7,7 +7,8 @@ import firebase from 'firebase';
 
 import BootState from './states/Boot';
 import MenuState from './states/Menu';
-import LobbiesListState from './states/LobbiesList';
+import LobbiesState from './states/Lobbies';
+import LobbyState from './states/Lobby';
 
 import User from './utils/User.js';
 
@@ -21,7 +22,8 @@ class Game extends Phaser.Game
 
     this.state.add('Boot', BootState, false);
     this.state.add('Menu', MenuState, false);
-    this.state.add('LobbiesList', LobbiesListState, false);
+    this.state.add('Lobbies', LobbiesState, false);
+    this.state.add('Lobby', LobbyState, false);
 
     this.firebase = firebase.initializeApp(config.firebase);
     this.database = this.firebase.database();
@@ -31,4 +33,4 @@ class Game extends Phaser.Game
   }
 }
 
-window.game = new Game();
+const game = new Game();

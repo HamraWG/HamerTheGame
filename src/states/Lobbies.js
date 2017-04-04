@@ -9,6 +9,7 @@ export default class extends Phaser.State
   {
     this.lobbyUI = null;
     this.lobbies = new Lobbies(this.game.database);
+    this.game.lobbies = this.lobbies;
   }
 
   create ()
@@ -16,6 +17,16 @@ export default class extends Phaser.State
     this.game.add.image(60, 11, 'm-logo');
 
     this.createLobbyUI();
+  }
+
+  shutdown ()
+  {
+    this.lobbyUI.remove();
+  }
+
+  joinLobby (key)
+  {
+    this.state.start('Lobby', true, false, this.lobbies.get(key));
   }
 
   createLobbyUI ()
@@ -136,6 +147,10 @@ export default class extends Phaser.State
     lobbyElement.appendChild(this._createLobbyName(lobby.name));
     lobbyElement.appendChild(this._createLobbyPlayers(lobby.players, lobby.owner));
 
+    lobbyElement.addEventListener('click', () => {
+      this.joinLobby(lobby.key);
+    });
+
     lobby.on('change', (data) =>
     {
       let lobbyName = lobbyElement.querySelector('.lobby__name');
@@ -203,6 +218,7 @@ export default class extends Phaser.State
       return false;
     }
 
-    this.lobbies.createLobby(lobbyName, this.game.currentUser);
+    let lobby = this.lobbies.createLobby(lobbyName, this.game.currentUser);
+    this.joinLobby(lobby.key);
   }
 }

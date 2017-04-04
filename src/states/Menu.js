@@ -48,7 +48,6 @@ export default class extends Phaser.State
     nameField.id = 'name-field';
     nameField.setAttribute('placeholder', 'Twój wspaniały pseudonim');
     nameField.setAttribute('maxlength', 16);
-    nameField.value = this.game.currentUser.name;
     nameField.classList.add('name-field');
 
     this.nameField = nameField;
@@ -83,11 +82,8 @@ export default class extends Phaser.State
       return this.createErrorField('Wprowadź swój tajemniczy pseudonim!');
     }
 
-    if (this.game.currentUser.name !== this.nameField.value)
-    {
-      this.game.currentUser.name = this.nameField.value;
-    }
+    this.game.currentUser.name = this.nameField.value;
 
-    this.state.start('LobbiesList');
+    this.state.start('Lobbies');
   }
 }

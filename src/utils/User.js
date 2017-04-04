@@ -6,7 +6,7 @@ class User
   /**
    * Creates user instance
    *
-   * @param {Firbase.Database} database The firebase database
+   * @param {firebase.database} database The firebase database
    */
   constructor (database)
   {
@@ -48,7 +48,8 @@ class User
   set name (name)
   {
     if (typeof name !== 'string') throw new TypeError('name must be a non-empty string.');
-
+    
+    this._name = name;
     this._dbRef.child(this._key).set({
       name: name.toString()
     });
@@ -63,7 +64,7 @@ class User
   {
     let storeKey = localStorage.getItem(this._dbKeyStorageRef);
 
-    if (storeKey)
+    if (storeKey !== null)
     {
       this._dbRef.child(storeKey).once('value').then(snapshot =>
       {
@@ -77,7 +78,11 @@ class User
           this._name = snapshot.val().name;
         }
       });
+
+      return;
     }
+
+    this.createNewKey();
   }
 
   /**
