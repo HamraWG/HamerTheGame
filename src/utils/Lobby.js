@@ -53,7 +53,7 @@ class Lobby
     if (typeof name !== 'string' || !name) throw new TypeError('name must be a non-empty string');
 
     this._name = name;
-    this._dbRef.set({name: name});
+    this._dbRef.update({name: name});
   }
 
   /**
@@ -76,7 +76,7 @@ class Lobby
     if (typeof ownerKey !== 'string' || !ownerKey) throw new TypeError('ownerKey must be a non-empty string.');
 
     this._owner = ownerKey;
-    this._dbRef.set({owner: ownerKey});
+    this._dbRef.update({owner: ownerKey});
   }
 
   /**

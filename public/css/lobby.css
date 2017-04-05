@@ -38,3 +38,27 @@
 {
   margin-right: 0;
 }
+
+.lobby-owner .lobby
+{
+  width: 65%;
+}
+
+.lobby-owner .lobby__player
+{
+  margin: 20px 5px;
+}
+
+.lobby-owner .lobby-form
+{
+  width: 100%;
+}
+
+.owner-box
+{
+  box-sizing: border-box;
+  width: 35%;
+  padding: 26px 20px 20px 20px;
+}
+
+

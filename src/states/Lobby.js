@@ -11,6 +11,8 @@ export default class extends Phaser.State
     this.lobby.offAllListeners();
     this.lobby.addPlayer(this.game.currentUser);
     this.lobby.removePlayerOnDisconnect(this.game.currentUser);
+
+    this.isUserAnOwner = this.game.currentUser.key === this.lobby.owner;
   }
 
   create ()
@@ -34,6 +36,7 @@ export default class extends Phaser.State
     this.lobbyUI.style.height = `${config.gameHeight - 80}px`;
 
     this.lobbyUI.appendChild(this.createPlayerBox());
+    if (this.isUserAnOwner === true) this.lobbyUI.appendChild(this.createOwnerBox());
     document.querySelector('#game').appendChild(this.lobbyUI);
   }
 
@@ -45,18 +48,22 @@ export default class extends Phaser.State
     lobbyPlayerBox.appendChild(this._createLobbyName());
     lobbyPlayerBox.appendChild(this._createLobbyPlayersList());
 
-    this.lobby.on('change', (data) =>
-    {
-      let lobbyName = lobbyPlayerBox.querySelector('.lobby__name');
-      lobbyName.innerHTML = data.name;
-
-      let lobbyPlayers = lobbyPlayerBox.querySelector('.lobby__players');
-      while (lobbyPlayers.hasChildNodes()) lobbyPlayers.removeChild(lobbyPlayers.lastChild);
-      let playersItems = this.createPlayersItems(data.players, data.owner);
-      playersItems.forEach((item) => lobbyPlayers.appendChild(item));
-    });
+    this.lobby.on('change', (data) => this.updateLobby(data));
 
     return lobbyPlayerBox;
+  }
+
+  updateLobby (data)
+  {
+    let lobbyPlayerBox = document.querySelector('.lobby');
+
+    let lobbyName = lobbyPlayerBox.querySelector('.lobby__name');
+    lobbyName.innerHTML = data.name;
+
+    let lobbyPlayers = lobbyPlayerBox.querySelector('.lobby__players');
+    while (lobbyPlayers.hasChildNodes()) lobbyPlayers.removeChild(lobbyPlayers.lastChild);
+    let playersItems = this.createPlayersItems(data.players, data.owner);
+    playersItems.forEach((item) => lobbyPlayers.appendChild(item));
   }
 
   _createLobbyName ()
@@ -94,5 +101,53 @@ export default class extends Phaser.State
     }
 
     return playersSet;
+  }
+
+  createOwnerBox ()
+  {
+    document.querySelector('#game').classList.add('lobby-owner');
+
+    let ownerBox = document.createElement('div');
+    ownerBox.classList.add('owner-box');
+    ownerBox.appendChild(this._createOwnerForm());
+
+    return ownerBox;
+  }
+
+  _createOwnerForm ()
+  {
+    let ownerForm = document.createElement('form');
+    ownerForm.classList.add('lobby-form');
+
+    ownerForm.appendChild(this._createOwnerFormNameInput());
+
+    return ownerForm;
+  }
+
+  _createOwnerFormNameInput ()
+  {
+    let input = document.createElement('input');
+    input.setAttribute('type', 'text');
+    input.id = 'lobby-name-field';
+    input.setAttribute('placeholder', 'Nazwa dla twojego lobby');
+    input.setAttribute('maxlength', '32');
+    input.classList.add('lobby-name-field');
+    input.value = this.lobby.name;
+
+    input.addEventListener('keyup', () =>
+    {
+      let newName = input.value;
+
+      if (newName.length >= 3 && newName.length <= 32)
+      {
+        this.lobby.name = newName;
+        input.classList.remove('error');
+        return;
+      }
+
+      input.classList.add('error');
+    });
+
+    return input;
   }
 }

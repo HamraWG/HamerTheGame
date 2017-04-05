@@ -44,11 +44,23 @@
   color: #fff;
   border: 0;
   font: 400 12px 'Exo', sans-serif;
+
+  margin-top: 10px;
+}
+
+.lobby-form input:first-of-type
+{
+  margin-top: 0;
 }
 
 .lobby-form input:focus
 {
   outline: 1px solid #4c220e;
+}
+
+.lobby-form input.error
+{
+  border: 1px solid red;
 }
 
 .lobby-form button

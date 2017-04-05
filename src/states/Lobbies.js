@@ -213,9 +213,14 @@ export default class extends Phaser.State
     evt.preventDefault();
 
     let lobbyName = document.querySelector('#lobby-name-field').value;
-    if (lobbyName.length < 3 || lobbyName.length > 32)
+    if (lobbyName.length === 0)
     {
       this.createErrorField('Wprowadź nazwę dla niesamowitego lobby!');
+      return false;
+    }
+    else if (lobbyName.length < 3 || lobbyName.length > 32)
+    {
+      this.createErrorField('Niesamowite lobby ma od 3-32 znaków. Trzymaj się zasad niesamowitości!');
       return false;
     }
 

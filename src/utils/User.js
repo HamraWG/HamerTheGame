@@ -52,7 +52,7 @@ class User
     if (typeof name !== 'string') throw new TypeError('name must be a non-empty string.');
 
     this._name = name;
-    this._dbRef.child(this._key).set({
+    this._dbRef.child(this._key).update({
       name: name.toString()
     });
   }

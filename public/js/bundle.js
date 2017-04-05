@@ -4341,8 +4341,11 @@ var _class = function (_Phaser$State) {
       evt.preventDefault();
 
       var lobbyName = document.querySelector('#lobby-name-field').value;
-      if (lobbyName.length < 3 || lobbyName.length > 32) {
+      if (lobbyName.length === 0) {
         this.createErrorField('Wprowadź nazwę dla niesamowitego lobby!');
+        return false;
+      } else if (lobbyName.length < 3 || lobbyName.length > 32) {
+        this.createErrorField('Niesamowite lobby ma od 3-32 znaków. Trzymaj się zasad niesamowitości!');
         return false;
       }
 
@@ -4406,6 +4409,8 @@ var _class = function (_Phaser$State) {
       this.lobby.offAllListeners();
       this.lobby.addPlayer(this.game.currentUser);
       this.lobby.removePlayerOnDisconnect(this.game.currentUser);
+
+      this.isUserAnOwner = this.game.currentUser.key === this.lobby.owner;
     }
   }, {
     key: 'create',
@@ -4429,6 +4434,7 @@ var _class = function (_Phaser$State) {
       this.lobbyUI.style.height = _config2.default.gameHeight - 80 + 'px';
 
       this.lobbyUI.appendChild(this.createPlayerBox());
+      if (this.isUserAnOwner === true) this.lobbyUI.appendChild(this.createOwnerBox());
       document.querySelector('#game').appendChild(this.lobbyUI);
     }
   }, {
@@ -4443,19 +4449,26 @@ var _class = function (_Phaser$State) {
       lobbyPlayerBox.appendChild(this._createLobbyPlayersList());
 
       this.lobby.on('change', function (data) {
-        var lobbyName = lobbyPlayerBox.querySelector('.lobby__name');
-        lobbyName.innerHTML = data.name;
-
-        var lobbyPlayers = lobbyPlayerBox.querySelector('.lobby__players');
-        while (lobbyPlayers.hasChildNodes()) {
-          lobbyPlayers.removeChild(lobbyPlayers.lastChild);
-        }var playersItems = _this2.createPlayersItems(data.players, data.owner);
-        playersItems.forEach(function (item) {
-          return lobbyPlayers.appendChild(item);
-        });
+        return _this2.updateLobby(data);
       });
 
       return lobbyPlayerBox;
+    }
+  }, {
+    key: 'updateLobby',
+    value: function updateLobby(data) {
+      var lobbyPlayerBox = document.querySelector('.lobby');
+
+      var lobbyName = lobbyPlayerBox.querySelector('.lobby__name');
+      lobbyName.innerHTML = data.name;
+
+      var lobbyPlayers = lobbyPlayerBox.querySelector('.lobby__players');
+      while (lobbyPlayers.hasChildNodes()) {
+        lobbyPlayers.removeChild(lobbyPlayers.lastChild);
+      }var playersItems = this.createPlayersItems(data.players, data.owner);
+      playersItems.forEach(function (item) {
+        return lobbyPlayers.appendChild(item);
+      });
     }
   }, {
     key: '_createLobbyName',
@@ -4494,6 +4507,54 @@ var _class = function (_Phaser$State) {
       }
 
       return playersSet;
+    }
+  }, {
+    key: 'createOwnerBox',
+    value: function createOwnerBox() {
+      document.querySelector('#game').classList.add('lobby-owner');
+
+      var ownerBox = document.createElement('div');
+      ownerBox.classList.add('owner-box');
+      ownerBox.appendChild(this._createOwnerForm());
+
+      return ownerBox;
+    }
+  }, {
+    key: '_createOwnerForm',
+    value: function _createOwnerForm() {
+      var ownerForm = document.createElement('form');
+      ownerForm.classList.add('lobby-form');
+
+      ownerForm.appendChild(this._createOwnerFormNameInput());
+
+      return ownerForm;
+    }
+  }, {
+    key: '_createOwnerFormNameInput',
+    value: function _createOwnerFormNameInput() {
+      var _this3 = this;
+
+      var input = document.createElement('input');
+      input.setAttribute('type', 'text');
+      input.id = 'lobby-name-field';
+      input.setAttribute('placeholder', 'Nazwa dla twojego lobby');
+      input.setAttribute('maxlength', '32');
+      input.classList.add('lobby-name-field');
+      input.value = this.lobby.name;
+
+      input.addEventListener('keyup', function () {
+        var newName = input.value;
+
+        if (newName.length >= 3 && newName.length <= 32) {
+          _this3.lobby.name = newName;
+          input.classList.remove('error');
+          return;
+        }
+
+        input.classList.add('error');
+      });
+
+      return input;
     }
   }]);
 
@@ -5053,7 +5114,7 @@ var Lobby = function () {
       if (typeof name !== 'string' || !name) throw new TypeError('name must be a non-empty string');
 
       this._name = name;
-      this._dbRef.set({ name: name });
+      this._dbRef.update({ name: name });
     }
 
     /**
@@ -5078,7 +5139,7 @@ var Lobby = function () {
       if (typeof ownerKey !== 'string' || !ownerKey) throw new TypeError('ownerKey must be a non-empty string.');
 
       this._owner = ownerKey;
-      this._dbRef.set({ owner: ownerKey });
+      this._dbRef.update({ owner: ownerKey });
     }
 
     /**
@@ -5222,7 +5283,7 @@ var User = function () {
       if (typeof name !== 'string') throw new TypeError('name must be a non-empty string.');
 
       this._name = name;
-      this._dbRef.child(this._key).set({
+      this._dbRef.child(this._key).update({
         name: name.toString()
       });
     }
