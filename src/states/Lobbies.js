@@ -142,7 +142,7 @@ export default class extends Phaser.State
   {
     let lobbyElement = document.createElement('li');
     lobbyElement.id = `lobby-${lobby.key}`;
-    lobbyElement.classList.add('lobbies__item', 'lobby');
+    lobbyElement.classList.add('lobbies__item', 'lobby-item');
 
     lobbyElement.appendChild(this._createLobbyName(lobby.name));
     lobbyElement.appendChild(this._createLobbyPlayers(lobby.players, lobby.owner));
@@ -154,11 +154,11 @@ export default class extends Phaser.State
 
     lobby.on('change', (data) =>
     {
-      let lobbyName = lobbyElement.querySelector('.lobby__name');
+      let lobbyName = lobbyElement.querySelector('.lobby-item__name');
       lobbyName.innerHTML = data.name;
 
-      let lobbyPlayers = lobbyElement.querySelector('.lobby__players');
-      for (let child of lobbyPlayers.children)child.remove();
+      let lobbyPlayers = lobbyElement.querySelector('.lobby-item__players');
+      while (lobbyPlayers.hasChildNodes()) lobbyPlayers.removeChild(lobbyPlayers.lastChild);
 
       let lobbyPlayersItems = this._createLobbyPlayersItems(data.players, data.owner);
       lobbyPlayersItems.forEach((item) => lobbyPlayers.appendChild(item));
@@ -172,7 +172,7 @@ export default class extends Phaser.State
     if (typeof name !== 'string') throw new TypeError('name must be a non-empty string');
 
     let lobbyName = document.createElement('h3');
-    lobbyName.classList.add('lobby__name');
+    lobbyName.classList.add('lobby-item__name');
     lobbyName.innerHTML = name;
 
     return lobbyName;
@@ -183,7 +183,7 @@ export default class extends Phaser.State
     if (typeof players !== 'object') throw new TypeError('players must be an object');
 
     let lobbyPlayers = document.createElement('ul');
-    lobbyPlayers.classList.add('lobby__players');
+    lobbyPlayers.classList.add('lobby-item__players');
 
     let playersItems = this._createLobbyPlayersItems(players, owner);
     playersItems.forEach((item) => lobbyPlayers.appendChild(item));
@@ -199,8 +199,8 @@ export default class extends Phaser.State
     {
       let player = document.createElement('li');
       player.innerHTML = players[key];
-      player.classList.add('lobby__player');
-      if (key === owner) player.classList.add('lobby__player--owner');
+      player.classList.add('lobby-item__player');
+      if (key === owner) player.classList.add('lobby-item__player--owner');
 
       playersList.add(player);
     }

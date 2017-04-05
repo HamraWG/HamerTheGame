@@ -76,9 +76,13 @@ export default class extends Phaser.State
 
   goToGames ()
   {
-    if (this.nameField.value.length < 3 || this.nameField.value.length > 16)
+    if (this.nameField.value.length === 0)
     {
       return this.createErrorField('Wprowadź swój tajemniczy pseudonim!');
+    }
+    else if (this.nameField.value.length < 3 || this.nameField.value.length > 16)
+    {
+      return this.createErrorField('Twój tajemniczy pseudonim może mieć od 3-16 znaków!');
     }
 
     this.game.currentUser.name = this.nameField.value;

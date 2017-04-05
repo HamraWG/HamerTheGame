@@ -209,6 +209,18 @@ class Lobby
 
     return this;
   }
+
+  /**
+   * Removes all events listeners.
+   *
+   * @returns {Lobby}
+   */
+  offAllListeners ()
+  {
+    this._eventsStorage = {};
+
+    return this;
+  }
 }
 
 export default Lobby;

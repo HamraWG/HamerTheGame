@@ -1,0 +1,40 @@
+.lobby
+{
+  width: 100%;
+  color: #fff;
+  font-family: 'Exo', sans-serif;
+}
+
+.lobby__name:after
+{
+  width: 100%;
+}
+
+.lobby__players
+{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.lobby__player
+{
+  box-sizing: border-box;
+  flex-basis: 20%;
+  padding: 20px;
+  margin: 20px;
+  font-size: 14px;
+  background: #282835;
+}
+
+.lobby__player:nth-of-type(4n+1)
+{
+  margin-left: 0;
+}
+
+.lobby__player:nth-of-type(4n+4)
+{
+  margin-right: 0;
+}

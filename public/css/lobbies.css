@@ -33,7 +33,7 @@
   color: #fff;
 }
 
-.lobby
+.lobby-item
 {
   margin-top: 10px;
   padding: 6px 10px;
@@ -43,25 +43,25 @@
   animation: fadeInBottom 0.3s cubic-bezier(0.39, 0.575, 0.565, 1);
 }
 
-.lobby:first-of-type
+.lobby-item:first-of-type
 {
   margin-top: 0;
 }
 
-.lobby:hover
+.lobby-item:hover
 {
   cursor: pointer;
   background: #222220;
 }
 
 
-.lobby__name
+.lobby-item__name
 {
   margin: 0;
   font: 300 18px 'Exo', sans-serif;
 }
 
-.lobby__players
+.lobby-item__players
 {
   list-style: none;
   margin: 5px 0 0 0;
@@ -72,22 +72,22 @@
   font-size: 12px;
 }
 
-.lobby__player
+.lobby-item__player
 {
   color: #aaa;
 }
 
-.lobby__player--owner
+.lobby-item__player--owner
 {
   color: #fff;
 }
 
-.lobby__player:before
+.lobby-item__player:before
 {
   content: ',  ';
 }
 
-.lobby__player:first-of-type:before
+.lobby-item__player:first-of-type:before
 {
   content: none;
 }
