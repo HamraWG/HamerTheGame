@@ -19,6 +19,8 @@ class Lobby
     this._name = this._dbRef.name;
     this._owner = this._dbRef.owner;
     this._players = this._dbRef.players;
+    this._map = this._dbRef.map;
+    this._gameType = this._dbRef.gameType;
 
     this._addEventsListeners();
   }
@@ -91,40 +93,6 @@ class Lobby
   }
 
   /**
-   * Executes all events listeners.
-   *
-   * @private
-   */
-  _addEventsListeners ()
-  {
-    this._onChange();
-  }
-
-  /**
-   * Replaces all lobby variables and executes 'change' event.
-   *
-   * @private
-   */
-  _onChange ()
-  {
-    this._dbRef.on('value', (snapshot) =>
-    {
-      if (snapshot.exists() === false)
-      {
-        return;
-      }
-
-      let data = snapshot.val();
-      this._key = snapshot.key;
-      this._name = data.name;
-      this._owner = data.owner;
-      this._players = data.players;
-
-      if (this._eventsStorage['change']) this._eventsStorage['change'].forEach((event) => event(data));
-    });
-  }
-
-  /**
    * Adds player to the lobby.
    *
    * @param {User} player User instance.
@@ -162,6 +130,88 @@ class Lobby
     this._dbRef.child(`players/${player.key}`).remove();
 
     return this;
+  }
+
+  /**
+   * Gets Game's map.
+   *
+   * @returns {string}
+   */
+  get map ()
+  {
+    return this._map;
+  }
+
+  /**
+   * Sets game's map.
+   *
+   * @param {string} map Game's map.
+   */
+  set map (map)
+  {
+    if (typeof map !== 'string' || !map) throw new TypeError('`map` must be a non-empty string');
+
+    this._map = map;
+    this._dbRef.update({map: map});
+  }
+
+  /**
+   * Gets Game's type.
+   *
+   * @returns {string}
+   */
+  get gameType ()
+  {
+    return this._gameType;
+  }
+
+  /**
+   * Sets game's type.
+   *
+   * @param {string} gameType Game's type.
+   */
+  set gameType (gameType)
+  {
+    if (typeof gameType !== 'string' || !gameType) throw new TypeError('`gameType` must be a non-empty string');
+
+    this._gameType = gameType;
+    this._dbRef.update({gameType: gameType});
+  }
+
+  /**
+   * Executes all events listeners.
+   *
+   * @private
+   */
+  _addEventsListeners ()
+  {
+    this._onChange();
+  }
+
+  /**
+   * Replaces all lobby variables and executes 'change' event.
+   *
+   * @private
+   */
+  _onChange ()
+  {
+    this._dbRef.on('value', (snapshot) =>
+    {
+      if (snapshot.exists() === false)
+      {
+        return;
+      }
+
+      let data = snapshot.val();
+      this._key = snapshot.key;
+      this._name = data.name;
+      this._owner = data.owner;
+      this._players = data.players;
+      this._map = data.map;
+      this._gameType = data.gameType;
+
+      if (this._eventsStorage['change']) this._eventsStorage['change'].forEach((event) => event(data));
+    });
   }
 
   /**

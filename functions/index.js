@@ -19,3 +19,24 @@ exports.removeLobbyOnNonePlayers = functions.database.ref('/lobbies/{lobbyId}/pl
       });
   }
 });
+
+/**
+ * Changes lobby's owner if current owner left.
+ */
+exports.changeLobbyOnwerOnOwnerDisconnect = functions.database.ref('/lobbies/{lobbyId}').onWrite((event) =>
+{
+  if (event.data.exists() === true && event.data.val().players)
+  {
+    let data = event.data.val();
+
+    if (event.data.child(`players/${data.owner}`).exists() === false)
+    {
+      let firstPlayer = Object.keys(data.players)[0];
+
+      return event.data.ref.update({owner: firstPlayer}, () =>
+      {
+        console.log(`Owner of Lobby '${event.params.lobbyId}' has been changed!`);
+      });
+    }
+  }
+});

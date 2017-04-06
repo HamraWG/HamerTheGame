@@ -3,6 +3,9 @@
 import Phaser from 'phaser';
 import config from './../config';
 
+import CreateGameListener from './../utils/CreateGameListener';
+import GameCreator from './../utils/GameCreator';
+
 export default class extends Phaser.State
 {
   init (lobby)
@@ -12,18 +15,47 @@ export default class extends Phaser.State
     this.lobby.addPlayer(this.game.currentUser);
     this.lobby.removePlayerOnDisconnect(this.game.currentUser);
 
-    this.isUserAnOwner = this.game.currentUser.key === this.lobby.owner;
+    this.createGameListener = new CreateGameListener(this.game.database, this.lobby.key);
+    this.isOwner = false;
   }
 
   create ()
   {
     this.game.add.image(60, 11, 'm-logo');
     this.createLobbyUI();
+    this.isUserAnOwner(this.lobby.owner);
   }
 
   shutdown ()
   {
     this.lobbyUI.remove();
+  }
+
+  render ()
+  {
+    if (this.createGameListener.created === true)
+    {
+      // WE NEED TO GO DEEPEEEER!
+    }
+  }
+
+  isUserAnOwner (owner)
+  {
+    if (this.game.currentUser.key === owner)
+    {
+      console.log('elo');
+      this.isOwner = true;
+      this.gameCreator = new GameCreator(this.game.database);
+
+      if (!document.querySelector('#lobby-ui .owner-box'))
+      {
+        this.lobbyUI.appendChild(this.createOwnerBox());
+      }
+    }
+    else
+    {
+      this.isOwner = false;
+    }
   }
 
   createLobbyUI ()
@@ -36,7 +68,6 @@ export default class extends Phaser.State
     this.lobbyUI.style.height = `${config.gameHeight - 80}px`;
 
     this.lobbyUI.appendChild(this.createPlayerBox());
-    if (this.isUserAnOwner === true) this.lobbyUI.appendChild(this.createOwnerBox());
     document.querySelector('#game').appendChild(this.lobbyUI);
   }
 
@@ -64,6 +95,8 @@ export default class extends Phaser.State
     while (lobbyPlayers.hasChildNodes()) lobbyPlayers.removeChild(lobbyPlayers.lastChild);
     let playersItems = this.createPlayersItems(data.players, data.owner);
     playersItems.forEach((item) => lobbyPlayers.appendChild(item));
+
+    this.isUserAnOwner(data.owner);
   }
 
   _createLobbyName ()
@@ -120,6 +153,7 @@ export default class extends Phaser.State
     ownerForm.classList.add('lobby-form');
 
     ownerForm.appendChild(this._createOwnerFormNameInput());
+    ownerForm.appendChild(this._createStartGameButton());
 
     return ownerForm;
   }
@@ -149,5 +183,21 @@ export default class extends Phaser.State
     });
 
     return input;
+  }
+
+  _createStartGameButton ()
+  {
+    let button = document.createElement('button');
+    button.setAttribute('type', 'button');
+    button.innerHTML = 'Rozpocznij grę';
+
+    button.addEventListener('click', () => this.createGame());
+
+    return button;
+  }
+
+  createGame ()
+  {
+    this.gameCreator.create(this.lobby.key, this.lobby.name, this.lobby.players, this.lobby.map, this.lobby.gameType);
   }
 }
