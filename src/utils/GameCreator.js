@@ -8,7 +8,7 @@ class GameCreator
   /**
    * Creates GameCreator instance.
    *
-   * @param {firebase.Database} [database]
+   * @param {firebase.Database} database
    */
   constructor (database)
   {
