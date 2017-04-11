@@ -48,6 +48,9 @@ export default class extends Phaser.State
     nameField.setAttribute('placeholder', 'Twój wspaniały pseudonim');
     nameField.setAttribute('maxlength', 16);
     nameField.classList.add('name-field');
+    nameField.style.left = `${this.game.world.centerX * 1.5}px`;
+    nameField.style.top = `${this.game.world.centerY - 100}px`;
+    nameField.style.transform = 'translate(-50%, -50%)';
 
     this.nameField = nameField;
 
@@ -63,15 +66,15 @@ export default class extends Phaser.State
     }
 
     this.fieldError = this.game.add.text(
-      this.game.camera.width - 53,
-      210,
+      this.game.world.centerX * 1.5,
+      this.game.world.centerY - 70,
       text.toString(),
       {
-        font: '400 12px Exo',
+        font: '400 13px Exo',
         fill: '#fd5151'
       }
     );
-    this.fieldError.anchor.setTo(1, 1);
+    this.fieldError.anchor.setTo(0.5, 0.5);
   }
 
   goToGames ()

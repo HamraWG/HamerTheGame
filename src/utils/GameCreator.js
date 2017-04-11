@@ -60,10 +60,17 @@ class GameCreator
 
       playersConfig[pKey] = {
         name: players[pKey],
+        champion: 'one',
+        online: true,
         alive: false,
         position: {
-          x: null,
-          y: null
+          x: -500,
+          y: -500
+        },
+        stats: {
+          kills: 0,
+          deaths: 0,
+          assists: 0
         },
         eq: {}
       };

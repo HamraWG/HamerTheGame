@@ -8,6 +8,7 @@ import BootState from './states/Boot';
 import MenuState from './states/Menu';
 import LobbiesState from './states/Lobbies';
 import LobbyState from './states/Lobby';
+import GameLoaderState from './states/GameLoader';
 import GameState from './states/Game';
 
 import User from './utils/User.js';
@@ -24,6 +25,7 @@ class Game extends Phaser.Game
     this.state.add('Menu', MenuState, false);
     this.state.add('Lobbies', LobbiesState, false);
     this.state.add('Lobby', LobbyState, false);
+    this.state.add('GameLoader', GameLoaderState, false);
     this.state.add('Game', GameState, false);
 
     this.currentUser = new User();

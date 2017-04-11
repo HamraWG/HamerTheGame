@@ -1,29 +1,26 @@
 'use strict';
 
-import {database} from '../utils';
+import Phaser from 'phaser';
+import EventEmitter from 'wolfy87-eventemitter';
 
 /**
  * Class representing Player.
  */
-class Player
+class Player extends Phaser.Sprite
 {
   /**
    * Creates Player instance.
+   *
+   * @param {Phaser.Game} game
+   * @param {firebase.Database} dbRef
    */
-  constructor ()
+  constructor (game, dbRef)
   {
-    this._dbRef = database;
+    super(game, -500, -500, 'champ:one', 0);
+    this._dbRef = dbRef;
+    this.eventEmitter = new EventEmitter();
 
-    this._key = this._dbRef.key;
-    this._name = this._dbRef.name;
-    this._hp = this._dbRef.hp;
-    this._position = {
-      x: this._dbRef.position.x || null,
-      y: this._dbRef.position.y || null
-    };
-    this._alive = this._dbRef.alive;
-    this._eq = this._dbRef.eq;
-
+    this._addAnimations();
     this._update();
   }
 
@@ -38,33 +35,16 @@ class Player
 
       let data = snapshot.val();
 
+      this._key = snapshot.key;
+      this._name = data.name;
+      this._hp = data.hp;
       this._alive = data.alive;
       this._position = data.position;
-      this._hp = data.hp;
+      this._stats = data.stats;
       this._eq = data.eq;
+
+      this.eventEmitter.emitEvent('value');
     });
-  }
-
-  /**
-   * Sets player's position
-   *
-   * @param {number} x Player's position relative to the vertical axis
-   * @param {number} y Player's position relative to the horizontal axis
-   * @returns {Player}
-   */
-  setPosition (x, y)
-  {
-    if (typeof x !== 'number') throw new TypeError('`x` must be a number!');
-    if (typeof x !== 'number') throw new TypeError('`y` must be a number!');
-
-    this._dbRef.update({
-      position: {
-        x: x,
-        y: y
-      }
-    });
-
-    return this;
   }
 
   /**
@@ -78,6 +58,16 @@ class Player
       x: this._position.x,
       y: this._position.y
     };
+  }
+
+  _addAnimations ()
+  {
+    let animationSpeed = 10;
+
+    this.animations.add('down', [0, 1, 2, 3], animationSpeed, true);
+    this.animations.add('left', [4, 5, 6, 7], animationSpeed, true);
+    this.animations.add('right', [8, 9, 10, 11], animationSpeed, true);
+    this.animations.add('up', [12, 13, 14, 15], animationSpeed, true);
   }
 }
 

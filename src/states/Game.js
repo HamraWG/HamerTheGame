@@ -1,53 +1,46 @@
 'use strict';
 
 import Phaser from 'phaser';
+import CurrentPlayer from '../utils/CurrentPlayer';
+import Player from '../utils/Player';
 
 export default class extends Phaser.State
 {
-  init ()
-  {}
-
-  preload ()
+  init (dbGame)
   {
-    this.game.load.tilemap('map', 'assets/maps/Elo.json', null, Phaser.Tilemap.TILED_JSON);
-    this.game.load.image('tiles', 'assets/maps/tiles.png');
-    this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 48);
+    this.dbGame = dbGame;
   }
 
   create ()
   {
-    let map = this.game.add.tilemap('map');
-    map.addTilesetImage('tiles');
+    let map = this.game.add.tilemap(`map-${this.dbGame.map}`);
+    map.addTilesetImage(`tiles-${this.dbGame.map}`);
 
-    let layer = map.createLayer(0);
-    layer.resizeWorld();
+    let ground = map.createLayer('ground');
+    ground.resizeWorld();
+    let walls = map.createLayer('walls');
+    walls.resizeWorld();
 
-    this.player = this.game.add.sprite(0, 0, 'champ:one', 0);
-    this.player.smoothed = false;
-    this.player.animations.add('down', [0, 1, 2, 3], 10, true);
-    this.player.animations.add('up', [12, 13, 14, 15], 10, true);
+    this.createPlayers();
+  }
 
-    this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
-    this.cursors = this.game.input.keyboard.createCursorKeys();
+  createPlayers ()
+  {
+    for (let player in this.dbGame.players)
+    {
+      let p = new Player(this.game, this.dbGame.getPlayerRef(player));
+      this.game.add.existing(p);
+
+      p.eventEmitter.on('value', () =>
+      {
+        p.x = p._position.x;
+        p.y = p._position.y;
+      });
+    }
   }
 
   update ()
   {
-    this.player.body.velocity.set(0);
 
-    if (this.cursors.down.isDown)
-    {
-      this.player.body.velocity.y = 100;
-      this.player.play('down');
-    }
-    else if (this.cursors.up.isDown)
-    {
-      this.player.body.velocity.y = -100;
-      this.player.play('up');
-    }
-    else
-    {
-      this.player.animations.stop();
-    }
   }
 }

@@ -29,7 +29,7 @@ class Lobbies
    */
   createLobby (name, owner)
   {
-    if (typeof name !== 'string' || !name) throw new TypeError('name must be a non-empty string');
+    if (typeof name !== 'string') throw new TypeError('name must be a non-empty string');
 
     let lobby = this._dbRef.push({
       name: name,
@@ -39,7 +39,7 @@ class Lobbies
       },
 
       gameType: 'deathmatch',
-      map: 'lul'
+      map: 'pixel_dust'
     });
 
     this._lobbies.set(lobby.key, new Lobby(lobby));

@@ -1,7 +1,7 @@
 export default
 {
-  gameWidth: 848,
-  gameHeight: 480,
+  gameWidth: window.innerWidth,
+  gameHeight: window.innerHeight,
 
   firebase: {
     apiKey: 'AIzaSyB_2EWiop4bh5Uv8a4NKmsuV95wNEXMw2s',

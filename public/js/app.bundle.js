@@ -1688,8 +1688,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  gameWidth: 848,
-  gameHeight: 480,
+  gameWidth: window.innerWidth,
+  gameHeight: window.innerHeight,
 
   firebase: {
     apiKey: 'AIzaSyB_2EWiop4bh5Uv8a4NKmsuV95wNEXMw2s',
@@ -3320,6 +3320,10 @@ var _Lobby = __webpack_require__(126);
 
 var _Lobby2 = _interopRequireDefault(_Lobby);
 
+var _GameLoader = __webpack_require__(330);
+
+var _GameLoader2 = _interopRequireDefault(_GameLoader);
+
 var _Game = __webpack_require__(124);
 
 var _Game2 = _interopRequireDefault(_Game);
@@ -3352,6 +3356,7 @@ var Game = function (_Phaser$Game) {
         _this.state.add('Menu', _Menu2.default, false);
         _this.state.add('Lobbies', _Lobbies2.default, false);
         _this.state.add('Lobby', _Lobby2.default, false);
+        _this.state.add('GameLoader', _GameLoader2.default, false);
         _this.state.add('Game', _Game2.default, false);
 
         _this.currentUser = new _User2.default();
@@ -3474,7 +3479,7 @@ var _class = function (_Phaser$State) {
     key: 'render',
     value: function render() {
       // FIXME(Ivan): Go to the Menu!
-      if (this.fontsReady) this.state.start('Game');
+      if (this.fontsReady) this.state.start('Menu'); //this.state.start('GameLoader', true, false, '-KhSRxUVvyuJEXT-FsRd');
     }
   }, {
     key: 'fontsLoaded',
@@ -3505,6 +3510,14 @@ var _phaser = __webpack_require__(32);
 
 var _phaser2 = _interopRequireDefault(_phaser);
 
+var _CurrentPlayer = __webpack_require__(326);
+
+var _CurrentPlayer2 = _interopRequireDefault(_CurrentPlayer);
+
+var _Player = __webpack_require__(327);
+
+var _Player2 = _interopRequireDefault(_Player);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3524,46 +3537,44 @@ var _class = function (_Phaser$State) {
 
   _createClass(_class, [{
     key: 'init',
-    value: function init() {}
-  }, {
-    key: 'preload',
-    value: function preload() {
-      this.game.load.tilemap('map', 'assets/maps/Elo.json', null, _phaser2.default.Tilemap.TILED_JSON);
-      this.game.load.image('tiles', 'assets/maps/tiles.png');
-      this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 48);
+    value: function init(dbGame) {
+      this.dbGame = dbGame;
     }
   }, {
     key: 'create',
     value: function create() {
-      var map = this.game.add.tilemap('map');
-      map.addTilesetImage('tiles');
+      var map = this.game.add.tilemap('map-' + this.dbGame.map);
+      map.addTilesetImage('tiles-' + this.dbGame.map);
 
-      var layer = map.createLayer(0);
-      layer.resizeWorld();
+      var ground = map.createLayer('ground');
+      ground.resizeWorld();
+      var walls = map.createLayer('walls');
+      walls.resizeWorld();
 
-      this.player = this.game.add.sprite(0, 0, 'champ:one', 0);
-      this.player.smoothed = false;
-      this.player.animations.add('down', [0, 1, 2, 3], 10, true);
-      this.player.animations.add('up', [12, 13, 14, 15], 10, true);
+      this.createPlayers();
+    }
+  }, {
+    key: 'createPlayers',
+    value: function createPlayers() {
+      var _this2 = this;
 
-      this.game.physics.enable(this.player, _phaser2.default.Physics.ARCADE);
-      this.cursors = this.game.input.keyboard.createCursorKeys();
+      var _loop = function _loop(player) {
+        var p = new _Player2.default(_this2.game, _this2.dbGame.getPlayerRef(player));
+        _this2.game.add.existing(p);
+
+        p.eventEmitter.on('value', function () {
+          p.x = p._position.x;
+          p.y = p._position.y;
+        });
+      };
+
+      for (var player in this.dbGame.players) {
+        _loop(player);
+      }
     }
   }, {
     key: 'update',
-    value: function update() {
-      this.player.body.velocity.set(0);
-
-      if (this.cursors.down.isDown) {
-        this.player.body.velocity.y = 100;
-        this.player.play('down');
-      } else if (this.cursors.up.isDown) {
-        this.player.body.velocity.y = -100;
-        this.player.play('up');
-      } else {
-        this.player.animations.stop();
-      }
-    }
+    value: function update() {}
   }]);
 
   return _class;
@@ -3919,14 +3930,13 @@ var _class = function (_Phaser$State) {
     key: 'render',
     value: function render() {
       if (this.createGameListener.created === true) {
-        // WE NEED TO GO DEEPEEEER!
+        this.state.start('GameLoader', true, false, this.lobby.key);
       }
     }
   }, {
     key: 'isUserAnOwner',
     value: function isUserAnOwner(owner) {
       if (this.game.currentUser.key === owner) {
-        console.log('elo');
         this.isOwner = true;
         this.gameCreator = new _GameCreator2.default();
 
@@ -4166,6 +4176,9 @@ var _class = function (_Phaser$State) {
       nameField.setAttribute('placeholder', 'Twój wspaniały pseudonim');
       nameField.setAttribute('maxlength', 16);
       nameField.classList.add('name-field');
+      nameField.style.left = this.game.world.centerX * 1.5 + 'px';
+      nameField.style.top = this.game.world.centerY - 100 + 'px';
+      nameField.style.transform = 'translate(-50%, -50%)';
 
       this.nameField = nameField;
 
@@ -4179,11 +4192,11 @@ var _class = function (_Phaser$State) {
         return;
       }
 
-      this.fieldError = this.game.add.text(this.game.camera.width - 53, 210, text.toString(), {
-        font: '400 12px Exo',
+      this.fieldError = this.game.add.text(this.game.world.centerX * 1.5, this.game.world.centerY - 70, text.toString(), {
+        font: '400 13px Exo',
         fill: '#fd5151'
       });
-      this.fieldError.anchor.setTo(1, 1);
+      this.fieldError.anchor.setTo(0.5, 0.5);
     }
   }, {
     key: 'goToGames',
@@ -4362,10 +4375,17 @@ var GameCreator = function () {
 
         playersConfig[pKey] = {
           name: players[pKey],
+          champion: 'one',
+          online: true,
           alive: false,
           position: {
-            x: null,
-            y: null
+            x: -500,
+            y: -500
+          },
+          stats: {
+            kills: 0,
+            deaths: 0,
+            assists: 0
           },
           eq: {}
         };
@@ -4434,7 +4454,7 @@ var Lobbies = function () {
   _createClass(Lobbies, [{
     key: 'createLobby',
     value: function createLobby(name, owner) {
-      if (typeof name !== 'string' || !name) throw new TypeError('name must be a non-empty string');
+      if (typeof name !== 'string') throw new TypeError('name must be a non-empty string');
 
       var lobby = this._dbRef.push({
         name: name,
@@ -4442,7 +4462,7 @@ var Lobbies = function () {
         players: _defineProperty({}, owner.key, owner.name),
 
         gameType: 'deathmatch',
-        map: 'lul'
+        map: 'pixel_dust'
       });
 
       this._lobbies.set(lobby.key, new _Lobby2.default(lobby));
@@ -10557,6 +10577,853 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var firebaseApp = exports.firebaseApp = _firebase2.default.initializeApp(_config2.default.firebase);
 var database = exports.database = firebaseApp.database();
+
+/***/ }),
+/* 326 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+'use strcit';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _phaser = __webpack_require__(32);
+
+var _phaser2 = _interopRequireDefault(_phaser);
+
+var _Player2 = __webpack_require__(327);
+
+var _Player3 = _interopRequireDefault(_Player2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var CurrentPlayer = function (_Player) {
+  _inherits(CurrentPlayer, _Player);
+
+  function CurrentPlayer(dbRef, game) {
+    _classCallCheck(this, CurrentPlayer);
+
+    var _this = _possibleConstructorReturn(this, (CurrentPlayer.__proto__ || Object.getPrototypeOf(CurrentPlayer)).call(this, dbRef, game));
+
+    _this.game = game;
+
+    _this.addMovementKeyListeners();
+    return _this;
+  }
+
+  _createClass(CurrentPlayer, [{
+    key: 'addMovementKeyListeners',
+    value: function addMovementKeyListeners() {
+      var keyboard = this.game.input.keyboard;
+
+      var moveUp = keyboard.addKey(_phaser2.default.Keyboard.W);
+      var moveDown = keyboard.addKey(_phaser2.default.Keyboard.S);
+      var moveLeft = keyboard.addKey(_phaser2.default.Keyboard.A);
+      var moveRight = keyboard.addKey(_phaser2.default.Keyboard.D);
+    }
+  }]);
+
+  return CurrentPlayer;
+}(_Player3.default);
+
+exports.default = CurrentPlayer;
+
+/***/ }),
+/* 327 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _phaser = __webpack_require__(32);
+
+var _phaser2 = _interopRequireDefault(_phaser);
+
+var _wolfy87Eventemitter = __webpack_require__(331);
+
+var _wolfy87Eventemitter2 = _interopRequireDefault(_wolfy87Eventemitter);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * Class representing Player.
+ */
+var Player = function (_Phaser$Sprite) {
+  _inherits(Player, _Phaser$Sprite);
+
+  /**
+   * Creates Player instance.
+   *
+   * @param {Phaser.Game} game
+   * @param {firebase.Database} dbRef
+   */
+  function Player(game, dbRef) {
+    _classCallCheck(this, Player);
+
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, -500, -500, 'champ:one', 0));
+
+    _this._dbRef = dbRef;
+    _this.eventEmitter = new _wolfy87Eventemitter2.default();
+
+    _this._addAnimations();
+    _this._update();
+    return _this;
+  }
+
+  /**
+   * Listens changes in database.
+   */
+
+
+  _createClass(Player, [{
+    key: '_update',
+    value: function _update() {
+      var _this2 = this;
+
+      this._dbRef.on('value', function (snapshot) {
+        if (snapshot.exists() === false) return;
+
+        var data = snapshot.val();
+
+        _this2._key = snapshot.key;
+        _this2._name = data.name;
+        _this2._hp = data.hp;
+        _this2._alive = data.alive;
+        _this2._position = data.position;
+        _this2._stats = data.stats;
+        _this2._eq = data.eq;
+
+        _this2.eventEmitter.emitEvent('value');
+      });
+    }
+
+    /**
+     * Returns player's position.
+     *
+     * @returns {{x: (number|null), y: (number|null)}}
+     */
+
+  }, {
+    key: 'getPosition',
+    value: function getPosition() {
+      return {
+        x: this._position.x,
+        y: this._position.y
+      };
+    }
+  }, {
+    key: '_addAnimations',
+    value: function _addAnimations() {
+      var animationSpeed = 10;
+
+      this.animations.add('down', [0, 1, 2, 3], animationSpeed, true);
+      this.animations.add('left', [4, 5, 6, 7], animationSpeed, true);
+      this.animations.add('right', [8, 9, 10, 11], animationSpeed, true);
+      this.animations.add('up', [12, 13, 14, 15], animationSpeed, true);
+    }
+  }]);
+
+  return Player;
+}(_phaser2.default.Sprite);
+
+exports.default = Player;
+
+/***/ }),
+/* 328 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _utils = __webpack_require__(325);
+
+var _wolfy87Eventemitter = __webpack_require__(331);
+
+var _wolfy87Eventemitter2 = _interopRequireDefault(_wolfy87Eventemitter);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Game = function (_EventEmitter) {
+  _inherits(Game, _EventEmitter);
+
+  function Game(key) {
+    _classCallCheck(this, Game);
+
+    var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this));
+
+    _this._dbRef = _utils.database.ref('games/' + key);
+
+    _this._name = null;
+    _this._map = null;
+    _this._gameType = null;
+    _this._players = null;
+
+    _this.listenData();
+    return _this;
+  }
+
+  _createClass(Game, [{
+    key: 'listenData',
+    value: function listenData() {
+      var _this2 = this;
+
+      this._dbRef.on('value', function (snapshot) {
+        var data = snapshot.val();
+
+        _this2._name = data.name;
+        _this2._map = data.map;
+        _this2._gameType = data.gameType;
+        _this2._players = data.players;
+
+        _this2.emitEvent('value');
+      });
+    }
+  }, {
+    key: 'getPlayerRef',
+    value: function getPlayerRef(key) {
+      return this._dbRef.child('players/' + key);
+    }
+  }, {
+    key: 'name',
+    get: function get() {
+      return this._name;
+    }
+  }, {
+    key: 'map',
+    get: function get() {
+      return this._map;
+    }
+  }, {
+    key: 'gameType',
+    get: function get() {
+      return this._gameType;
+    }
+  }, {
+    key: 'players',
+    get: function get() {
+      return this._players;
+    }
+  }]);
+
+  return Game;
+}(_wolfy87Eventemitter2.default);
+
+exports.default = Game;
+
+/***/ }),
+/* 329 */,
+/* 330 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _phaser = __webpack_require__(32);
+
+var _phaser2 = _interopRequireDefault(_phaser);
+
+var _Game = __webpack_require__(328);
+
+var _Game2 = _interopRequireDefault(_Game);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _class = function (_Phaser$State) {
+  _inherits(_class, _Phaser$State);
+
+  function _class() {
+    _classCallCheck(this, _class);
+
+    return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+  }
+
+  _createClass(_class, [{
+    key: 'init',
+    value: function init(gameKey) {
+      var _this2 = this;
+
+      this.dbGame = new _Game2.default(gameKey);
+      // TODO(Ivan): Refactor it!
+      if (this.dbGame.name) this.loadMapInit(this);else this.dbGame.once('value', function () {
+        return _this2.loadMapInit(_this2);
+      });
+
+      // TODO(Ivan): Start game when all players all loaded
+      this.allLoaded = false;
+    }
+  }, {
+    key: 'preload',
+    value: function preload() {
+      this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 64);
+
+      // Loading info
+      var loadingText = this.add.text(this.world.centerX, this.world.centerY, 'Wczytywanie tajemniczych danych...', {
+        font: '16px Arial',
+        fill: '#fff',
+        align: 'center'
+      });
+      loadingText.anchor.setTo(0.5, 0.5);
+    }
+  }, {
+    key: 'loadMapInit',
+    value: function loadMapInit() {
+      var _this3 = this;
+
+      var loader = this.game.load;
+      loader.tilemap('map-' + this.dbGame.map, 'assets/maps/' + this.dbGame.map + '/map.json', null, _phaser2.default.Tilemap.TILED_JSON);
+      loader.image('tiles-' + this.dbGame.map, 'assets/maps/' + this.dbGame.map + '/tiles.png');
+      loader.start();
+
+      loader.onLoadComplete.add(function () {
+        _this3.state.start('Game', true, false, _this3.dbGame);
+      });
+    }
+  }]);
+
+  return _class;
+}(_phaser2.default.State);
+
+exports.default = _class;
+
+/***/ }),
+/* 331 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_RESULT__;/*!
+ * EventEmitter v5.1.0 - git.io/ee
+ * Unlicense - http://unlicense.org/
+ * Oliver Caldwell - http://oli.me.uk/
+ * @preserve
+ */
+
+;(function (exports) {
+    'use strict';
+
+    /**
+     * Class for managing events.
+     * Can be extended to provide event functionality in other classes.
+     *
+     * @class EventEmitter Manages event registering and emitting.
+     */
+    function EventEmitter() {}
+
+    // Shortcuts to improve speed and size
+    var proto = EventEmitter.prototype;
+    var originalGlobalValue = exports.EventEmitter;
+
+    /**
+     * Finds the index of the listener for the event in its storage array.
+     *
+     * @param {Function[]} listeners Array of listeners to search through.
+     * @param {Function} listener Method to look for.
+     * @return {Number} Index of the specified listener, -1 if not found
+     * @api private
+     */
+    function indexOfListener(listeners, listener) {
+        var i = listeners.length;
+        while (i--) {
+            if (listeners[i].listener === listener) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Alias a method while keeping the context correct, to allow for overwriting of target method.
+     *
+     * @param {String} name The name of the target method.
+     * @return {Function} The aliased method
+     * @api private
+     */
+    function alias(name) {
+        return function aliasClosure() {
+            return this[name].apply(this, arguments);
+        };
+    }
+
+    /**
+     * Returns the listener array for the specified event.
+     * Will initialise the event object and listener arrays if required.
+     * Will return an object if you use a regex search. The object contains keys for each matched event. So /ba[rz]/ might return an object containing bar and baz. But only if you have either defined them with defineEvent or added some listeners to them.
+     * Each property in the object response is an array of listener functions.
+     *
+     * @param {String|RegExp} evt Name of the event to return the listeners from.
+     * @return {Function[]|Object} All listener functions for the event.
+     */
+    proto.getListeners = function getListeners(evt) {
+        var events = this._getEvents();
+        var response;
+        var key;
+
+        // Return a concatenated array of all matching events if
+        // the selector is a regular expression.
+        if (evt instanceof RegExp) {
+            response = {};
+            for (key in events) {
+                if (events.hasOwnProperty(key) && evt.test(key)) {
+                    response[key] = events[key];
+                }
+            }
+        }
+        else {
+            response = events[evt] || (events[evt] = []);
+        }
+
+        return response;
+    };
+
+    /**
+     * Takes a list of listener objects and flattens it into a list of listener functions.
+     *
+     * @param {Object[]} listeners Raw listener objects.
+     * @return {Function[]} Just the listener functions.
+     */
+    proto.flattenListeners = function flattenListeners(listeners) {
+        var flatListeners = [];
+        var i;
+
+        for (i = 0; i < listeners.length; i += 1) {
+            flatListeners.push(listeners[i].listener);
+        }
+
+        return flatListeners;
+    };
+
+    /**
+     * Fetches the requested listeners via getListeners but will always return the results inside an object. This is mainly for internal use but others may find it useful.
+     *
+     * @param {String|RegExp} evt Name of the event to return the listeners from.
+     * @return {Object} All listener functions for an event in an object.
+     */
+    proto.getListenersAsObject = function getListenersAsObject(evt) {
+        var listeners = this.getListeners(evt);
+        var response;
+
+        if (listeners instanceof Array) {
+            response = {};
+            response[evt] = listeners;
+        }
+
+        return response || listeners;
+    };
+
+    function isValidListener (listener) {
+        if (typeof listener === 'function' || listener instanceof RegExp) {
+            return true
+        } else if (listener && typeof listener === 'object') {
+            return isValidListener(listener.listener)
+        } else {
+            return false
+        }
+    }
+
+    /**
+     * Adds a listener function to the specified event.
+     * The listener will not be added if it is a duplicate.
+     * If the listener returns true then it will be removed after it is called.
+     * If you pass a regular expression as the event name then the listener will be added to all events that match it.
+     *
+     * @param {String|RegExp} evt Name of the event to attach the listener to.
+     * @param {Function} listener Method to be called when the event is emitted. If the function returns true then it will be removed after calling.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.addListener = function addListener(evt, listener) {
+        if (!isValidListener(listener)) {
+            throw new TypeError('listener must be a function');
+        }
+
+        var listeners = this.getListenersAsObject(evt);
+        var listenerIsWrapped = typeof listener === 'object';
+        var key;
+
+        for (key in listeners) {
+            if (listeners.hasOwnProperty(key) && indexOfListener(listeners[key], listener) === -1) {
+                listeners[key].push(listenerIsWrapped ? listener : {
+                    listener: listener,
+                    once: false
+                });
+            }
+        }
+
+        return this;
+    };
+
+    /**
+     * Alias of addListener
+     */
+    proto.on = alias('addListener');
+
+    /**
+     * Semi-alias of addListener. It will add a listener that will be
+     * automatically removed after its first execution.
+     *
+     * @param {String|RegExp} evt Name of the event to attach the listener to.
+     * @param {Function} listener Method to be called when the event is emitted. If the function returns true then it will be removed after calling.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.addOnceListener = function addOnceListener(evt, listener) {
+        return this.addListener(evt, {
+            listener: listener,
+            once: true
+        });
+    };
+
+    /**
+     * Alias of addOnceListener.
+     */
+    proto.once = alias('addOnceListener');
+
+    /**
+     * Defines an event name. This is required if you want to use a regex to add a listener to multiple events at once. If you don't do this then how do you expect it to know what event to add to? Should it just add to every possible match for a regex? No. That is scary and bad.
+     * You need to tell it what event names should be matched by a regex.
+     *
+     * @param {String} evt Name of the event to create.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.defineEvent = function defineEvent(evt) {
+        this.getListeners(evt);
+        return this;
+    };
+
+    /**
+     * Uses defineEvent to define multiple events.
+     *
+     * @param {String[]} evts An array of event names to define.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.defineEvents = function defineEvents(evts) {
+        for (var i = 0; i < evts.length; i += 1) {
+            this.defineEvent(evts[i]);
+        }
+        return this;
+    };
+
+    /**
+     * Removes a listener function from the specified event.
+     * When passed a regular expression as the event name, it will remove the listener from all events that match it.
+     *
+     * @param {String|RegExp} evt Name of the event to remove the listener from.
+     * @param {Function} listener Method to remove from the event.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.removeListener = function removeListener(evt, listener) {
+        var listeners = this.getListenersAsObject(evt);
+        var index;
+        var key;
+
+        for (key in listeners) {
+            if (listeners.hasOwnProperty(key)) {
+                index = indexOfListener(listeners[key], listener);
+
+                if (index !== -1) {
+                    listeners[key].splice(index, 1);
+                }
+            }
+        }
+
+        return this;
+    };
+
+    /**
+     * Alias of removeListener
+     */
+    proto.off = alias('removeListener');
+
+    /**
+     * Adds listeners in bulk using the manipulateListeners method.
+     * If you pass an object as the second argument you can add to multiple events at once. The object should contain key value pairs of events and listeners or listener arrays. You can also pass it an event name and an array of listeners to be added.
+     * You can also pass it a regular expression to add the array of listeners to all events that match it.
+     * Yeah, this function does quite a bit. That's probably a bad thing.
+     *
+     * @param {String|Object|RegExp} evt An event name if you will pass an array of listeners next. An object if you wish to add to multiple events at once.
+     * @param {Function[]} [listeners] An optional array of listener functions to add.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.addListeners = function addListeners(evt, listeners) {
+        // Pass through to manipulateListeners
+        return this.manipulateListeners(false, evt, listeners);
+    };
+
+    /**
+     * Removes listeners in bulk using the manipulateListeners method.
+     * If you pass an object as the second argument you can remove from multiple events at once. The object should contain key value pairs of events and listeners or listener arrays.
+     * You can also pass it an event name and an array of listeners to be removed.
+     * You can also pass it a regular expression to remove the listeners from all events that match it.
+     *
+     * @param {String|Object|RegExp} evt An event name if you will pass an array of listeners next. An object if you wish to remove from multiple events at once.
+     * @param {Function[]} [listeners] An optional array of listener functions to remove.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.removeListeners = function removeListeners(evt, listeners) {
+        // Pass through to manipulateListeners
+        return this.manipulateListeners(true, evt, listeners);
+    };
+
+    /**
+     * Edits listeners in bulk. The addListeners and removeListeners methods both use this to do their job. You should really use those instead, this is a little lower level.
+     * The first argument will determine if the listeners are removed (true) or added (false).
+     * If you pass an object as the second argument you can add/remove from multiple events at once. The object should contain key value pairs of events and listeners or listener arrays.
+     * You can also pass it an event name and an array of listeners to be added/removed.
+     * You can also pass it a regular expression to manipulate the listeners of all events that match it.
+     *
+     * @param {Boolean} remove True if you want to remove listeners, false if you want to add.
+     * @param {String|Object|RegExp} evt An event name if you will pass an array of listeners next. An object if you wish to add/remove from multiple events at once.
+     * @param {Function[]} [listeners] An optional array of listener functions to add/remove.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.manipulateListeners = function manipulateListeners(remove, evt, listeners) {
+        var i;
+        var value;
+        var single = remove ? this.removeListener : this.addListener;
+        var multiple = remove ? this.removeListeners : this.addListeners;
+
+        // If evt is an object then pass each of its properties to this method
+        if (typeof evt === 'object' && !(evt instanceof RegExp)) {
+            for (i in evt) {
+                if (evt.hasOwnProperty(i) && (value = evt[i])) {
+                    // Pass the single listener straight through to the singular method
+                    if (typeof value === 'function') {
+                        single.call(this, i, value);
+                    }
+                    else {
+                        // Otherwise pass back to the multiple function
+                        multiple.call(this, i, value);
+                    }
+                }
+            }
+        }
+        else {
+            // So evt must be a string
+            // And listeners must be an array of listeners
+            // Loop over it and pass each one to the multiple method
+            i = listeners.length;
+            while (i--) {
+                single.call(this, evt, listeners[i]);
+            }
+        }
+
+        return this;
+    };
+
+    /**
+     * Removes all listeners from a specified event.
+     * If you do not specify an event then all listeners will be removed.
+     * That means every event will be emptied.
+     * You can also pass a regex to remove all events that match it.
+     *
+     * @param {String|RegExp} [evt] Optional name of the event to remove all listeners for. Will remove from every event if not passed.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.removeEvent = function removeEvent(evt) {
+        var type = typeof evt;
+        var events = this._getEvents();
+        var key;
+
+        // Remove different things depending on the state of evt
+        if (type === 'string') {
+            // Remove all listeners for the specified event
+            delete events[evt];
+        }
+        else if (evt instanceof RegExp) {
+            // Remove all events matching the regex.
+            for (key in events) {
+                if (events.hasOwnProperty(key) && evt.test(key)) {
+                    delete events[key];
+                }
+            }
+        }
+        else {
+            // Remove all listeners in all events
+            delete this._events;
+        }
+
+        return this;
+    };
+
+    /**
+     * Alias of removeEvent.
+     *
+     * Added to mirror the node API.
+     */
+    proto.removeAllListeners = alias('removeEvent');
+
+    /**
+     * Emits an event of your choice.
+     * When emitted, every listener attached to that event will be executed.
+     * If you pass the optional argument array then those arguments will be passed to every listener upon execution.
+     * Because it uses `apply`, your array of arguments will be passed as if you wrote them out separately.
+     * So they will not arrive within the array on the other side, they will be separate.
+     * You can also pass a regular expression to emit to all events that match it.
+     *
+     * @param {String|RegExp} evt Name of the event to emit and execute listeners for.
+     * @param {Array} [args] Optional array of arguments to be passed to each listener.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.emitEvent = function emitEvent(evt, args) {
+        var listenersMap = this.getListenersAsObject(evt);
+        var listeners;
+        var listener;
+        var i;
+        var key;
+        var response;
+
+        for (key in listenersMap) {
+            if (listenersMap.hasOwnProperty(key)) {
+                listeners = listenersMap[key].slice(0);
+
+                for (i = 0; i < listeners.length; i++) {
+                    // If the listener returns true then it shall be removed from the event
+                    // The function is executed either with a basic call or an apply if there is an args array
+                    listener = listeners[i];
+
+                    if (listener.once === true) {
+                        this.removeListener(evt, listener.listener);
+                    }
+
+                    response = listener.listener.apply(this, args || []);
+
+                    if (response === this._getOnceReturnValue()) {
+                        this.removeListener(evt, listener.listener);
+                    }
+                }
+            }
+        }
+
+        return this;
+    };
+
+    /**
+     * Alias of emitEvent
+     */
+    proto.trigger = alias('emitEvent');
+
+    /**
+     * Subtly different from emitEvent in that it will pass its arguments on to the listeners, as opposed to taking a single array of arguments to pass on.
+     * As with emitEvent, you can pass a regex in place of the event name to emit to all events that match it.
+     *
+     * @param {String|RegExp} evt Name of the event to emit and execute listeners for.
+     * @param {...*} Optional additional arguments to be passed to each listener.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.emit = function emit(evt) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        return this.emitEvent(evt, args);
+    };
+
+    /**
+     * Sets the current value to check against when executing listeners. If a
+     * listeners return value matches the one set here then it will be removed
+     * after execution. This value defaults to true.
+     *
+     * @param {*} value The new value to check for when executing listeners.
+     * @return {Object} Current instance of EventEmitter for chaining.
+     */
+    proto.setOnceReturnValue = function setOnceReturnValue(value) {
+        this._onceReturnValue = value;
+        return this;
+    };
+
+    /**
+     * Fetches the current value to check against when executing listeners. If
+     * the listeners return value matches this one then it should be removed
+     * automatically. It will return true by default.
+     *
+     * @return {*|Boolean} The current value to check for or the default, true.
+     * @api private
+     */
+    proto._getOnceReturnValue = function _getOnceReturnValue() {
+        if (this.hasOwnProperty('_onceReturnValue')) {
+            return this._onceReturnValue;
+        }
+        else {
+            return true;
+        }
+    };
+
+    /**
+     * Fetches the events object and creates one if required.
+     *
+     * @return {Object} The events storage object.
+     * @api private
+     */
+    proto._getEvents = function _getEvents() {
+        return this._events || (this._events = {});
+    };
+
+    /**
+     * Reverts the global {@link EventEmitter} to its previous value and returns a reference to this version.
+     *
+     * @return {Function} Non conflicting EventEmitter class.
+     */
+    EventEmitter.noConflict = function noConflict() {
+        exports.EventEmitter = originalGlobalValue;
+        return EventEmitter;
+    };
+
+    // Expose the class either via AMD, CommonJS or the global object
+    if (true) {
+        !(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+            return EventEmitter;
+        }.call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+    }
+    else if (typeof module === 'object' && module.exports){
+        module.exports = EventEmitter;
+    }
+    else {
+        exports.EventEmitter = EventEmitter;
+    }
+}(this || {}));
+
 
 /***/ })
 ],[323]);

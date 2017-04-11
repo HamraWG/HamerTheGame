@@ -35,7 +35,7 @@ export default class extends Phaser.State
   {
     if (this.createGameListener.created === true)
     {
-      // WE NEED TO GO DEEPEEEER!
+      this.state.start('GameLoader', true, false, this.lobby.key);
     }
   }
 
@@ -43,7 +43,6 @@ export default class extends Phaser.State
   {
     if (this.game.currentUser.key === owner)
     {
-      console.log('elo');
       this.isOwner = true;
       this.gameCreator = new GameCreator();
 
