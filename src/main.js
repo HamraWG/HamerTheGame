@@ -3,7 +3,6 @@
 import 'pixi';
 import 'p2';
 import Phaser from 'phaser';
-import firebase from 'firebase';
 
 import BootState from './states/Boot';
 import MenuState from './states/Menu';
@@ -27,9 +26,7 @@ class Game extends Phaser.Game
     this.state.add('Lobby', LobbyState, false);
     this.state.add('Game', GameState, false);
 
-    this.firebase = firebase.initializeApp(config.firebase);
-    this.database = this.firebase.database();
-    this.currentUser = new User(this.database);
+    this.currentUser = new User();
 
     this.state.start('Boot');
   }

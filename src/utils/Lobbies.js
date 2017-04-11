@@ -1,6 +1,7 @@
 'use strict';
 
 import Lobby from './Lobby';
+import {database} from '../utils';
 
 /**
  * Class representing Lobbies.
@@ -9,10 +10,8 @@ class Lobbies
 {
   /**
    * Creates Lobbies instance.
-   *
-   * @param {firebase.Database.Reference} database
    */
-  constructor (database)
+  constructor ()
   {
     this._dbRef = database.ref('lobbies');
     this._lobbies = new Map();

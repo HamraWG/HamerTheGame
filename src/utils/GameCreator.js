@@ -1,5 +1,7 @@
 'use strict';
 
+import {database} from '../utils';
+
 /**
  * Class representing GameCreator.
  */
@@ -7,10 +9,8 @@ class GameCreator
 {
   /**
    * Creates GameCreator instance.
-   *
-   * @param {firebase.Database} database
    */
-  constructor (database)
+  constructor ()
   {
     this._db = database.ref('games');
   }

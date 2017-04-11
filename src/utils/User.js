@@ -1,5 +1,7 @@
 'use strict';
 
+import {database} from '../utils';
+
 /**
  * Class representing a User.
  */
@@ -7,10 +9,8 @@ class User
 {
   /**
    * Creates user instance.
-   *
-   * @param {firebase.database} database Firebase database
    */
-  constructor (database)
+  constructor ()
   {
     this._dbRef = database.ref('users');
     this._dbKeyStorageRef = 'firebase.user';

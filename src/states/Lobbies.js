@@ -10,7 +10,7 @@ export default class extends Phaser.State
   init ()
   {
     this.lobbyUI = null;
-    this.lobbies = new Lobbies(this.game.database);
+    this.lobbies = new Lobbies();
   }
 
   create ()

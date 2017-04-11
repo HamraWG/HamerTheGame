@@ -15,7 +15,7 @@ export default class extends Phaser.State
     this.lobby.addPlayer(this.game.currentUser);
     this.lobby.removePlayerOnDisconnect(this.game.currentUser);
 
-    this.createGameListener = new CreateGameListener(this.game.database, this.lobby.key);
+    this.createGameListener = new CreateGameListener(this.lobby.key);
     this.isOwner = false;
   }
 
@@ -45,7 +45,7 @@ export default class extends Phaser.State
     {
       console.log('elo');
       this.isOwner = true;
-      this.gameCreator = new GameCreator(this.game.database);
+      this.gameCreator = new GameCreator();
 
       if (!document.querySelector('#lobby-ui .owner-box'))
       {

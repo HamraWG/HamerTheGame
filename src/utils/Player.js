@@ -1,5 +1,7 @@
 'use strict';
 
+import {database} from '../utils';
+
 /**
  * Class representing Player.
  */
@@ -7,12 +9,10 @@ class Player
 {
   /**
    * Creates Player instance.
-   *
-   * @param {firebase.Database} dbRef
    */
-  constructor (dbRef)
+  constructor ()
   {
-    this._dbRef = dbRef;
+    this._dbRef = database;
 
     this._key = this._dbRef.key;
     this._name = this._dbRef.name;

@@ -1,5 +1,7 @@
 'use strict';
 
+import {database} from '../utils';
+
 /**
  * Class representing a CreateGameListener.
  */
@@ -8,10 +10,9 @@ class CreateGameListener
   /**
    * Creates CreateGameListener instance.
    *
-   * @param {firebase.Database} database The firebase database.
    * @param {string} gameId Id that has to be listening.
    */
-  constructor (database, gameId)
+  constructor (gameId)
   {
     this._dbRef = database.ref('games');
     this._gameId = gameId;
