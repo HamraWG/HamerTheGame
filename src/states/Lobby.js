@@ -22,6 +22,7 @@ export default class extends Phaser.State
   create ()
   {
     this.game.add.image(60, 11, 'm-logo');
+    this.createBackToLobbiesButton();
     this.createLobbyUI();
     this.isUserAnOwner(this.lobby.owner);
   }
@@ -29,14 +30,46 @@ export default class extends Phaser.State
   shutdown ()
   {
     this.lobbyUI.remove();
+    document.querySelector('#game').classList.remove('lobby-owner');
+    document.querySelector('.back-button').remove();
   }
 
   render ()
   {
     if (this.createGameListener.created === true)
     {
-      this.state.start('GameLoader', true, false, this.lobby.key);
+      this.joinGame();
     }
+  }
+
+  joinGame ()
+  {
+    this.lobby.removePlayer(this.game.currentUser);
+    this.state.start('GameLoader', true, false, this.lobby.key);
+  }
+
+  goToLobbies ()
+  {
+    this.lobby.removePlayer(this.game.currentUser);
+    this.state.start('Lobbies');
+  }
+
+  createBackToLobbiesButton ()
+  {
+    let button = document.createElement('button');
+    button.setAttribute('type', 'button');
+    button.classList.add('back-button');
+    button.innerHTML = 'Wróć do listy';
+
+    button.style.position = 'absolute';
+    button.style.right = '60px';
+    button.style.top = '10px';
+
+    button.addEventListener('click', () => {
+      this.goToLobbies();
+    });
+
+    document.querySelector('#game').appendChild(button);
   }
 
   isUserAnOwner (owner)

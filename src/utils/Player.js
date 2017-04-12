@@ -16,9 +16,15 @@ class Player extends Phaser.Sprite
    */
   constructor (game, dbRef)
   {
-    super(game, -500, -500, 'champ:one', 0);
+    super(game, 0, 0, 'champ:one', 0);
     this._dbRef = dbRef;
     this.eventEmitter = new EventEmitter();
+
+    this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.body.collideWorldBounds = true;
+    this.velocity = 300;
+
+    this.game.add.existing(this);
 
     this._addAnimations();
     this._update();
@@ -43,7 +49,7 @@ class Player extends Phaser.Sprite
       this._stats = data.stats;
       this._eq = data.eq;
 
-      this.eventEmitter.emitEvent('value');
+      this.eventEmitter.emitEvent('value', [this]);
     });
   }
 

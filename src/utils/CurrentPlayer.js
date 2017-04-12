@@ -1,27 +1,22 @@
-'use strcit';
+'use strict';
 
-import Phaser from 'phaser';
 import Player from './Player';
+import Phaser from 'phaser';
 
 class CurrentPlayer extends Player
 {
-  constructor (dbRef, game)
+  constructor (game, dbRef)
   {
-    super(dbRef, game);
+    super(game, dbRef);
 
-    this.game = game;
+    this.game.camera.follow(this);
 
     this.addMovementKeyListeners();
   }
 
   addMovementKeyListeners ()
   {
-    let keyboard = this.game.input.keyboard;
 
-    let moveUp = keyboard.addKey(Phaser.Keyboard.W);
-    let moveDown = keyboard.addKey(Phaser.Keyboard.S);
-    let moveLeft = keyboard.addKey(Phaser.Keyboard.A);
-    let moveRight = keyboard.addKey(Phaser.Keyboard.D);
   }
 }
 

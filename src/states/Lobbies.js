@@ -132,7 +132,7 @@ export default class extends Phaser.State
     this.lobbies.on('remove', (lobby) =>
     {
       let lobbyElement = lobbiesList.querySelector(`#lobby-${lobby.key}`);
-      lobbiesList.removeChild(lobbyElement);
+      if (lobbyElement) lobbiesList.removeChild(lobbyElement);
     });
 
     return lobbiesList;

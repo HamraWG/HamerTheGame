@@ -64,8 +64,8 @@ class GameCreator
         online: true,
         alive: false,
         position: {
-          x: -500,
-          y: -500
+          x: Math.floor(Math.random() * 300) + 1,
+          y: Math.floor(Math.random() * 200) + 1
         },
         stats: {
           kills: 0,
