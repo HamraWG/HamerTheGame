@@ -16,25 +16,26 @@ class Player extends Phaser.Sprite
    */
   constructor (game, dbRef)
   {
-    super(game, 32, 32, 'champ:one', 0);
+    super(game, 0, 0, 'champ:one', 0);
     this._dbRef = dbRef;
     this.eventEmitter = new EventEmitter();
 
+    this.visible = false;
     this.game.physics.enable(this);
     this.body.collideWorldBounds = true;
-    this.game.camera.follow(this);
     this.velocity = 300;
 
     this.game.add.existing(this);
 
     this._addAnimations();
-    this._update();
+    this.eventEmitter.once('value', () => this.instantPositionUpdate(this));
+    this._listenChange();
   }
 
   /**
    * Listens changes in database.
    */
-  _update ()
+  _listenChange ()
   {
     this._dbRef.on('value', (snapshot) =>
     {
@@ -54,17 +55,34 @@ class Player extends Phaser.Sprite
     });
   }
 
+  instantPositionUpdate ()
+  {
+    this.x = this._position.x;
+    this.y = this._position.y;
+    this.visible = true;
+  }
+
   /**
    * Returns player's position.
    *
-   * @returns {{x: (number|null), y: (number|null)}}
+   * @returns {object}
    */
   getPosition ()
   {
-    return {
-      x: this._position.x,
-      y: this._position.y
-    };
+    return this._position;
+  }
+
+  update ()
+  {
+    let posPlayer = this.getPosition();
+    if (this.body.x !== posPlayer.x)
+    {
+      this.body.velocity.x = posPlayer.x > this.body.x ? this.velocity : -this.velocity;
+    }
+    if (this.body.y !== posPlayer.y)
+    {
+      this.body.velocity.y = posPlayer.y > this.body.y ? this.velocity : -this.velocity;
+    }
   }
 
   _addAnimations ()

@@ -8,7 +8,6 @@ export default class extends Phaser.State
 {
   init (dbGame)
   {
-    this.game.time.desireFps = 30;
     this.dbGame = dbGame;
   }
 
@@ -45,52 +44,28 @@ export default class extends Phaser.State
     {
       this.game.physics.arcade.collide(player, this.game.layers.layer);
 
+      if (player instanceof CurrentPlayer)
+      {
+        player.collideTest();
+
+        player.hitTestObject.body.velocity.x = 0;
+        player.hitTestObject.body.velocity.y = 0;
+      }
+
       player.body.velocity.x = 0;
       player.body.velocity.y = 0;
 
-      if (this.keyboard.addKey(Phaser.Keyboard.W).isDown)
-      {
-        player.body.velocity.y = -300;
-      }
-      if (this.keyboard.addKey(Phaser.Keyboard.S).isDown)
-      {
-        player.body.velocity.y = 300;
-      }
-      if (this.keyboard.addKey(Phaser.Keyboard.A).isDown)
-      {
-        player.body.velocity.x = -300;
-      }
-      if (this.keyboard.addKey(Phaser.Keyboard.D).isDown)
-      {
-        player.body.velocity.x = 300;
-      }
+      player.update();
     });
+  }
 
-    /*
-    console.log(this.player);
-    let line = new Phaser.Line(this.player.body.x, this.player.body.y, this.player.body.x, this.player.body.y - 10);
+  render ()
+  {
+    this.players.forEach((player) =>
+    {
+      if (player instanceof CurrentPlayer === false) return;
 
-    let a = this.layers.walls.getRayCastTiles(line, 0);
-    console.log(a);
-
-
-    if (this.keyboard.addKey(Phaser.Keyboard.W).isDown)
-    {
-      console.log(this.game.physics.p2.hitTest(new Phaser.Point(this.player.body.x, this.player.body.y - 10))[0].parent);
-      this.player.body.moveUp(300);
-    }
-    if (this.keyboard.addKey(Phaser.Keyboard.S).isDown)
-    {
-      this.player.body.moveDown(300);
-    }
-    if (this.keyboard.addKey(Phaser.Keyboard.A).isDown)
-    {
-      this.player.body.moveLeft(300);
-    }
-    if (this.keyboard.addKey(Phaser.Keyboard.D).isDown)
-    {
-      this.player.body.moveRight(300);
-    }
-    */
+      this.game.debug.body(player.hitTestObject);
+    });
   }
 }

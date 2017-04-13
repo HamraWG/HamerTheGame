@@ -11,9 +11,15 @@ class CurrentPlayer extends Player
     super(game, dbRef);
 
     this.game.camera.follow(this);
-    this.moveUnit = 5;
 
-    // this.addMovementKeyListeners();
+    this.hitTestObject = new Phaser.Sprite(game, this.body.x, this.body.y, 'champ:one', 0);
+    this.game.physics.enable(this.hitTestObject);
+    this.hitTestObject.body.collideWorldBounds = true;
+    this.hitTestObject.alpha = 0;
+    this.game.add.existing(this.hitTestObject);
+
+    this.moveTestToPlayerAtStart();
+    this.addMovementKeyListeners();
   }
 
   addMovementKeyListeners ()
@@ -28,75 +34,76 @@ class CurrentPlayer extends Player
 
   move (direction)
   {
-    if (direction !== 'up' && direction !== 'right' && direction !== 'down' && direction !== 'left')
-    {
+    if (direction !== 'up' && direction !== 'right' && direction !== 'down' && direction !== 'left') {
       throw new TypeError('`direction` must be a string equals `up`, `right`, `down` or `left`');
     }
-
-    let lines = this._createMoveLines(direction);
-    let test = this._testMove(lines);
-  }
-
-  _testMove (lines)
-  {
-    // FIXME(Ivan): Test if player is near to the world border.
-    let test1 = this.game.layers.walls.getRayCastTiles(lines[0], 0);
-    let test2 = this.game.layers.walls.getRayCastTiles(lines[1], 0);
-
-    console.log(test1, test2);
-    return false;
-  }
-
-  _createMoveLines (direction)
-  {
-    if (direction !== 'up' && direction !== 'right' && direction !== 'down' && direction !== 'left')
-    {
-      throw new TypeError('`direction` must be a string equals `up`, `right`, `down` or `left`');
-    }
-
-    let lines = [
-      new Phaser.Line(),
-      new Phaser.Line()
-    ];
-
-    let body = this.body;
 
     switch (direction)
     {
       case 'up':
-        lines[0].start.set(body.left, body.top);
-        lines[0].end.set(body.left, body.top - this.moveUnit);
-
-        lines[1].start.set(body.right, body.top);
-        lines[1].end.set(body.right, body.top - this.moveUnit);
+        this.hitTestObject.body.velocity.y = -this.velocity;
         break;
 
       case 'right':
-        lines[0].start.set(body.right, body.top);
-        lines[0].end.set(body.right + this.moveUnit, body.top);
-
-        lines[1].start.set(body.right, body.bottom);
-        lines[1].end.set(body.right + this.moveUnit, body.bottom);
+        this.hitTestObject.body.velocity.x = this.velocity;
         break;
 
       case 'down':
-        lines[0].start.set(body.left, body.top);
-        lines[0].end.set(body.left, body.top + this.moveUnit);
-
-        lines[1].start.set(body.right, body.top);
-        lines[1].end.set(body.right, body.top + this.moveUnit);
+        this.hitTestObject.body.velocity.y = this.velocity;
         break;
 
       case 'left':
-        lines[0].start.set(body.right, body.top);
-        lines[0].end.set(body.right - this.moveUnit, body.top);
-
-        lines[1].start.set(body.right, body.bottom);
-        lines[1].end.set(body.right - this.moveUnit, body.bottom);
+        this.hitTestObject.body.velocity.x = -this.velocity;
         break;
     }
+  }
 
-    return lines;
+  collideTest ()
+  {
+    this.testCollides = false;
+    this.game.physics.arcade.collide(this.hitTestObject, this.game.layers.layer, () =>
+    {
+      this.testCollides = true;
+    });
+  }
+
+  updatePositionRelativeToTest ()
+  {
+    let updatePos = {};
+
+    if (this.body.x !== this.hitTestObject.body.x) updatePos.x = this.hitTestObject.body.x;
+    if (this.body.y !== this.hitTestObject.body.y) updatePos.y = this.hitTestObject.body.y;
+
+    this._dbRef.child('position').update(updatePos);
+    console.log('elo');
+  }
+
+  moveTestToPlayerAtStart ()
+  {
+    if (this.visible === false)
+    {
+      this.eventEmitter.once('value', () => this.moveTestToPlayer());
+      return;
+    }
+
+    this.moveTestToPlayer();
+  }
+
+  moveTestToPlayer ()
+  {
+    this.hitTestObject.x = this.x;
+    this.hitTestObject.y = this.y;
+  }
+
+  update ()
+  {
+    super.update();
+
+    let playerPos = this.getPosition();
+    if (this.hitTestObject.body.x !== playerPos.x || this.hitTestObject.body.y !== playerPos.y)
+    {
+      this.updatePositionRelativeToTest();
+    }
   }
 }
 
