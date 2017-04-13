@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 export default
 {
   gameWidth: window.innerWidth,
@@ -9,5 +11,12 @@ export default
     databaseURL: 'https://hamer-the-game.firebaseio.com',
     storageBucket: 'hamer-the-game.appspot.com',
     messagingSenderId: '964483972641'
+  },
+
+  controls: {
+    up: Phaser.Keyboard.W,
+    down: Phaser.Keyboard.S,
+    right: Phaser.Keyboard.D,
+    left: Phaser.Keyboard.A
   }
 };

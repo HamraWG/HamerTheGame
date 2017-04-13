@@ -39,6 +39,7 @@ export default class extends Phaser.State
     let loader = this.game.load;
     loader.tilemap(`map-${this.dbGame.map}`, `assets/maps/${this.dbGame.map}/map.json`, null, Phaser.Tilemap.TILED_JSON);
     loader.image(`tiles-${this.dbGame.map}`, `assets/maps/${this.dbGame.map}/tiles.png`);
+
     loader.start();
 
     loader.onLoadComplete.add(() =>

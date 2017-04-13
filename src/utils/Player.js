@@ -16,12 +16,13 @@ class Player extends Phaser.Sprite
    */
   constructor (game, dbRef)
   {
-    super(game, 0, 0, 'champ:one', 0);
+    super(game, 32, 32, 'champ:one', 0);
     this._dbRef = dbRef;
     this.eventEmitter = new EventEmitter();
 
-    this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.game.physics.enable(this);
     this.body.collideWorldBounds = true;
+    this.game.camera.follow(this);
     this.velocity = 300;
 
     this.game.add.existing(this);
