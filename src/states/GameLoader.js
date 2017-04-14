@@ -19,6 +19,8 @@ export default class extends Phaser.State
   preload ()
   {
     this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 64);
+    this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
+    this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
 
     // Loading info
     let loadingText = this.add.text(

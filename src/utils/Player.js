@@ -21,14 +21,18 @@ class Player extends Phaser.Group
     this.eventEmitter = new EventEmitter();
 
     this.velocity = 300;
+    this.direction = null;
 
     this.createChampion();
     this.createPlayerName();
+    this.createPlayerHands();
+    //this.createWeaponSprite();
     this.game.add.existing(this);
 
     this.eventEmitter.once('value', () => this.positionObjectsUpdate(this));
     this._listenChange();
     this._addAnimations();
+    console.log(this);
   }
 
   createChampion ()
@@ -43,7 +47,7 @@ class Player extends Phaser.Group
 
   createPlayerName ()
   {
-    this.playerName = new Phaser.Text(this.game, 0, 0, 'elo', {
+    this.playerName = new Phaser.Text(this.game, 0, 0, '', {
       font: '400 14px Exo',
       fill: '#fff'
     });
@@ -53,9 +57,24 @@ class Player extends Phaser.Group
     this.add(this.playerName);
   }
 
-  createHealthBar ()
+  createPlayerHands ()
   {
-    this.playerHealthBar = new Phaser.Group()
+    this.hands = {
+      left: new Phaser.Sprite(this.game, 20, 20, 'champ:one:hand', 0),
+      right: new Phaser.Sprite(this.game, 20, 20, 'champ:one:hand', 0)
+    };
+
+    this.hands.left.anchor.set(0.5, 1);
+    this.hands.right.anchor.set(0.5, 1);
+
+    this.add(this.hands.left);
+    this.add(this.hands.right);
+  }
+
+  createWeaponSprite ()
+  {
+    this.weaponSprite = new Phaser.Sprite(this.game, 0, 0, 'weapons', 0);
+    this.addAt(this.weaponSprite, 0);
   }
 
   /**
@@ -88,7 +107,6 @@ class Player extends Phaser.Group
     this.champion.visible = true;
 
     this.playerName.text = this._name;
-    this.updatePlayerNamePosition();
   }
 
   /**
@@ -103,10 +121,22 @@ class Player extends Phaser.Group
 
   update ()
   {
+    this.direction = this.countPlayerDirection(
+      this.game.input.worldX,
+      this.game.input.worldY,
+      this.champion.body,
+      {
+        x: this.champion.width,
+        y: this.champion.height
+      }
+    );
+
     this.updatePlayerPosition();
     this.updatePlayerNamePosition();
     this.updatePlayerHealth();
     this.updatePlayerFrame();
+    this.updatePlayerHands();
+    // this.updatePlayerWeaponPosition();
   }
 
   updatePlayerPosition ()
@@ -132,31 +162,90 @@ class Player extends Phaser.Group
   updatePlayerHealth ()
   {
     let healthAlpha = this._hp / 100;
-    this.playerName.alpha = healthAlpha;
-    this.champion.alpha = healthAlpha;
+    this.alpha = healthAlpha;
   }
 
   updatePlayerFrame ()
   {
-    let direction = this.countPlayerDirection(
-      this.game.input.worldX,
-      this.game.input.worldY,
-      this.champion.body,
-      {
-        x: this.champion.width,
-        y: this.champion.height
-      }
-    );
-
     if (this.champion.body.velocity.x !== 0 || this.champion.body.velocity.y !== 0)
     {
-      this.champion.animations.play(direction);
+      this.champion.animations.play(this.direction);
     }
     else
     {
-      this.champion.animations.play(direction);
+      this.champion.animations.play(this.direction);
       this.champion.animations.stop();
     }
+  }
+
+  updatePlayerHands ()
+  {
+    let angle = this.game.physics.arcade.angleToPointer(this.champion);
+    switch (this.direction)
+    {
+      case 'up':
+        this.sendToBack(this.hands.left);
+        this.sendToBack(this.hands.right);
+
+        this.hands.left.x = this.champion.body.x + 5;
+        this.hands.left.y = this.champion.body.y + 23;
+        this.hands.left.visible = true;
+
+        this.hands.right.x = this.champion.body.right - 5;
+        this.hands.right.y = this.champion.body.y + 23;
+        this.hands.right.visible = true;
+
+        this.hands.left.rotation = angle + 2;
+        this.hands.right.rotation = angle + 1;
+        break;
+
+      case 'down':
+        this.bringToTop(this.hands.left);
+        this.bringToTop(this.hands.right);
+
+        this.hands.left.x = this.champion.body.x + 5;
+        this.hands.left.y = this.champion.body.y + 23;
+        this.hands.left.visible = true;
+
+        this.hands.right.x = this.champion.body.right - 5;
+        this.hands.right.y = this.champion.body.y + 23;
+        this.hands.right.visible = true;
+
+        this.hands.left.rotation = angle + 1.2;
+        this.hands.right.rotation = angle + 2.2;
+        break;
+
+      case 'left':
+        this.bringToTop(this.hands.left);
+        this.bringToTop(this.hands.right);
+
+        this.hands.left.x = this.champion.body.right - 14;
+        this.hands.left.y = this.champion.body.y + 23;
+
+        this.hands.right.visible = false;
+
+        this.hands.left.rotation = angle + 1.4;
+        break;
+
+      case 'right':
+        this.bringToTop(this.hands.left);
+        this.bringToTop(this.hands.right);
+
+        this.hands.left.visible = false;
+
+        this.hands.right.x = this.champion.body.left + 14;
+        this.hands.right.y = this.champion.body.y + 23;
+        this.hands.right.visible = true;
+
+        this.hands.right.rotation = angle + 1.4;
+        break;
+    }
+  }
+
+  updatePlayerWeaponPosition ()
+  {
+    this.weaponSprite.x = this.champion.body.x + this.champion.width / 2;
+    this.weaponSprite.y = this.champion.body.y;
   }
 
   countPlayerDirection (cursorX, cursorY, bodyPos, bodySize)

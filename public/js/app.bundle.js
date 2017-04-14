@@ -2638,9 +2638,12 @@ var Player = function (_Phaser$Group) {
     _this.eventEmitter = new _wolfy87Eventemitter2.default();
 
     _this.velocity = 300;
+    _this.direction = null;
 
     _this.createChampion();
     _this.createPlayerName();
+    _this.createPlayerHands();
+    //this.createWeaponSprite();
     _this.game.add.existing(_this);
 
     _this.eventEmitter.once('value', function () {
@@ -2648,6 +2651,7 @@ var Player = function (_Phaser$Group) {
     });
     _this._listenChange();
     _this._addAnimations();
+    console.log(_this);
     return _this;
   }
 
@@ -2664,7 +2668,7 @@ var Player = function (_Phaser$Group) {
   }, {
     key: 'createPlayerName',
     value: function createPlayerName() {
-      this.playerName = new _phaser2.default.Text(this.game, 0, 0, 'elo', {
+      this.playerName = new _phaser2.default.Text(this.game, 0, 0, '', {
         font: '400 14px Exo',
         fill: '#fff'
       });
@@ -2674,9 +2678,24 @@ var Player = function (_Phaser$Group) {
       this.add(this.playerName);
     }
   }, {
-    key: 'createHealthBar',
-    value: function createHealthBar() {
-      this.playerHealthBar = new _phaser2.default.Group();
+    key: 'createPlayerHands',
+    value: function createPlayerHands() {
+      this.hands = {
+        left: new _phaser2.default.Sprite(this.game, 20, 20, 'champ:one:hand', 0),
+        right: new _phaser2.default.Sprite(this.game, 20, 20, 'champ:one:hand', 0)
+      };
+
+      this.hands.left.anchor.set(0.5, 1);
+      this.hands.right.anchor.set(0.5, 1);
+
+      this.add(this.hands.left);
+      this.add(this.hands.right);
+    }
+  }, {
+    key: 'createWeaponSprite',
+    value: function createWeaponSprite() {
+      this.weaponSprite = new _phaser2.default.Sprite(this.game, 0, 0, 'weapons', 0);
+      this.addAt(this.weaponSprite, 0);
     }
 
     /**
@@ -2712,7 +2731,6 @@ var Player = function (_Phaser$Group) {
       this.champion.visible = true;
 
       this.playerName.text = this._name;
-      this.updatePlayerNamePosition();
     }
 
     /**
@@ -2729,10 +2747,17 @@ var Player = function (_Phaser$Group) {
   }, {
     key: 'update',
     value: function update() {
+      this.direction = this.countPlayerDirection(this.game.input.worldX, this.game.input.worldY, this.champion.body, {
+        x: this.champion.width,
+        y: this.champion.height
+      });
+
       this.updatePlayerPosition();
       this.updatePlayerNamePosition();
       this.updatePlayerHealth();
       this.updatePlayerFrame();
+      this.updatePlayerHands();
+      // this.updatePlayerWeaponPosition();
     }
   }, {
     key: 'updatePlayerPosition',
@@ -2756,23 +2781,86 @@ var Player = function (_Phaser$Group) {
     key: 'updatePlayerHealth',
     value: function updatePlayerHealth() {
       var healthAlpha = this._hp / 100;
-      this.playerName.alpha = healthAlpha;
-      this.champion.alpha = healthAlpha;
+      this.alpha = healthAlpha;
     }
   }, {
     key: 'updatePlayerFrame',
     value: function updatePlayerFrame() {
-      var direction = this.countPlayerDirection(this.game.input.worldX, this.game.input.worldY, this.champion.body, {
-        x: this.champion.width,
-        y: this.champion.height
-      });
-
       if (this.champion.body.velocity.x !== 0 || this.champion.body.velocity.y !== 0) {
-        this.champion.animations.play(direction);
+        this.champion.animations.play(this.direction);
       } else {
-        this.champion.animations.play(direction);
+        this.champion.animations.play(this.direction);
         this.champion.animations.stop();
       }
+    }
+  }, {
+    key: 'updatePlayerHands',
+    value: function updatePlayerHands() {
+      var angle = this.game.physics.arcade.angleToPointer(this.champion);
+      switch (this.direction) {
+        case 'up':
+          this.sendToBack(this.hands.left);
+          this.sendToBack(this.hands.right);
+
+          this.hands.left.x = this.champion.body.x + 5;
+          this.hands.left.y = this.champion.body.y + 23;
+          this.hands.left.visible = true;
+
+          this.hands.right.x = this.champion.body.right - 5;
+          this.hands.right.y = this.champion.body.y + 23;
+          this.hands.right.visible = true;
+
+          this.hands.left.rotation = angle + 2;
+          this.hands.right.rotation = angle + 1;
+          break;
+
+        case 'down':
+          this.bringToTop(this.hands.left);
+          this.bringToTop(this.hands.right);
+
+          this.hands.left.x = this.champion.body.x + 5;
+          this.hands.left.y = this.champion.body.y + 23;
+          this.hands.left.visible = true;
+
+          this.hands.right.x = this.champion.body.right - 5;
+          this.hands.right.y = this.champion.body.y + 23;
+          this.hands.right.visible = true;
+
+          this.hands.left.rotation = angle + 1.2;
+          this.hands.right.rotation = angle + 2.2;
+          break;
+
+        case 'left':
+          this.bringToTop(this.hands.left);
+          this.bringToTop(this.hands.right);
+
+          this.hands.left.x = this.champion.body.right - 14;
+          this.hands.left.y = this.champion.body.y + 23;
+
+          this.hands.right.visible = false;
+
+          this.hands.left.rotation = angle + 1.4;
+          break;
+
+        case 'right':
+          this.bringToTop(this.hands.left);
+          this.bringToTop(this.hands.right);
+
+          this.hands.left.visible = false;
+
+          this.hands.right.x = this.champion.body.left + 14;
+          this.hands.right.y = this.champion.body.y + 23;
+          this.hands.right.visible = true;
+
+          this.hands.right.rotation = angle + 1.4;
+          break;
+      }
+    }
+  }, {
+    key: 'updatePlayerWeaponPosition',
+    value: function updatePlayerWeaponPosition() {
+      this.weaponSprite.x = this.champion.body.x + this.champion.width / 2;
+      this.weaponSprite.y = this.champion.body.y;
     }
   }, {
     key: 'countPlayerDirection',
@@ -4406,6 +4494,8 @@ var _class = function (_Phaser$State) {
     key: 'preload',
     value: function preload() {
       this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 64);
+      this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
+      this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
 
       // Loading info
       var loadingText = this.add.text(this.world.centerX, this.world.centerY, 'Wczytywanie tajemniczych danych...', {
