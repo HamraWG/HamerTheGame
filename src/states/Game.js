@@ -42,7 +42,7 @@ export default class extends Phaser.State
   {
     this.players.forEach((player) =>
     {
-      this.game.physics.arcade.collide(player, this.game.layers.layer);
+      this.game.physics.arcade.collide(player.champion, this.game.layers.layer);
 
       if (player instanceof CurrentPlayer)
       {
@@ -52,8 +52,8 @@ export default class extends Phaser.State
         player.hitTestObject.body.velocity.y = 0;
       }
 
-      player.body.velocity.x = 0;
-      player.body.velocity.y = 0;
+      player.champion.body.velocity.x = 0;
+      player.champion.body.velocity.y = 0;
 
       player.update();
     });
@@ -65,7 +65,7 @@ export default class extends Phaser.State
     {
       if (player instanceof CurrentPlayer === false) return;
 
-      this.game.debug.body(player.hitTestObject);
+      // this.game.debug.body(player.hitTestObject);
     });
   }
 }

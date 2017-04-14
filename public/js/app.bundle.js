@@ -2620,8 +2620,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 /**
  * Class representing Player.
  */
-var Player = function (_Phaser$Sprite) {
-  _inherits(Player, _Phaser$Sprite);
+var Player = function (_Phaser$Group) {
+  _inherits(Player, _Phaser$Group);
 
   /**
    * Creates Player instance.
@@ -2632,19 +2632,17 @@ var Player = function (_Phaser$Sprite) {
   function Player(game, dbRef) {
     _classCallCheck(this, Player);
 
-    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game, 0, 0, 'champ:one', 0));
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, game));
 
     _this._dbRef = dbRef;
     _this.eventEmitter = new _wolfy87Eventemitter2.default();
 
-    _this.visible = false;
-    _this.game.physics.enable(_this);
-    _this.body.collideWorldBounds = true;
     _this.velocity = 300;
 
+    _this.createChampion();
+    _this.createPlayerName();
     _this.game.add.existing(_this);
 
-    _this._addAnimations();
     _this.eventEmitter.once('value', function () {
       return _this.instantPositionUpdate(_this);
     });
@@ -2652,12 +2650,34 @@ var Player = function (_Phaser$Sprite) {
     return _this;
   }
 
-  /**
-   * Listens changes in database.
-   */
-
-
   _createClass(Player, [{
+    key: 'createChampion',
+    value: function createChampion() {
+      this.champion = new _phaser2.default.Sprite(this.game, 0, 0, 'champ:one', 0);
+      this.champion.visible = false;
+      this.game.physics.enable(this.champion);
+      this.champion.body.collideWorldBounds = true;
+
+      this.add(this.champion);
+    }
+  }, {
+    key: 'createPlayerName',
+    value: function createPlayerName() {
+      this.playerName = new _phaser2.default.Text(this.game, 0, 0, 'elo', {
+        font: '400 14px Exo',
+        fill: '#fff'
+      });
+      this.playerName.setShadow(3, 3, 'rgba(0,0,0,0.8)', 3);
+      this.playerName.anchor.set(0.5, 1);
+
+      this.add(this.playerName);
+    }
+
+    /**
+     * Listens changes in database.
+     */
+
+  }, {
     key: '_listenChange',
     value: function _listenChange() {
       var _this2 = this;
@@ -2681,9 +2701,12 @@ var Player = function (_Phaser$Sprite) {
   }, {
     key: 'instantPositionUpdate',
     value: function instantPositionUpdate() {
-      this.x = this._position.x;
-      this.y = this._position.y;
-      this.visible = true;
+      this.champion.x = this._position.x;
+      this.champion.y = this._position.y;
+      this.champion.visible = true;
+
+      this.playerName.text = this._name;
+      this.positionPlayerName();
     }
 
     /**
@@ -2700,13 +2723,22 @@ var Player = function (_Phaser$Sprite) {
   }, {
     key: 'update',
     value: function update() {
-      var posPlayer = this.getPosition();
-      if (this.body.x !== posPlayer.x) {
-        this.body.velocity.x = posPlayer.x > this.body.x ? this.velocity : -this.velocity;
+      var playerPos = this.getPosition();
+      var bodyPos = this.champion.body;
+      if (bodyPos.x !== playerPos.x) {
+        bodyPos.velocity.x = playerPos.x > bodyPos.x ? this.velocity : -this.velocity;
       }
-      if (this.body.y !== posPlayer.y) {
-        this.body.velocity.y = posPlayer.y > this.body.y ? this.velocity : -this.velocity;
+      if (bodyPos.y !== playerPos.y) {
+        bodyPos.velocity.y = playerPos.y > bodyPos.y ? this.velocity : -this.velocity;
       }
+
+      this.positionPlayerName();
+    }
+  }, {
+    key: 'positionPlayerName',
+    value: function positionPlayerName() {
+      this.playerName.x = this.champion.body.x + this.champion.width / 2;
+      this.playerName.y = this.champion.body.y;
     }
   }, {
     key: '_addAnimations',
@@ -2721,7 +2753,7 @@ var Player = function (_Phaser$Sprite) {
   }]);
 
   return Player;
-}(_phaser2.default.Sprite);
+}(_phaser2.default.Group);
 
 exports.default = Player;
 
@@ -4241,7 +4273,7 @@ var _class = function (_Phaser$State) {
       var _this2 = this;
 
       this.players.forEach(function (player) {
-        _this2.game.physics.arcade.collide(player, _this2.game.layers.layer);
+        _this2.game.physics.arcade.collide(player.champion, _this2.game.layers.layer);
 
         if (player instanceof _CurrentPlayer2.default) {
           player.collideTest();
@@ -4250,8 +4282,8 @@ var _class = function (_Phaser$State) {
           player.hitTestObject.body.velocity.y = 0;
         }
 
-        player.body.velocity.x = 0;
-        player.body.velocity.y = 0;
+        player.champion.body.velocity.x = 0;
+        player.champion.body.velocity.y = 0;
 
         player.update();
       });
@@ -4259,12 +4291,10 @@ var _class = function (_Phaser$State) {
   }, {
     key: 'render',
     value: function render() {
-      var _this3 = this;
-
       this.players.forEach(function (player) {
         if (player instanceof _CurrentPlayer2.default === false) return;
 
-        _this3.game.debug.body(player.hitTestObject);
+        // this.game.debug.body(player.hitTestObject);
       });
     }
   }]);
@@ -5149,15 +5179,15 @@ var CurrentPlayer = function (_Player) {
   function CurrentPlayer(game, dbRef) {
     _classCallCheck(this, CurrentPlayer);
 
+    // Update position helpers.
     var _this = _possibleConstructorReturn(this, (CurrentPlayer.__proto__ || Object.getPrototypeOf(CurrentPlayer)).call(this, game, dbRef));
 
-    _this.game.camera.follow(_this);
+    _this.updateTime = true;
+    _this.updateIteration = 1;
+    _this.updateEveryFrame = 5;
 
-    _this.hitTestObject = new _phaser2.default.Sprite(game, _this.body.x, _this.body.y, 'champ:one', 0);
-    _this.game.physics.enable(_this.hitTestObject);
-    _this.hitTestObject.body.collideWorldBounds = true;
-    _this.hitTestObject.alpha = 0;
-    _this.game.add.existing(_this.hitTestObject);
+    _this.game.camera.follow(_this.champion);
+    _this.createHitTestObject();
 
     _this.moveTestToPlayerAtStart();
     _this.addMovementKeyListeners();
@@ -5165,6 +5195,15 @@ var CurrentPlayer = function (_Player) {
   }
 
   _createClass(CurrentPlayer, [{
+    key: 'createHitTestObject',
+    value: function createHitTestObject() {
+      this.hitTestObject = new _phaser2.default.Sprite(this.game, this.champion.x, this.champion.y, 'champ:one', 0);
+      this.game.physics.enable(this.hitTestObject);
+      this.hitTestObject.body.collideWorldBounds = true;
+      this.hitTestObject.alpha = 0;
+      this.add(this.hitTestObject);
+    }
+  }, {
     key: 'addMovementKeyListeners',
     value: function addMovementKeyListeners() {
       var _this2 = this;
@@ -5224,18 +5263,17 @@ var CurrentPlayer = function (_Player) {
     value: function updatePositionRelativeToTest() {
       var updatePos = {};
 
-      if (this.body.x !== this.hitTestObject.body.x) updatePos.x = this.hitTestObject.body.x;
-      if (this.body.y !== this.hitTestObject.body.y) updatePos.y = this.hitTestObject.body.y;
+      if (this.champion.body.x !== this.hitTestObject.body.x) updatePos.x = this.hitTestObject.body.x;
+      if (this.champion.body.y !== this.hitTestObject.body.y) updatePos.y = this.hitTestObject.body.y;
 
       this._dbRef.child('position').update(updatePos);
-      console.log('elo');
     }
   }, {
     key: 'moveTestToPlayerAtStart',
     value: function moveTestToPlayerAtStart() {
       var _this4 = this;
 
-      if (this.visible === false) {
+      if (this.champion.visible === false) {
         this.eventEmitter.once('value', function () {
           return _this4.moveTestToPlayer();
         });
@@ -5247,16 +5285,24 @@ var CurrentPlayer = function (_Player) {
   }, {
     key: 'moveTestToPlayer',
     value: function moveTestToPlayer() {
-      this.hitTestObject.x = this.x;
-      this.hitTestObject.y = this.y;
+      this.hitTestObject.x = this.champion.x;
+      this.hitTestObject.y = this.champion.y;
     }
   }, {
     key: 'update',
     value: function update() {
       _get(CurrentPlayer.prototype.__proto__ || Object.getPrototypeOf(CurrentPlayer.prototype), 'update', this).call(this);
 
+      /**
+       * Update iteration.
+       * It blocks update database position every frame.
+       */
+      this.updateIteration++;
+      if (this.updateIteration > this.updateEveryFrame) this.updateIteration = 0;
+      this.updateTime = this.updateIteration === this.updateEveryFrame;
+
       var playerPos = this.getPosition();
-      if (this.hitTestObject.body.x !== playerPos.x || this.hitTestObject.body.y !== playerPos.y) {
+      if ((this.hitTestObject.body.x !== playerPos.x || this.hitTestObject.body.y !== playerPos.y) && this.updateTime === true) {
         this.updatePositionRelativeToTest();
       }
     }

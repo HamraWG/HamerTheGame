@@ -6,7 +6,7 @@ import EventEmitter from 'wolfy87-eventemitter';
 /**
  * Class representing Player.
  */
-class Player extends Phaser.Sprite
+class Player extends Phaser.Group
 {
   /**
    * Creates Player instance.
@@ -16,20 +16,40 @@ class Player extends Phaser.Sprite
    */
   constructor (game, dbRef)
   {
-    super(game, 0, 0, 'champ:one', 0);
+    super(game);
     this._dbRef = dbRef;
     this.eventEmitter = new EventEmitter();
 
-    this.visible = false;
-    this.game.physics.enable(this);
-    this.body.collideWorldBounds = true;
     this.velocity = 300;
 
+    this.createChampion();
+    this.createPlayerName();
     this.game.add.existing(this);
 
-    this._addAnimations();
     this.eventEmitter.once('value', () => this.instantPositionUpdate(this));
     this._listenChange();
+  }
+
+  createChampion ()
+  {
+    this.champion = new Phaser.Sprite(this.game, 0, 0, 'champ:one', 0);
+    this.champion.visible = false;
+    this.game.physics.enable(this.champion);
+    this.champion.body.collideWorldBounds = true;
+
+    this.add(this.champion);
+  }
+
+  createPlayerName ()
+  {
+    this.playerName = new Phaser.Text(this.game, 0, 0, 'elo', {
+      font: '400 14px Exo',
+      fill: '#fff'
+    });
+    this.playerName.setShadow(3, 3, 'rgba(0,0,0,0.8)', 3);
+    this.playerName.anchor.set(0.5, 1);
+
+    this.add(this.playerName);
   }
 
   /**
@@ -57,9 +77,12 @@ class Player extends Phaser.Sprite
 
   instantPositionUpdate ()
   {
-    this.x = this._position.x;
-    this.y = this._position.y;
-    this.visible = true;
+    this.champion.x = this._position.x;
+    this.champion.y = this._position.y;
+    this.champion.visible = true;
+
+    this.playerName.text = this._name;
+    this.positionPlayerName();
   }
 
   /**
@@ -74,15 +97,24 @@ class Player extends Phaser.Sprite
 
   update ()
   {
-    let posPlayer = this.getPosition();
-    if (this.body.x !== posPlayer.x)
+    let playerPos = this.getPosition();
+    let bodyPos = this.champion.body;
+    if (bodyPos.x !== playerPos.x)
     {
-      this.body.velocity.x = posPlayer.x > this.body.x ? this.velocity : -this.velocity;
+      bodyPos.velocity.x = playerPos.x > bodyPos.x ? this.velocity : -this.velocity;
     }
-    if (this.body.y !== posPlayer.y)
+    if (bodyPos.y !== playerPos.y)
     {
-      this.body.velocity.y = posPlayer.y > this.body.y ? this.velocity : -this.velocity;
+      bodyPos.velocity.y = playerPos.y > bodyPos.y ? this.velocity : -this.velocity;
     }
+
+    this.positionPlayerName();
+  }
+
+  positionPlayerName ()
+  {
+    this.playerName.x = this.champion.body.x + this.champion.width / 2;
+    this.playerName.y = this.champion.body.y;
   }
 
   _addAnimations ()

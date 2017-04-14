@@ -10,16 +10,25 @@ class CurrentPlayer extends Player
   {
     super(game, dbRef);
 
-    this.game.camera.follow(this);
+    // Update position helpers.
+    this.updateTime = true;
+    this.updateIteration = 1;
+    this.updateEveryFrame = 5;
 
-    this.hitTestObject = new Phaser.Sprite(game, this.body.x, this.body.y, 'champ:one', 0);
-    this.game.physics.enable(this.hitTestObject);
-    this.hitTestObject.body.collideWorldBounds = true;
-    this.hitTestObject.alpha = 0;
-    this.game.add.existing(this.hitTestObject);
+    this.game.camera.follow(this.champion);
+    this.createHitTestObject();
 
     this.moveTestToPlayerAtStart();
     this.addMovementKeyListeners();
+  }
+
+  createHitTestObject ()
+  {
+    this.hitTestObject = new Phaser.Sprite(this.game, this.champion.x, this.champion.y, 'champ:one', 0);
+    this.game.physics.enable(this.hitTestObject);
+    this.hitTestObject.body.collideWorldBounds = true;
+    this.hitTestObject.alpha = 0;
+    this.add(this.hitTestObject);
   }
 
   addMovementKeyListeners ()
@@ -71,16 +80,15 @@ class CurrentPlayer extends Player
   {
     let updatePos = {};
 
-    if (this.body.x !== this.hitTestObject.body.x) updatePos.x = this.hitTestObject.body.x;
-    if (this.body.y !== this.hitTestObject.body.y) updatePos.y = this.hitTestObject.body.y;
+    if (this.champion.body.x !== this.hitTestObject.body.x) updatePos.x = this.hitTestObject.body.x;
+    if (this.champion.body.y !== this.hitTestObject.body.y) updatePos.y = this.hitTestObject.body.y;
 
     this._dbRef.child('position').update(updatePos);
-    console.log('elo');
   }
 
   moveTestToPlayerAtStart ()
   {
-    if (this.visible === false)
+    if (this.champion.visible === false)
     {
       this.eventEmitter.once('value', () => this.moveTestToPlayer());
       return;
@@ -91,16 +99,24 @@ class CurrentPlayer extends Player
 
   moveTestToPlayer ()
   {
-    this.hitTestObject.x = this.x;
-    this.hitTestObject.y = this.y;
+    this.hitTestObject.x = this.champion.x;
+    this.hitTestObject.y = this.champion.y;
   }
 
   update ()
   {
     super.update();
 
+    /**
+     * Update iteration.
+     * It blocks update database position every frame.
+     */
+    this.updateIteration++;
+    if (this.updateIteration > this.updateEveryFrame) this.updateIteration = 0;
+    this.updateTime = this.updateIteration === this.updateEveryFrame;
+
     let playerPos = this.getPosition();
-    if (this.hitTestObject.body.x !== playerPos.x || this.hitTestObject.body.y !== playerPos.y)
+    if ((this.hitTestObject.body.x !== playerPos.x || this.hitTestObject.body.y !== playerPos.y) && this.updateTime === true)
     {
       this.updatePositionRelativeToTest();
     }
