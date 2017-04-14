@@ -88,7 +88,7 @@ class Player extends Phaser.Group
     this.champion.visible = true;
 
     this.playerName.text = this._name;
-    this.positionPlayerName();
+    this.updatePlayerNamePosition();
   }
 
   /**
@@ -106,22 +106,7 @@ class Player extends Phaser.Group
     this.updatePlayerPosition();
     this.updatePlayerNamePosition();
     this.updatePlayerHealth();
-
-    /* Player animation
-
-    if (bodyPos.velocity.x !== 0 || bodyPos.velocity.y !== 0)
-    {
-      // TODO: Get cursor pointer online
-      let direction = bodyPos.x > this.game.input.mousePointer.x ? 'left' : 'right';
-
-      this.champion.animations.play(direction);
-    }
-    else
-    {
-      this.champion.animations.currentAnim.restart();
-      this.champion.animations.stop();
-    }
-    */
+    this.updatePlayerFrame();
   }
 
   updatePlayerPosition ()
@@ -149,6 +134,50 @@ class Player extends Phaser.Group
     let healthAlpha = this._hp / 100;
     this.playerName.alpha = healthAlpha;
     this.champion.alpha = healthAlpha;
+  }
+
+  updatePlayerFrame ()
+  {
+    let direction = this.countPlayerDirection(
+      this.game.input.worldX,
+      this.game.input.worldY,
+      this.champion.body,
+      {
+        x: this.champion.width,
+        y: this.champion.height
+      }
+    );
+
+    if (this.champion.body.velocity.x !== 0 || this.champion.body.velocity.y !== 0)
+    {
+      this.champion.animations.play(direction);
+    }
+    else
+    {
+      this.champion.animations.play(direction);
+      this.champion.animations.stop();
+    }
+  }
+
+  countPlayerDirection (cursorX, cursorY, bodyPos, bodySize)
+  {
+    let distance = {};
+    distance.x = cursorX - (bodyPos.x + bodySize.x / 2);
+    distance.y = cursorY - (bodyPos.y + bodySize.y / 2);
+
+    let directionAxis = Math.abs(distance.x) < Math.abs(distance.y) ? 'y' : 'x';
+
+    let direction = null;
+    if (directionAxis === 'x')
+    {
+      direction = distance.x <= 0 ? 'left' : 'right';
+    }
+    else
+    {
+      direction = distance.y <= 0 ? 'up' : 'down';
+    }
+
+    return direction;
   }
 
   _addAnimations ()

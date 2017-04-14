@@ -2712,7 +2712,7 @@ var Player = function (_Phaser$Group) {
       this.champion.visible = true;
 
       this.playerName.text = this._name;
-      this.positionPlayerName();
+      this.updatePlayerNamePosition();
     }
 
     /**
@@ -2732,20 +2732,7 @@ var Player = function (_Phaser$Group) {
       this.updatePlayerPosition();
       this.updatePlayerNamePosition();
       this.updatePlayerHealth();
-
-      /* Player animation
-        if (bodyPos.velocity.x !== 0 || bodyPos.velocity.y !== 0)
-      {
-        // TODO: Get cursor pointer online
-        let direction = bodyPos.x > this.game.input.mousePointer.x ? 'left' : 'right';
-          this.champion.animations.play(direction);
-      }
-      else
-      {
-        this.champion.animations.currentAnim.restart();
-        this.champion.animations.stop();
-      }
-      */
+      this.updatePlayerFrame();
     }
   }, {
     key: 'updatePlayerPosition',
@@ -2771,6 +2758,39 @@ var Player = function (_Phaser$Group) {
       var healthAlpha = this._hp / 100;
       this.playerName.alpha = healthAlpha;
       this.champion.alpha = healthAlpha;
+    }
+  }, {
+    key: 'updatePlayerFrame',
+    value: function updatePlayerFrame() {
+      var direction = this.countPlayerDirection(this.game.input.worldX, this.game.input.worldY, this.champion.body, {
+        x: this.champion.width,
+        y: this.champion.height
+      });
+
+      if (this.champion.body.velocity.x !== 0 || this.champion.body.velocity.y !== 0) {
+        this.champion.animations.play(direction);
+      } else {
+        this.champion.animations.play(direction);
+        this.champion.animations.stop();
+      }
+    }
+  }, {
+    key: 'countPlayerDirection',
+    value: function countPlayerDirection(cursorX, cursorY, bodyPos, bodySize) {
+      var distance = {};
+      distance.x = cursorX - (bodyPos.x + bodySize.x / 2);
+      distance.y = cursorY - (bodyPos.y + bodySize.y / 2);
+
+      var directionAxis = Math.abs(distance.x) < Math.abs(distance.y) ? 'y' : 'x';
+
+      var direction = null;
+      if (directionAxis === 'x') {
+        direction = distance.x <= 0 ? 'left' : 'right';
+      } else {
+        direction = distance.y <= 0 ? 'up' : 'down';
+      }
+
+      return direction;
     }
   }, {
     key: '_addAnimations',
@@ -4322,13 +4342,7 @@ var _class = function (_Phaser$State) {
     }
   }, {
     key: 'render',
-    value: function render() {
-      this.players.forEach(function (player) {
-        if (player instanceof _CurrentPlayer2.default === false) return;
-
-        // this.game.debug.body(player.hitTestObject);
-      });
-    }
+    value: function render() {}
   }]);
 
   return _class;

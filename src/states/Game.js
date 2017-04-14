@@ -60,12 +60,5 @@ export default class extends Phaser.State
   }
 
   render ()
-  {
-    this.players.forEach((player) =>
-    {
-      if (player instanceof CurrentPlayer === false) return;
-
-      // this.game.debug.body(player.hitTestObject);
-    });
-  }
+  {}
 }
