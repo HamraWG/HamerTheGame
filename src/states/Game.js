@@ -44,6 +44,9 @@ export default class extends Phaser.State
     {
       this.game.physics.arcade.collide(player.champion, this.game.layers.layer);
 
+      player.champion.body.velocity.x = 0;
+      player.champion.body.velocity.y = 0;
+
       if (player instanceof CurrentPlayer)
       {
         player.collideTest();
@@ -51,9 +54,6 @@ export default class extends Phaser.State
         player.hitTestObject.body.velocity.x = 0;
         player.hitTestObject.body.velocity.y = 0;
       }
-
-      player.champion.body.velocity.x = 0;
-      player.champion.body.velocity.y = 0;
 
       player.update();
     });

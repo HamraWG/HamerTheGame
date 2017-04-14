@@ -26,8 +26,9 @@ class Player extends Phaser.Group
     this.createPlayerName();
     this.game.add.existing(this);
 
-    this.eventEmitter.once('value', () => this.instantPositionUpdate(this));
+    this.eventEmitter.once('value', () => this.positionObjectsUpdate(this));
     this._listenChange();
+    this._addAnimations();
   }
 
   createChampion ()
@@ -50,6 +51,11 @@ class Player extends Phaser.Group
     this.playerName.anchor.set(0.5, 1);
 
     this.add(this.playerName);
+  }
+
+  createHealthBar ()
+  {
+    this.playerHealthBar = new Phaser.Group()
   }
 
   /**
@@ -75,7 +81,7 @@ class Player extends Phaser.Group
     });
   }
 
-  instantPositionUpdate ()
+  positionObjectsUpdate ()
   {
     this.champion.x = this._position.x;
     this.champion.y = this._position.y;
@@ -97,6 +103,29 @@ class Player extends Phaser.Group
 
   update ()
   {
+    this.updatePlayerPosition();
+    this.updatePlayerNamePosition();
+    this.updatePlayerHealth();
+
+    /* Player animation
+
+    if (bodyPos.velocity.x !== 0 || bodyPos.velocity.y !== 0)
+    {
+      // TODO: Get cursor pointer online
+      let direction = bodyPos.x > this.game.input.mousePointer.x ? 'left' : 'right';
+
+      this.champion.animations.play(direction);
+    }
+    else
+    {
+      this.champion.animations.currentAnim.restart();
+      this.champion.animations.stop();
+    }
+    */
+  }
+
+  updatePlayerPosition ()
+  {
     let playerPos = this.getPosition();
     let bodyPos = this.champion.body;
     if (bodyPos.x !== playerPos.x)
@@ -107,24 +136,29 @@ class Player extends Phaser.Group
     {
       bodyPos.velocity.y = playerPos.y > bodyPos.y ? this.velocity : -this.velocity;
     }
-
-    this.positionPlayerName();
   }
 
-  positionPlayerName ()
+  updatePlayerNamePosition ()
   {
     this.playerName.x = this.champion.body.x + this.champion.width / 2;
     this.playerName.y = this.champion.body.y;
+  }
+
+  updatePlayerHealth ()
+  {
+    let healthAlpha = this._hp / 100;
+    this.playerName.alpha = healthAlpha;
+    this.champion.alpha = healthAlpha;
   }
 
   _addAnimations ()
   {
     let animationSpeed = 10;
 
-    this.animations.add('down', [0, 1, 2, 3], animationSpeed, true);
-    this.animations.add('left', [4, 5, 6, 7], animationSpeed, true);
-    this.animations.add('right', [8, 9, 10, 11], animationSpeed, true);
-    this.animations.add('up', [12, 13, 14, 15], animationSpeed, true);
+    this.champion.animations.add('down', [0, 1, 2, 3], animationSpeed, true);
+    this.champion.animations.add('left', [4, 5, 6, 7], animationSpeed, true);
+    this.champion.animations.add('right', [8, 9, 10, 11], animationSpeed, true);
+    this.champion.animations.add('up', [12, 13, 14, 15], animationSpeed, true);
   }
 }
 

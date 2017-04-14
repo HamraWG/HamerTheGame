@@ -63,6 +63,7 @@ class GameCreator
         champion: 'one',
         online: true,
         alive: false,
+        hp: 100,
         position: {
           x: 32,
           y: 32

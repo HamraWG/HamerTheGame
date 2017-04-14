@@ -2644,9 +2644,10 @@ var Player = function (_Phaser$Group) {
     _this.game.add.existing(_this);
 
     _this.eventEmitter.once('value', function () {
-      return _this.instantPositionUpdate(_this);
+      return _this.positionObjectsUpdate(_this);
     });
     _this._listenChange();
+    _this._addAnimations();
     return _this;
   }
 
@@ -2671,6 +2672,11 @@ var Player = function (_Phaser$Group) {
       this.playerName.anchor.set(0.5, 1);
 
       this.add(this.playerName);
+    }
+  }, {
+    key: 'createHealthBar',
+    value: function createHealthBar() {
+      this.playerHealthBar = new _phaser2.default.Group();
     }
 
     /**
@@ -2699,8 +2705,8 @@ var Player = function (_Phaser$Group) {
       });
     }
   }, {
-    key: 'instantPositionUpdate',
-    value: function instantPositionUpdate() {
+    key: 'positionObjectsUpdate',
+    value: function positionObjectsUpdate() {
       this.champion.x = this._position.x;
       this.champion.y = this._position.y;
       this.champion.visible = true;
@@ -2723,6 +2729,27 @@ var Player = function (_Phaser$Group) {
   }, {
     key: 'update',
     value: function update() {
+      this.updatePlayerPosition();
+      this.updatePlayerNamePosition();
+      this.updatePlayerHealth();
+
+      /* Player animation
+        if (bodyPos.velocity.x !== 0 || bodyPos.velocity.y !== 0)
+      {
+        // TODO: Get cursor pointer online
+        let direction = bodyPos.x > this.game.input.mousePointer.x ? 'left' : 'right';
+          this.champion.animations.play(direction);
+      }
+      else
+      {
+        this.champion.animations.currentAnim.restart();
+        this.champion.animations.stop();
+      }
+      */
+    }
+  }, {
+    key: 'updatePlayerPosition',
+    value: function updatePlayerPosition() {
       var playerPos = this.getPosition();
       var bodyPos = this.champion.body;
       if (bodyPos.x !== playerPos.x) {
@@ -2731,24 +2758,29 @@ var Player = function (_Phaser$Group) {
       if (bodyPos.y !== playerPos.y) {
         bodyPos.velocity.y = playerPos.y > bodyPos.y ? this.velocity : -this.velocity;
       }
-
-      this.positionPlayerName();
     }
   }, {
-    key: 'positionPlayerName',
-    value: function positionPlayerName() {
+    key: 'updatePlayerNamePosition',
+    value: function updatePlayerNamePosition() {
       this.playerName.x = this.champion.body.x + this.champion.width / 2;
       this.playerName.y = this.champion.body.y;
+    }
+  }, {
+    key: 'updatePlayerHealth',
+    value: function updatePlayerHealth() {
+      var healthAlpha = this._hp / 100;
+      this.playerName.alpha = healthAlpha;
+      this.champion.alpha = healthAlpha;
     }
   }, {
     key: '_addAnimations',
     value: function _addAnimations() {
       var animationSpeed = 10;
 
-      this.animations.add('down', [0, 1, 2, 3], animationSpeed, true);
-      this.animations.add('left', [4, 5, 6, 7], animationSpeed, true);
-      this.animations.add('right', [8, 9, 10, 11], animationSpeed, true);
-      this.animations.add('up', [12, 13, 14, 15], animationSpeed, true);
+      this.champion.animations.add('down', [0, 1, 2, 3], animationSpeed, true);
+      this.champion.animations.add('left', [4, 5, 6, 7], animationSpeed, true);
+      this.champion.animations.add('right', [8, 9, 10, 11], animationSpeed, true);
+      this.champion.animations.add('up', [12, 13, 14, 15], animationSpeed, true);
     }
   }]);
 
@@ -4275,15 +4307,15 @@ var _class = function (_Phaser$State) {
       this.players.forEach(function (player) {
         _this2.game.physics.arcade.collide(player.champion, _this2.game.layers.layer);
 
+        player.champion.body.velocity.x = 0;
+        player.champion.body.velocity.y = 0;
+
         if (player instanceof _CurrentPlayer2.default) {
           player.collideTest();
 
           player.hitTestObject.body.velocity.x = 0;
           player.hitTestObject.body.velocity.y = 0;
         }
-
-        player.champion.body.velocity.x = 0;
-        player.champion.body.velocity.y = 0;
 
         player.update();
       });
@@ -5491,6 +5523,7 @@ var GameCreator = function () {
           champion: 'one',
           online: true,
           alive: false,
+          hp: 100,
           position: {
             x: 32,
             y: 32
