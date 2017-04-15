@@ -26,7 +26,7 @@ class Player extends Phaser.Group
     this.createChampion();
     this.createPlayerName();
     this.createPlayerHands();
-    //this.createWeaponSprite();
+    this.createWeaponSprite();
     this.game.add.existing(this);
 
     this.eventEmitter.once('value', () => this.positionObjectsUpdate(this));
@@ -74,6 +74,8 @@ class Player extends Phaser.Group
   createWeaponSprite ()
   {
     this.weaponSprite = new Phaser.Sprite(this.game, 0, 0, 'weapons', 0);
+    this.weaponSprite.anchor.set(0, 0.5);
+    this.weaponSprite.defaultFrame = 0;
     this.addAt(this.weaponSprite, 0);
   }
 
@@ -135,8 +137,8 @@ class Player extends Phaser.Group
     this.updatePlayerNamePosition();
     this.updatePlayerHealth();
     this.updatePlayerFrame();
-    this.updatePlayerHands();
-    // this.updatePlayerWeaponPosition();
+    this.updatePlayerHandsPosition();
+    this.updatePlayerWeaponPosition();
   }
 
   updatePlayerPosition ()
@@ -178,74 +180,123 @@ class Player extends Phaser.Group
     }
   }
 
-  updatePlayerHands ()
+  updatePlayerHandsPosition ()
   {
-    let angle = this.game.physics.arcade.angleToPointer(this.champion);
+    let angleRight = this.game.physics.arcade.angleToPointer(this.hands.right);
+    let angleLeft = this.game.physics.arcade.angleToPointer(this.hands.left);
     switch (this.direction)
     {
       case 'up':
         this.sendToBack(this.hands.left);
         this.sendToBack(this.hands.right);
+        this.hands.left.visible = true;
+        this.hands.right.visible = true;
 
         this.hands.left.x = this.champion.body.x + 5;
         this.hands.left.y = this.champion.body.y + 23;
-        this.hands.left.visible = true;
 
         this.hands.right.x = this.champion.body.right - 5;
         this.hands.right.y = this.champion.body.y + 23;
-        this.hands.right.visible = true;
 
-        this.hands.left.rotation = angle + 2;
-        this.hands.right.rotation = angle + 1;
+        this.hands.left.rotation = angleLeft + Math.PI * 0.6;
+        this.hands.right.rotation = angleRight + Math.PI * 0.35;
         break;
 
       case 'down':
         this.bringToTop(this.hands.left);
         this.bringToTop(this.hands.right);
+        this.hands.left.visible = true;
+        this.hands.right.visible = true;
 
         this.hands.left.x = this.champion.body.x + 5;
         this.hands.left.y = this.champion.body.y + 23;
-        this.hands.left.visible = true;
 
         this.hands.right.x = this.champion.body.right - 5;
         this.hands.right.y = this.champion.body.y + 23;
-        this.hands.right.visible = true;
 
-        this.hands.left.rotation = angle + 1.2;
-        this.hands.right.rotation = angle + 2.2;
+        this.hands.left.rotation = angleLeft + Math.PI * 0.4;
+        this.hands.right.rotation = angleRight + Math.PI * 0.6;
         break;
 
       case 'left':
         this.bringToTop(this.hands.left);
         this.bringToTop(this.hands.right);
+        this.hands.left.visible = true;
+        this.hands.right.visible = false;
 
         this.hands.left.x = this.champion.body.right - 14;
         this.hands.left.y = this.champion.body.y + 23;
 
-        this.hands.right.visible = false;
-
-        this.hands.left.rotation = angle + 1.4;
+        this.hands.left.rotation = angleLeft + Math.PI * 0.5;
         break;
 
       case 'right':
         this.bringToTop(this.hands.left);
         this.bringToTop(this.hands.right);
-
         this.hands.left.visible = false;
+        this.hands.right.visible = true;
 
         this.hands.right.x = this.champion.body.left + 14;
         this.hands.right.y = this.champion.body.y + 23;
-        this.hands.right.visible = true;
 
-        this.hands.right.rotation = angle + 1.4;
+        this.hands.right.rotation = angleRight + Math.PI * 0.55;
         break;
     }
   }
 
   updatePlayerWeaponPosition ()
   {
-    this.weaponSprite.x = this.champion.body.x + this.champion.width / 2;
-    this.weaponSprite.y = this.champion.body.y;
+    let angle = null;
+    switch (this.direction)
+    {
+      case 'right':
+        angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
+        this.bringToTop(this.weaponSprite);
+        this.weaponSprite.frame = this.weaponSprite.defaultFrame;
+        this.weaponSprite.anchor.set(0, 0.5);
+
+        this.weaponSprite.x = this.hands.right.right + this.hands.right.width;
+        this.weaponSprite.y = this.hands.right.y;
+
+        this.weaponSprite.rotation = angle;
+        break;
+
+      case 'left':
+        angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
+        this.bringToTop(this.weaponSprite);
+        this.weaponSprite.frame = this.weaponSprite.defaultFrame + 2;
+        this.weaponSprite.anchor.set(1, 0.5);
+
+        this.weaponSprite.x = this.hands.left.left - this.hands.left.width;
+        this.weaponSprite.y = this.hands.left.y;
+
+        this.weaponSprite.rotation = angle + Math.PI;
+        break;
+
+      case 'down':
+        angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
+        this.bringToTop(this.weaponSprite);
+        this.weaponSprite.frame = this.weaponSprite.defaultFrame + 3;
+        this.weaponSprite.anchor.set(0.5, 0);
+
+        this.weaponSprite.x = this.champion.centerX;
+        this.weaponSprite.y = this.champion.centerY - 3;
+
+        this.weaponSprite.rotation = angle - Math.PI * 0.5;
+        break;
+
+      case 'up':
+        angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
+        this.sendToBack(this.weaponSprite);
+        this.weaponSprite.frame = this.weaponSprite.defaultFrame + 1;
+        this.weaponSprite.anchor.set(0.5, 1);
+
+        this.weaponSprite.x = this.champion.centerX;
+        this.weaponSprite.y = this.champion.y + 5;
+
+        this.weaponSprite.rotation = angle + Math.PI * 0.5;
+        break;
+    }
   }
 
   countPlayerDirection (cursorX, cursorY, bodyPos, bodySize)
