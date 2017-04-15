@@ -2651,7 +2651,6 @@ var Player = function (_Phaser$Group) {
     });
     _this._listenChange();
     _this._addAnimations();
-    console.log(_this);
     return _this;
   }
 
@@ -2716,6 +2715,7 @@ var Player = function (_Phaser$Group) {
 
         _this2._key = snapshot.key;
         _this2._name = data.name;
+        _this2._online = data.online;
         _this2._hp = data.hp;
         _this2._alive = data.alive;
         _this2._position = data.position;
@@ -2861,10 +2861,9 @@ var Player = function (_Phaser$Group) {
   }, {
     key: 'updatePlayerWeaponPosition',
     value: function updatePlayerWeaponPosition() {
-      var angle = null;
+      var angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
       switch (this.direction) {
         case 'right':
-          angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
           this.bringToTop(this.weaponSprite);
           this.weaponSprite.frame = this.weaponSprite.defaultFrame;
           this.weaponSprite.anchor.set(0, 0.5);
@@ -2876,7 +2875,6 @@ var Player = function (_Phaser$Group) {
           break;
 
         case 'left':
-          angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
           this.bringToTop(this.weaponSprite);
           this.weaponSprite.frame = this.weaponSprite.defaultFrame + 2;
           this.weaponSprite.anchor.set(1, 0.5);
@@ -2888,7 +2886,6 @@ var Player = function (_Phaser$Group) {
           break;
 
         case 'down':
-          angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
           this.bringToTop(this.weaponSprite);
           this.weaponSprite.frame = this.weaponSprite.defaultFrame + 3;
           this.weaponSprite.anchor.set(0.5, 0);
@@ -2900,7 +2897,6 @@ var Player = function (_Phaser$Group) {
           break;
 
         case 'up':
-          angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
           this.sendToBack(this.weaponSprite);
           this.weaponSprite.frame = this.weaponSprite.defaultFrame + 1;
           this.weaponSprite.anchor.set(0.5, 1);
@@ -4409,6 +4405,10 @@ var _Player = __webpack_require__(93);
 
 var _Player2 = _interopRequireDefault(_Player);
 
+var _Bullets = __webpack_require__(332);
+
+var _Bullets2 = _interopRequireDefault(_Bullets);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4432,6 +4432,12 @@ var _class = function (_Phaser$State) {
       this.dbGame = dbGame;
     }
   }, {
+    key: 'shutdown',
+    value: function shutdown() {
+      this.game.map = undefined;
+      this.game.layers = undefined;
+    }
+  }, {
     key: 'create',
     value: function create() {
       this.game.physics.startSystem(_phaser2.default.Physics.ARCADE);
@@ -4448,6 +4454,8 @@ var _class = function (_Phaser$State) {
       this.keyboard = this.game.input.keyboard;
       this.players = new Set();
       this.createPlayers();
+
+      this.bullets = new _Bullets2.default(this.game, this.dbGame.key);
     }
   }, {
     key: 'createPlayers',
@@ -4462,6 +4470,8 @@ var _class = function (_Phaser$State) {
     value: function update() {
       var _this2 = this;
 
+      this.game.canvas.style.cursor = 'crosshair';
+
       this.players.forEach(function (player) {
         _this2.game.physics.arcade.collide(player.champion, _this2.game.layers.layer);
 
@@ -4469,13 +4479,21 @@ var _class = function (_Phaser$State) {
         player.champion.body.velocity.y = 0;
 
         if (player instanceof _CurrentPlayer2.default) {
-          player.collideTest();
+          _this2.game.physics.arcade.collide(player.hitTestObject, _this2.game.layers.layer);
 
           player.hitTestObject.body.velocity.x = 0;
           player.hitTestObject.body.velocity.y = 0;
         }
 
         player.update();
+      });
+
+      this.bullets.map.forEach(function (bullet) {
+        _this2.game.physics.arcade.collide(bullet, _this2.game.layers.layer, bullet.remove, function () {
+          return true;
+        }, bullet);
+
+        bullet.update();
       });
     }
   }, {
@@ -4546,6 +4564,7 @@ var _class = function (_Phaser$State) {
       this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 64);
       this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
       this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
+      this.game.load.image('bullet', 'assets/bullet.png');
 
       // Loading info
       var loadingText = this.add.text(this.world.centerX, this.world.centerY, 'Wczytywanie tajemniczych danych...', {
@@ -5343,6 +5362,10 @@ var _Player2 = __webpack_require__(93);
 
 var _Player3 = _interopRequireDefault(_Player2);
 
+var _Weapon = __webpack_require__(331);
+
+var _Weapon2 = _interopRequireDefault(_Weapon);
+
 var _phaser = __webpack_require__(18);
 
 var _phaser2 = _interopRequireDefault(_phaser);
@@ -5365,7 +5388,7 @@ var CurrentPlayer = function (_Player) {
   function CurrentPlayer(game, dbRef) {
     _classCallCheck(this, CurrentPlayer);
 
-    // Update position helpers.
+    // Database update helpers.
     var _this = _possibleConstructorReturn(this, (CurrentPlayer.__proto__ || Object.getPrototypeOf(CurrentPlayer)).call(this, game, dbRef));
 
     _this.updateTime = true;
@@ -5374,6 +5397,8 @@ var CurrentPlayer = function (_Player) {
 
     _this.game.camera.follow(_this.champion);
     _this.createHitTestObject();
+
+    _this.weapon = new _Weapon2.default(_this.weaponSprite, dbRef.parent.parent.child('bullets'));
 
     _this.moveTestToPlayerAtStart();
     _this.addMovementKeyListeners();
@@ -5435,16 +5460,6 @@ var CurrentPlayer = function (_Player) {
       }
     }
   }, {
-    key: 'collideTest',
-    value: function collideTest() {
-      var _this3 = this;
-
-      this.testCollides = false;
-      this.game.physics.arcade.collide(this.hitTestObject, this.game.layers.layer, function () {
-        _this3.testCollides = true;
-      });
-    }
-  }, {
     key: 'updatePositionRelativeToTest',
     value: function updatePositionRelativeToTest() {
       var updatePos = {};
@@ -5457,11 +5472,11 @@ var CurrentPlayer = function (_Player) {
   }, {
     key: 'moveTestToPlayerAtStart',
     value: function moveTestToPlayerAtStart() {
-      var _this4 = this;
+      var _this3 = this;
 
       if (this.champion.visible === false) {
         this.eventEmitter.once('value', function () {
-          return _this4.moveTestToPlayer();
+          return _this3.moveTestToPlayer();
         });
         return;
       }
@@ -5536,10 +5551,12 @@ var Game = function (_EventEmitter) {
 
     _this._dbRef = _utils.database.ref('games/' + key);
 
+    _this._key = null;
     _this._name = null;
     _this._map = null;
     _this._gameType = null;
     _this._players = null;
+    _this._bullets = null;
 
     _this.listenData();
     return _this;
@@ -5553,10 +5570,12 @@ var Game = function (_EventEmitter) {
       this._dbRef.on('value', function (snapshot) {
         var data = snapshot.val();
 
+        _this2._key = snapshot.key;
         _this2._name = data.name;
         _this2._map = data.map;
         _this2._gameType = data.gameType;
         _this2._players = data.players;
+        _this2._bullets = data.bullets;
 
         _this2.emitEvent('value');
       });
@@ -5564,7 +5583,14 @@ var Game = function (_EventEmitter) {
   }, {
     key: 'getPlayerRef',
     value: function getPlayerRef(key) {
+      if (typeof key !== 'string' || !key) throw new TypeError('`key` must be a non-empty string');
+
       return this._dbRef.child('players/' + key);
+    }
+  }, {
+    key: 'key',
+    get: function get() {
+      return this._key;
     }
   }, {
     key: 'name',
@@ -5585,6 +5611,11 @@ var Game = function (_EventEmitter) {
     key: 'players',
     get: function get() {
       return this._players;
+    }
+  }, {
+    key: 'bullets',
+    get: function get() {
+      return this._bullets;
     }
   }]);
 
@@ -11851,6 +11882,237 @@ module.exports = firebase.storage;
 __webpack_require__(125);
 module.exports = __webpack_require__(124);
 
+
+/***/ }),
+/* 330 */,
+/* 331 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Weapon = function () {
+  function Weapon(weaponSprite, dbBulletsRef) {
+    _classCallCheck(this, Weapon);
+
+    this.sprite = weaponSprite;
+    this.game = weaponSprite.game;
+    this._bulletsRef = dbBulletsRef;
+
+    this.type = 'ak47';
+
+    this.listenFireButton();
+  }
+
+  _createClass(Weapon, [{
+    key: 'listenFireButton',
+    value: function listenFireButton() {
+      this.game.input.onDown.add(this.fire, this);
+    }
+  }, {
+    key: 'getBulletSize',
+    value: function getBulletSize(type) {
+      var size = null;
+      switch (type || this.type) {
+        case 'ak47':
+          size = 3;
+          break;
+      }
+
+      return size;
+    }
+  }, {
+    key: 'getBulletVelocity',
+    value: function getBulletVelocity(type) {
+      var velocity = null;
+      switch (type || this.type) {
+        case 'ak47':
+          velocity = 600;
+          break;
+      }
+
+      return velocity;
+    }
+  }, {
+    key: 'getBulletPower',
+    value: function getBulletPower(type) {
+      var power = null;
+      switch (type || this.type) {
+        case 'ak47':
+          power = 20;
+          break;
+      }
+
+      return power;
+    }
+  }, {
+    key: 'fire',
+    value: function fire() {
+      var angle = this.game.physics.arcade.angleToPointer(this.sprite);
+
+      this._bulletsRef.push({
+        x: this.sprite.x,
+        y: this.sprite.y,
+        size: this.getBulletSize(),
+        angle: angle,
+        velocity: this.getBulletVelocity(),
+        owner: this.game.currentUser.key,
+        power: this.getBulletPower()
+      });
+    }
+  }]);
+
+  return Weapon;
+}();
+
+exports.default = Weapon;
+
+/***/ }),
+/* 332 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _utils = __webpack_require__(48);
+
+var _Bullet = __webpack_require__(333);
+
+var _Bullet2 = _interopRequireDefault(_Bullet);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Bullets = function () {
+  function Bullets(game, gameKey) {
+    _classCallCheck(this, Bullets);
+
+    this.game = game;
+    this._dbRef = _utils.database.ref('games/' + gameKey + '/bullets');
+
+    this.map = new Map();
+
+    this._listenNewBullet();
+  }
+
+  _createClass(Bullets, [{
+    key: '_listenNewBullet',
+    value: function _listenNewBullet() {
+      var _this = this;
+
+      this._dbRef.on('child_added', function (snapshot) {
+        return _this.createBullet(snapshot.key, snapshot.val());
+      });
+    }
+  }, {
+    key: 'createBullet',
+    value: function createBullet(key, data) {
+      this.map.set(key, new _Bullet2.default(this.game, data.x, data.y, data.size, data.angle, data.velocity, data.owner, data.power));
+    }
+  }]);
+
+  return Bullets;
+}();
+
+exports.default = Bullets;
+
+/***/ }),
+/* 333 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _phaser = __webpack_require__(18);
+
+var _phaser2 = _interopRequireDefault(_phaser);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Bullet = function (_Phaser$Sprite) {
+  _inherits(Bullet, _Phaser$Sprite);
+
+  function Bullet(game, x, y, size, angle, velocity, owner, power) {
+    _classCallCheck(this, Bullet);
+
+    var _this = _possibleConstructorReturn(this, (Bullet.__proto__ || Object.getPrototypeOf(Bullet)).call(this, game, x, y, 'bullet', 0));
+
+    if (typeof game === 'undefined') throw new TypeError('`game` must be a Phaser.Game instance');
+    if (typeof x === 'undefined') throw new TypeError('`x` must be a number');
+    if (typeof y === 'undefined') throw new TypeError('`y` must be a number');
+    if (typeof size === 'undefined') throw new TypeError('`size` must be a number.');
+    if (typeof angle === 'undefined') throw new TypeError('`size` must be a number.');
+    if (typeof velocity === 'undefined') throw new TypeError('`velocity` must be a number.');
+    if (typeof owner === 'undefined') throw new TypeError('`owner` must be a string.');
+    if (typeof power === 'undefined') throw new TypeError('`power` must be a number.');
+
+    _this.game = game;
+
+    _this.angle = angle;
+    _this.velocity = velocity;
+    _this.owner = owner;
+    _this.power = power;
+
+    _this.game.physics.enable(_this);
+    _this.body.collideWorldBounds = true;
+
+    _this.game.add.existing(_this);
+    return _this;
+  }
+
+  _createClass(Bullet, [{
+    key: 'update',
+    value: function update() {
+      this.body.velocity.x = 0;
+      this.body.velocity.y = 0;
+
+      this.game.physics.arcade.velocityFromRotation(this.angle, this.velocity, this.body.velocity);
+    }
+  }, {
+    key: '_removeDBData',
+    value: function _removeDBData() {}
+  }, {
+    key: 'remove',
+    value: function remove() {
+      if (this.owner === this.game.currentUser.key) {
+        // remove
+      }
+
+      return true;
+    }
+  }]);
+
+  return Bullet;
+}(_phaser2.default.Sprite);
+
+exports.default = Bullet;
 
 /***/ })
 ],[329]);

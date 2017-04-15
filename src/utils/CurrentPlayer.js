@@ -1,6 +1,7 @@
 'use strict';
 
 import Player from './Player';
+import Weapon from './Weapon';
 import Phaser from 'phaser';
 import config from '../config';
 
@@ -10,13 +11,15 @@ class CurrentPlayer extends Player
   {
     super(game, dbRef);
 
-    // Update position helpers.
+    // Database update helpers.
     this.updateTime = true;
     this.updateIteration = 1;
     this.updateEveryFrame = 5;
 
     this.game.camera.follow(this.champion);
     this.createHitTestObject();
+
+    this.weapon = new Weapon(this.weaponSprite, dbRef.parent.parent.child('bullets'));
 
     this.moveTestToPlayerAtStart();
     this.addMovementKeyListeners();
@@ -43,7 +46,8 @@ class CurrentPlayer extends Player
 
   move (direction)
   {
-    if (direction !== 'up' && direction !== 'right' && direction !== 'down' && direction !== 'left') {
+    if (direction !== 'up' && direction !== 'right' && direction !== 'down' && direction !== 'left')
+    {
       throw new TypeError('`direction` must be a string equals `up`, `right`, `down` or `left`');
     }
 
@@ -65,15 +69,6 @@ class CurrentPlayer extends Player
         this.hitTestObject.body.velocity.x = -this.velocity;
         break;
     }
-  }
-
-  collideTest ()
-  {
-    this.testCollides = false;
-    this.game.physics.arcade.collide(this.hitTestObject, this.game.layers.layer, () =>
-    {
-      this.testCollides = true;
-    });
   }
 
   updatePositionRelativeToTest ()

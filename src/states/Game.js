@@ -3,12 +3,19 @@
 import Phaser from 'phaser';
 import CurrentPlayer from '../utils/CurrentPlayer';
 import Player from '../utils/Player';
+import Bullets from '../utils/Bullets';
 
 export default class extends Phaser.State
 {
   init (dbGame)
   {
     this.dbGame = dbGame;
+  }
+
+  shutdown ()
+  {
+    this.game.map = undefined;
+    this.game.layers = undefined;
   }
 
   create ()
@@ -27,6 +34,8 @@ export default class extends Phaser.State
     this.keyboard = this.game.input.keyboard;
     this.players = new Set();
     this.createPlayers();
+
+    this.bullets = new Bullets(this.game, this.dbGame.key);
   }
 
   createPlayers ()
@@ -40,6 +49,8 @@ export default class extends Phaser.State
 
   update ()
   {
+    this.game.canvas.style.cursor = 'crosshair';
+
     this.players.forEach((player) =>
     {
       this.game.physics.arcade.collide(player.champion, this.game.layers.layer);
@@ -49,13 +60,20 @@ export default class extends Phaser.State
 
       if (player instanceof CurrentPlayer)
       {
-        player.collideTest();
+        this.game.physics.arcade.collide(player.hitTestObject, this.game.layers.layer);
 
         player.hitTestObject.body.velocity.x = 0;
         player.hitTestObject.body.velocity.y = 0;
       }
 
       player.update();
+    });
+
+    this.bullets.map.forEach((bullet) =>
+    {
+      this.game.physics.arcade.collide(bullet, this.game.layers.layer, bullet.remove, () => true, bullet);
+
+      bullet.update();
     });
   }
 

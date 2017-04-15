@@ -32,7 +32,6 @@ class Player extends Phaser.Group
     this.eventEmitter.once('value', () => this.positionObjectsUpdate(this));
     this._listenChange();
     this._addAnimations();
-    console.log(this);
   }
 
   createChampion ()
@@ -92,6 +91,7 @@ class Player extends Phaser.Group
 
       this._key = snapshot.key;
       this._name = data.name;
+      this._online = data.online;
       this._hp = data.hp;
       this._alive = data.alive;
       this._position = data.position;
@@ -246,11 +246,10 @@ class Player extends Phaser.Group
 
   updatePlayerWeaponPosition ()
   {
-    let angle = null;
+    let angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
     switch (this.direction)
     {
       case 'right':
-        angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
         this.bringToTop(this.weaponSprite);
         this.weaponSprite.frame = this.weaponSprite.defaultFrame;
         this.weaponSprite.anchor.set(0, 0.5);
@@ -262,7 +261,6 @@ class Player extends Phaser.Group
         break;
 
       case 'left':
-        angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
         this.bringToTop(this.weaponSprite);
         this.weaponSprite.frame = this.weaponSprite.defaultFrame + 2;
         this.weaponSprite.anchor.set(1, 0.5);
@@ -274,7 +272,6 @@ class Player extends Phaser.Group
         break;
 
       case 'down':
-        angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
         this.bringToTop(this.weaponSprite);
         this.weaponSprite.frame = this.weaponSprite.defaultFrame + 3;
         this.weaponSprite.anchor.set(0.5, 0);
@@ -286,7 +283,6 @@ class Player extends Phaser.Group
         break;
 
       case 'up':
-        angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
         this.sendToBack(this.weaponSprite);
         this.weaponSprite.frame = this.weaponSprite.defaultFrame + 1;
         this.weaponSprite.anchor.set(0.5, 1);

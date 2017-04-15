@@ -11,10 +11,12 @@ class Game extends EventEmitter
 
     this._dbRef = database.ref(`games/${key}`);
 
+    this._key = null;
     this._name = null;
     this._map = null;
     this._gameType = null;
     this._players = null;
+    this._bullets = null;
 
     this.listenData();
   }
@@ -25,10 +27,12 @@ class Game extends EventEmitter
     {
       let data = snapshot.val();
 
+      this._key = snapshot.key;
       this._name = data.name;
       this._map = data.map;
       this._gameType = data.gameType;
       this._players = data.players;
+      this._bullets = data.bullets;
 
       this.emitEvent('value');
     });
@@ -36,7 +40,14 @@ class Game extends EventEmitter
 
   getPlayerRef (key)
   {
+    if (typeof key !== 'string' || !key) throw new TypeError('`key` must be a non-empty string');
+
     return this._dbRef.child(`players/${key}`);
+  }
+
+  get key ()
+  {
+    return this._key;
   }
 
   get name ()
@@ -57,6 +68,11 @@ class Game extends EventEmitter
   get players ()
   {
     return this._players;
+  }
+
+  get bullets ()
+  {
+    return this._bullets;
   }
 }
 
