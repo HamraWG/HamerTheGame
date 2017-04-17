@@ -69,9 +69,17 @@ export default class extends Phaser.State
       player.update();
     });
 
-    this.bullets.map.forEach((bullet) =>
+    this.bullets.set.forEach((bullet) =>
     {
-      this.game.physics.arcade.collide(bullet, this.game.layers.layer, bullet.remove, () => true, bullet);
+      let collide = this.game.physics.arcade.collide(bullet, this.game.layers.layer);
+
+      if (collide === true)
+      {
+        bullet.remove();
+        this.bullets.set.delete(bullet);
+
+        return;
+      }
 
       bullet.update();
     });

@@ -10,19 +10,19 @@ class Bullets
     this.game = game;
     this._dbRef = database.ref(`games/${gameKey}/bullets`);
 
-    this.map = new Map();
+    this.set = new Set();
 
     this._listenNewBullet();
   }
 
   _listenNewBullet ()
   {
-    this._dbRef.on('child_added', (snapshot) => this.createBullet(snapshot.key, snapshot.val()));
+    this._dbRef.on('child_added', (snapshot) => this.createBullet(snapshot.ref, snapshot.val()));
   }
 
-  createBullet (key, data)
+  createBullet (ref, data)
   {
-    this.map.set(key, new Bullet(
+    this.set.add(new Bullet(
       this.game,
       data.x,
       data.y,
@@ -30,10 +30,10 @@ class Bullets
       data.angle,
       data.velocity,
       data.owner,
-      data.power
+      data.power,
+      ref
     ));
   }
-
 }
 
 export default Bullets;
