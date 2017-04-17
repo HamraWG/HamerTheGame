@@ -2678,7 +2678,8 @@ var Player = function (_Phaser$Group) {
   }, {
     key: 'firstUpdate',
     value: function firstUpdate() {
-      this.positionObjectsUpdate(this);
+      this.instantlyPositionUpdate(this);
+      this.champion.visible = true;
       this.visible = this.online;
     }
 
@@ -2773,11 +2774,10 @@ var Player = function (_Phaser$Group) {
       });
     }
   }, {
-    key: 'positionObjectsUpdate',
-    value: function positionObjectsUpdate() {
+    key: 'instantlyPositionUpdate',
+    value: function instantlyPositionUpdate() {
       this.champion.x = this._position.x;
       this.champion.y = this._position.y;
-      this.champion.visible = true;
 
       this.playerName.text = this._name;
     }
@@ -2977,7 +2977,7 @@ var Player = function (_Phaser$Group) {
       var _this3 = this;
 
       this.game.onResume.add(function () {
-        _this3.positionObjectsUpdate();
+        _this3.instantlyPositionUpdate();
       }, this);
     }
   }, {
@@ -4479,7 +4479,6 @@ var _class = function (_Phaser$State) {
       var _this2 = this;
 
       var gameKey = localStorage.getItem('firebase:game:id');
-      console.log(gameKey);
       if (!gameKey) {
         this.inGame = false;
         return;
@@ -4557,6 +4556,8 @@ var _class = function (_Phaser$State) {
     key: 'init',
     value: function init(dbGame) {
       this.dbGame = dbGame;
+      this.deathTime = 1;
+      this.deathStateStatus = false;
     }
   }, {
     key: 'shutdown',
@@ -4583,6 +4584,8 @@ var _class = function (_Phaser$State) {
       this.createPlayers();
 
       this.bullets = new _Bullets2.default(this.game, this.dbGame.key);
+
+      this.createDeathState();
     }
   }, {
     key: 'createPlayers',
@@ -4601,9 +4604,15 @@ var _class = function (_Phaser$State) {
   }, {
     key: 'update',
     value: function update() {
-      var _this2 = this;
+      if (this.deathState.visible === false) this.game.canvas.style.cursor = 'crosshair';
 
-      this.game.canvas.style.cursor = 'crosshair';
+      this.updatePlayersPosition();
+      this.updateBullets();
+    }
+  }, {
+    key: 'updatePlayersPosition',
+    value: function updatePlayersPosition() {
+      var _this2 = this;
 
       this.players.forEach(function (player) {
         _this2.game.physics.arcade.collide(player.champion, _this2.game.layers.layer);
@@ -4616,27 +4625,34 @@ var _class = function (_Phaser$State) {
 
           player.hitTestObject.body.velocity.x = 0;
           player.hitTestObject.body.velocity.y = 0;
+
+          _this2.updateDeathState(player);
         }
 
         player.update();
       });
+    }
+  }, {
+    key: 'updateBullets',
+    value: function updateBullets() {
+      var _this3 = this;
 
       this.bullets.forEach(function (bullet) {
-        var layerCollide = _this2.game.physics.arcade.collide(bullet, _this2.game.layers.layer);
+        var layerCollide = _this3.game.physics.arcade.collide(bullet, _this3.game.layers.layer);
         var collidedPlayer = null;
 
-        _this2.players.forEach(function (player) {
+        _this3.players.forEach(function (player) {
           if (collidedPlayer !== null) return;
           if (player.live === false) return;
 
-          _this2.game.physics.arcade.overlap(player.champion, bullet, function () {
+          _this3.game.physics.arcade.overlap(player.champion, bullet, function () {
             collidedPlayer = player;
           });
         });
 
         if (layerCollide === true) {
           bullet.remove();
-          _this2.bullets.set.delete(bullet);
+          _this3.bullets.set.delete(bullet);
 
           return;
         }
@@ -4645,8 +4661,8 @@ var _class = function (_Phaser$State) {
           if (bullet.owner === collidedPlayer.key) return;
           if (collidedPlayer.hp <= 0 || collidedPlayer.visible === false) return;
 
-          bullet.hit(_this2.players.get(bullet.owner), collidedPlayer);
-          _this2.bullets.set.delete(bullet);
+          bullet.hit(_this3.players.get(bullet.owner), collidedPlayer);
+          _this3.bullets.set.delete(bullet);
 
           return;
         }
@@ -4655,8 +4671,74 @@ var _class = function (_Phaser$State) {
       });
     }
   }, {
-    key: 'render',
-    value: function render() {}
+    key: 'updateDeathState',
+    value: function updateDeathState(player) {
+      var _this4 = this;
+
+      if (this.deathStateStatus === false) {
+        this.deathState.button.setFrames(0);
+      }
+
+      if (player.hp <= 0 && this.deathStateStatus === false) {
+        this.deathStateStatus = true;
+        this.deathState.visible = true;
+        this.deathState.alpha = 0;
+
+        var text = player.lastHit ? player.lastHit.name + ' zabi\u0142/a Ci\u0119!' : 'Zostałeś/aś zabity/a';
+        this.deathState.text.setText(text);
+
+        this.game.time.events.add(this.deathTime * 1000, function () {
+          _this4.deathState.button.setFrames(1, 2);
+          _this4.deathState.button.onInputDown.add(function () {
+            _this4.respawnPlayer(player);
+
+            _this4.deathState.visible = false;
+            _this4.deathStateStatus = false;
+          });
+        });
+
+        this.game.add.tween(this.deathState).to({ alpha: 1 }, 500, _phaser2.default.Easing.Linear.None, true);
+      }
+    }
+  }, {
+    key: 'respawnPlayer',
+    value: function respawnPlayer(player) {
+      var respawns = this.game.map.properties.respawn;
+      var randomIndex = Math.floor(Math.random() * respawns.length);
+
+      var respawnTile = this.game.map.getTile(respawns[randomIndex][0], respawns[randomIndex][1], this.game.layers.layer);
+
+      player.hp = 100;
+      player.setInstantlyPosition(respawnTile.worldX, respawnTile.worldY);
+    }
+  }, {
+    key: 'createDeathState',
+    value: function createDeathState() {
+      this.deathState = new _phaser2.default.Group(this.game);
+      this.deathState.fixedToCamera = true;
+
+      var background = new _phaser2.default.Graphics(this.game);
+      background.beginFill(0xa70950, 0.4);
+      background.drawRect(0, 0, this.game.width, this.game.height);
+
+      var text = new _phaser2.default.Text(this.game, this.camera.width * 0.5, this.camera.height * 0.4, 'Death State!', {
+        fill: '#fff',
+        font: '400 24px Exo'
+      });
+      text.anchor.set(0.5, 0.5);
+
+      var button = new _phaser2.default.Button(this.game, this.game.width * 0.5, this.camera.height * 0.5, 'respawn-button');
+      button.anchor.set(0.5, 0.5);
+
+      this.deathState.add(background);
+      this.deathState.text = text;
+      this.deathState.add(text);
+      this.deathState.button = button;
+      this.deathState.add(button);
+
+      this.deathState.visible = false;
+      this.game.add.existing(this.deathState);
+    }
   }]);
 
   return _class;
@@ -4708,12 +4790,11 @@ var _class = function (_Phaser$State) {
       var _this2 = this;
 
       this.dbGame = new _Game2.default(gameKey);
-      // TODO(Ivan): Refactor it!
+
       if (this.dbGame.name) this.loadMapInit(this);else this.dbGame.once('value', function () {
         return _this2.loadMapInit(_this2);
       });
 
-      // TODO(Ivan): Start game when all players all loaded
       this.allLoaded = false;
 
       localStorage.setItem('firebase:game:id', gameKey);
@@ -4723,7 +4804,10 @@ var _class = function (_Phaser$State) {
     value: function preload() {
       this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 64);
       this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
+      this.game.load.spritesheet('champ:two', 'assets/champions/two.png', 32, 64);
+      this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
       this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
+      this.game.load.spritesheet('respawn-button', 'assets/images/respawn-button.png', 240, 60);
       this.game.load.image('bullet', 'assets/bullet.png');
 
       // Loading info
@@ -5791,6 +5875,8 @@ var CurrentPlayer = function (_Player) {
         throw new TypeError('`direction` must be a string equals `up`, `right`, `down` or `left`');
       }
 
+      if (this.hp <= 0) return;
+
       switch (direction) {
         case 'up':
           this.hitTestObject.body.velocity.y = -this.velocity;
@@ -5832,6 +5918,21 @@ var CurrentPlayer = function (_Player) {
       }
 
       this.moveTestToPlayer();
+    }
+  }, {
+    key: 'setInstantlyPosition',
+    value: function setInstantlyPosition(x, y) {
+      var _this4 = this;
+
+      if (typeof x !== 'number') throw new TypeError('`x` must be a number');
+      if (typeof y !== 'number') throw new TypeError('`y` must be a number');
+
+      this.eventEmitter.once('value', function () {
+        return _this4.instantlyPositionUpdate();
+      });
+
+      this.hitTestObject.x = x;
+      this.hitTestObject.y = y;
     }
   }, {
     key: 'moveTestToPlayer',
@@ -5928,7 +6029,7 @@ var Game = function (_EventEmitter) {
 
       this._dbRef.on('value', function (snapshot) {
         var data = snapshot.val();
-        console.log(data);
+
         _this2._key = snapshot.key;
         _this2._name = data.name;
         _this2._map = data.map;
@@ -6015,6 +6116,9 @@ var GameCreator = function () {
     _classCallCheck(this, GameCreator);
 
     this._db = _utils.database.ref('games');
+
+    // TODO(Ivan): CHANGE IT!
+    this.gameLast = 60;
   }
 
   /**
@@ -6043,7 +6147,7 @@ var GameCreator = function () {
         gameType: gameType,
         players: this._createPlayersConfig(players),
         startTimestamp: Date.now(),
-        endTimestamp: new Date(Date.now()).setMinutes(new Date(Date.now()).getMinutes() + 5)
+        endTimestamp: new Date(Date.now()).setMinutes(new Date(Date.now()).getMinutes() + this.gameLast)
       };
 
       this._db.update(_defineProperty({}, id, gameStartConfig));

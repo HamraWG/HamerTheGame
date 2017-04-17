@@ -10,6 +10,8 @@ export default class extends Phaser.State
   init (dbGame)
   {
     this.dbGame = dbGame;
+    this.deathTime = 1;
+    this.deathStateStatus = false;
   }
 
   shutdown ()
@@ -36,6 +38,8 @@ export default class extends Phaser.State
     this.createPlayers();
 
     this.bullets = new Bullets(this.game, this.dbGame.key);
+
+    this.createDeathState();
   }
 
   createPlayers ()
@@ -56,8 +60,14 @@ export default class extends Phaser.State
 
   update ()
   {
-    this.game.canvas.style.cursor = 'crosshair';
+    if (this.deathState.visible === false) this.game.canvas.style.cursor = 'crosshair';
 
+    this.updatePlayersPosition();
+    this.updateBullets();
+  }
+
+  updatePlayersPosition ()
+  {
     this.players.forEach((player) =>
     {
       this.game.physics.arcade.collide(player.champion, this.game.layers.layer);
@@ -71,11 +81,16 @@ export default class extends Phaser.State
 
         player.hitTestObject.body.velocity.x = 0;
         player.hitTestObject.body.velocity.y = 0;
+
+        this.updateDeathState(player);
       }
 
       player.update();
     });
+  }
 
+  updateBullets ()
+  {
     this.bullets.forEach((bullet) =>
     {
       let layerCollide = this.game.physics.arcade.collide(bullet, this.game.layers.layer);
@@ -115,6 +130,85 @@ export default class extends Phaser.State
     });
   }
 
-  render ()
-  {}
+  updateDeathState (player)
+  {
+    if (this.deathStateStatus === false)
+    {
+      this.deathState.button.setFrames(0);
+    }
+
+    if (player.hp <= 0 && this.deathStateStatus === false)
+    {
+      this.deathStateStatus = true;
+      this.deathState.visible = true;
+      this.deathState.alpha = 0;
+
+      let text = player.lastHit ? `${player.lastHit.name} zabił/a Cię!` : 'Zostałeś/aś zabity/a';
+      this.deathState.text.setText(text);
+
+      this.game.time.events.add(this.deathTime * 1000, () =>
+      {
+        this.deathState.button.setFrames(1, 2);
+        this.deathState.button.onInputDown.add(() =>
+        {
+          this.respawnPlayer(player);
+
+          this.deathState.visible = false;
+          this.deathStateStatus = false;
+        });
+      });
+
+      this.game.add.tween(this.deathState).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
+    }
+  }
+
+  respawnPlayer (player)
+  {
+    let respawns = this.game.map.properties.respawn;
+    let randomIndex = Math.floor(Math.random() * respawns.length);
+
+    let respawnTile = this.game.map.getTile(respawns[randomIndex][0], respawns[randomIndex][1], this.game.layers.layer);
+
+    player.hp = 100;
+    player.setInstantlyPosition(respawnTile.worldX, respawnTile.worldY);
+  }
+
+  createDeathState ()
+  {
+    this.deathState = new Phaser.Group(this.game);
+    this.deathState.fixedToCamera = true;
+
+    let background = new Phaser.Graphics(this.game);
+    background.beginFill(0xa70950, 0.4);
+    background.drawRect(0, 0, this.game.width, this.game.height);
+
+    let text = new Phaser.Text(
+      this.game,
+      this.camera.width * 0.5,
+      this.camera.height * 0.4,
+      'Death State!',
+      {
+        fill: '#fff',
+        font: '400 24px Exo'
+      }
+    );
+    text.anchor.set(0.5, 0.5);
+
+    let button = new Phaser.Button(
+      this.game,
+      this.game.width * 0.5,
+      this.camera.height * 0.5,
+      'respawn-button'
+    );
+    button.anchor.set(0.5, 0.5);
+
+    this.deathState.add(background);
+    this.deathState.text = text;
+    this.deathState.add(text);
+    this.deathState.button = button;
+    this.deathState.add(button);
+
+    this.deathState.visible = false;
+    this.game.add.existing(this.deathState);
+  }
 }

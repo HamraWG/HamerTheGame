@@ -55,6 +55,8 @@ class CurrentPlayer extends Player
       throw new TypeError('`direction` must be a string equals `up`, `right`, `down` or `left`');
     }
 
+    if (this.hp <= 0) return;
+
     switch (direction)
     {
       case 'up':
@@ -94,6 +96,17 @@ class CurrentPlayer extends Player
     }
 
     this.moveTestToPlayer();
+  }
+
+  setInstantlyPosition (x, y)
+  {
+    if (typeof x !== 'number') throw new TypeError('`x` must be a number');
+    if (typeof y !== 'number') throw new TypeError('`y` must be a number');
+
+    this.eventEmitter.once('value', () => this.instantlyPositionUpdate());
+
+    this.hitTestObject.x = x;
+    this.hitTestObject.y = y;
   }
 
   moveTestToPlayer ()

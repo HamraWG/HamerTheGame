@@ -13,6 +13,9 @@ class GameCreator
   constructor ()
   {
     this._db = database.ref('games');
+
+    // TODO(Ivan): CHANGE IT!
+    this.gameLast = 60;
   }
 
   /**
@@ -38,7 +41,7 @@ class GameCreator
       gameType: gameType,
       players: this._createPlayersConfig(players),
       startTimestamp: Date.now(),
-      endTimestamp: new Date(Date.now()).setMinutes(new Date(Date.now()).getMinutes() + 5)
+      endTimestamp: new Date(Date.now()).setMinutes(new Date(Date.now()).getMinutes() + this.gameLast)
     };
 
     this._db.update({

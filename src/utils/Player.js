@@ -112,7 +112,8 @@ class Player extends Phaser.Group
 
   firstUpdate ()
   {
-    this.positionObjectsUpdate(this);
+    this.instantlyPositionUpdate(this);
+    this.champion.visible = true;
     this.visible = this.online;
   }
 
@@ -202,11 +203,10 @@ class Player extends Phaser.Group
     });
   }
 
-  positionObjectsUpdate ()
+  instantlyPositionUpdate ()
   {
     this.champion.x = this._position.x;
     this.champion.y = this._position.y;
-    this.champion.visible = true;
 
     this.playerName.text = this._name;
   }
@@ -420,7 +420,7 @@ class Player extends Phaser.Group
   {
     this.game.onResume.add(() =>
     {
-      this.positionObjectsUpdate();
+      this.instantlyPositionUpdate();
     }, this);
   }
 }

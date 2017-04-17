@@ -8,11 +8,10 @@ export default class extends Phaser.State
   init (gameKey)
   {
     this.dbGame = new Game(gameKey);
-    // TODO(Ivan): Refactor it!
+
     if (this.dbGame.name) this.loadMapInit(this);
     else this.dbGame.once('value', () => this.loadMapInit(this));
 
-    // TODO(Ivan): Start game when all players all loaded
     this.allLoaded = false;
 
     localStorage.setItem('firebase:game:id', gameKey);
@@ -22,7 +21,10 @@ export default class extends Phaser.State
   {
     this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 64);
     this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
+    this.game.load.spritesheet('champ:two', 'assets/champions/two.png', 32, 64);
+    this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
     this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
+    this.game.load.spritesheet('respawn-button', 'assets/images/respawn-button.png', 240, 60);
     this.game.load.image('bullet', 'assets/bullet.png');
 
     // Loading info

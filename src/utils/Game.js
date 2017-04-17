@@ -26,7 +26,7 @@ class Game extends EventEmitter
     this._dbRef.on('value', (snapshot) =>
     {
       let data = snapshot.val();
-      console.log(data);
+
       this._key = snapshot.key;
       this._name = data.name;
       this._map = data.map;

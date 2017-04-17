@@ -21,6 +21,30 @@
         }],
  "nextobjectid":8,
  "orientation":"orthogonal",
+ "properties":
+    {
+     "respawn": [
+       [1, 2],
+       [14, 10],
+       [13, 25],
+       [49, 13],
+       [57, 1],
+       [51, 52],
+       [15, 45],
+       [4, 34],
+       [24, 32],
+       [31, 44],
+       [25, 50],
+       [5, 58],
+       [56, 48],
+       [31, 17],
+       [35, 37]
+     ]
+    },
+ "propertytypes":
+    {
+     "respawn":"array"
+    },
  "renderorder":"right-down",
  "tileheight":32,
  "tilesets":[

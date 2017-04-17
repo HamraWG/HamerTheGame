@@ -64,7 +64,6 @@ export default class extends Phaser.State
   checkIfUserIsInGame ()
   {
     let gameKey = localStorage.getItem('firebase:game:id');
-    console.log(gameKey);
     if (!gameKey)
     {
       this.inGame = false;
