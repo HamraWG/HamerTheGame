@@ -34,6 +34,11 @@ class Bullets
       ref
     ));
   }
+
+  forEach (...args)
+  {
+    this.set.forEach(...args);
+  }
 }
 
 export default Bullets;

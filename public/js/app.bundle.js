@@ -90,7 +90,7 @@ module.exports = function(it){
 /***/ (function(module, exports, __webpack_require__) {
 
 var store      = __webpack_require__(62)('wks')
-  , uid        = __webpack_require__(41)
+  , uid        = __webpack_require__(42)
   , Symbol     = __webpack_require__(2).Symbol
   , USE_SYMBOL = typeof Symbol == 'function';
 
@@ -190,7 +190,7 @@ module.exports = __webpack_require__(6) ? function(object, key, value){
 var global    = __webpack_require__(2)
   , hide      = __webpack_require__(12)
   , has       = __webpack_require__(10)
-  , SRC       = __webpack_require__(41)('src')
+  , SRC       = __webpack_require__(42)('src')
   , TO_STRING = 'toString'
   , $toString = Function[TO_STRING]
   , TPL       = ('' + $toString).split(TO_STRING);
@@ -504,20 +504,20 @@ module.exports = {
 "use strict";
 
 if(__webpack_require__(6)){
-  var LIBRARY             = __webpack_require__(34)
+  var LIBRARY             = __webpack_require__(35)
     , global              = __webpack_require__(2)
     , fails               = __webpack_require__(3)
     , $export             = __webpack_require__(0)
     , $typed              = __webpack_require__(63)
     , $buffer             = __webpack_require__(86)
     , ctx                 = __webpack_require__(27)
-    , anInstance          = __webpack_require__(33)
+    , anInstance          = __webpack_require__(34)
     , propertyDesc        = __webpack_require__(31)
     , hide                = __webpack_require__(12)
-    , redefineAll         = __webpack_require__(38)
+    , redefineAll         = __webpack_require__(39)
     , toInteger           = __webpack_require__(32)
     , toLength            = __webpack_require__(8)
-    , toIndex             = __webpack_require__(40)
+    , toIndex             = __webpack_require__(41)
     , toPrimitive         = __webpack_require__(24)
     , has                 = __webpack_require__(10)
     , same                = __webpack_require__(115)
@@ -525,11 +525,11 @@ if(__webpack_require__(6)){
     , isObject            = __webpack_require__(4)
     , toObject            = __webpack_require__(9)
     , isArrayIter         = __webpack_require__(71)
-    , create              = __webpack_require__(35)
+    , create              = __webpack_require__(36)
     , getPrototypeOf      = __webpack_require__(18)
-    , gOPN                = __webpack_require__(36).f
+    , gOPN                = __webpack_require__(37).f
     , getIterFn           = __webpack_require__(88)
-    , uid                 = __webpack_require__(41)
+    , uid                 = __webpack_require__(42)
     , wks                 = __webpack_require__(5)
     , createArrayMethod   = __webpack_require__(22)
     , createArrayIncludes = __webpack_require__(53)
@@ -537,7 +537,7 @@ if(__webpack_require__(6)){
     , ArrayIterators      = __webpack_require__(89)
     , Iterators           = __webpack_require__(45)
     , $iterDetect         = __webpack_require__(59)
-    , setSpecies          = __webpack_require__(39)
+    , setSpecies          = __webpack_require__(40)
     , arrayFill           = __webpack_require__(64)
     , arrayCopyWithin     = __webpack_require__(95)
     , $DP                 = __webpack_require__(7)
@@ -986,7 +986,7 @@ if(__webpack_require__(6)){
 /* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var META     = __webpack_require__(41)('meta')
+var META     = __webpack_require__(42)('meta')
   , isObject = __webpack_require__(4)
   , has      = __webpack_require__(10)
   , setDesc  = __webpack_require__(7).f
@@ -1066,6 +1066,31 @@ module.exports = function(it){
 
 /***/ }),
 /* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.database = exports.firebaseApp = undefined;
+
+var _firebase = __webpack_require__(325);
+
+var _firebase2 = _interopRequireDefault(_firebase);
+
+var _config = __webpack_require__(48);
+
+var _config2 = _interopRequireDefault(_config);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var firebaseApp = exports.firebaseApp = _firebase2.default.initializeApp(_config2.default.firebase);
+var database = exports.database = firebaseApp.database();
+
+/***/ }),
+/* 34 */
 /***/ (function(module, exports) {
 
 module.exports = function(it, Constructor, name, forbiddenField){
@@ -1075,13 +1100,13 @@ module.exports = function(it, Constructor, name, forbiddenField){
 };
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports) {
 
 module.exports = false;
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
@@ -1128,7 +1153,7 @@ module.exports = Object.create || function create(O, Properties){
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.7 / 15.2.3.4 Object.getOwnPropertyNames(O)
@@ -1140,7 +1165,7 @@ exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O){
 };
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.14 / 15.2.3.14 Object.keys(O)
@@ -1152,7 +1177,7 @@ module.exports = Object.keys || function keys(O){
 };
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var redefine = __webpack_require__(13);
@@ -1162,7 +1187,7 @@ module.exports = function(target, src, safe){
 };
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1181,7 +1206,7 @@ module.exports = function(KEY){
 };
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var toInteger = __webpack_require__(32)
@@ -1193,7 +1218,7 @@ module.exports = function(index, length){
 };
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports) {
 
 var id = 0
@@ -1201,31 +1226,6 @@ var id = 0
 module.exports = function(key){
   return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
 };
-
-/***/ }),
-/* 42 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.database = exports.firebaseApp = undefined;
-
-var _firebase = __webpack_require__(325);
-
-var _firebase2 = _interopRequireDefault(_firebase);
-
-var _config = __webpack_require__(48);
-
-var _config2 = _interopRequireDefault(_config);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var firebaseApp = exports.firebaseApp = _firebase2.default.initializeApp(_config2.default.firebase);
-var database = exports.database = firebaseApp.database();
 
 /***/ }),
 /* 43 */
@@ -1457,7 +1457,7 @@ module.exports = firebase;
 // true  -> Array#includes
 var toIObject = __webpack_require__(15)
   , toLength  = __webpack_require__(8)
-  , toIndex   = __webpack_require__(40);
+  , toIndex   = __webpack_require__(41);
 module.exports = function(IS_INCLUDES){
   return function($this, el, fromIndex){
     var O      = toIObject($this)
@@ -1484,10 +1484,10 @@ module.exports = function(IS_INCLUDES){
 var global            = __webpack_require__(2)
   , $export           = __webpack_require__(0)
   , redefine          = __webpack_require__(13)
-  , redefineAll       = __webpack_require__(38)
+  , redefineAll       = __webpack_require__(39)
   , meta              = __webpack_require__(30)
   , forOf             = __webpack_require__(44)
-  , anInstance        = __webpack_require__(33)
+  , anInstance        = __webpack_require__(34)
   , isObject          = __webpack_require__(4)
   , fails             = __webpack_require__(3)
   , $iterDetect       = __webpack_require__(59)
@@ -1684,7 +1684,7 @@ module.exports = function(exec, skipClosing){
 /***/ (function(module, exports, __webpack_require__) {
 
 // Forced replacement prototype accessors methods
-module.exports = __webpack_require__(34)|| !__webpack_require__(3)(function(){
+module.exports = __webpack_require__(35)|| !__webpack_require__(3)(function(){
   var K = Math.random();
   // In FF throws only define methods
   __defineSetter__.call(null, K, function(){ /* empty */});
@@ -1714,7 +1714,7 @@ module.exports = function(key){
 
 var global = __webpack_require__(2)
   , hide   = __webpack_require__(12)
-  , uid    = __webpack_require__(41)
+  , uid    = __webpack_require__(42)
   , TYPED  = uid('typed_array')
   , VIEW   = uid('view')
   , ABV    = !!(global.ArrayBuffer && global.DataView)
@@ -1747,7 +1747,7 @@ module.exports = {
 // 22.1.3.6 Array.prototype.fill(value, start = 0, end = this.length)
 
 var toObject = __webpack_require__(9)
-  , toIndex  = __webpack_require__(40)
+  , toIndex  = __webpack_require__(41)
   , toLength = __webpack_require__(8);
 module.exports = function fill(value /*, start = 0, end = @length */){
   var O      = toObject(this)
@@ -1860,7 +1860,7 @@ module.exports = Array.isArray || function isArray(arg){
 
 "use strict";
 
-var create         = __webpack_require__(35)
+var create         = __webpack_require__(36)
   , descriptor     = __webpack_require__(31)
   , setToStringTag = __webpack_require__(46)
   , IteratorPrototype = {};
@@ -1879,7 +1879,7 @@ module.exports = function(Constructor, NAME, next){
 
 "use strict";
 
-var LIBRARY        = __webpack_require__(34)
+var LIBRARY        = __webpack_require__(35)
   , $export        = __webpack_require__(0)
   , redefine       = __webpack_require__(13)
   , hide           = __webpack_require__(12)
@@ -2081,7 +2081,7 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 var shared = __webpack_require__(62)('keys')
-  , uid    = __webpack_require__(41);
+  , uid    = __webpack_require__(42);
 module.exports = function(key){
   return shared[key] || (shared[key] = uid(key));
 };
@@ -2247,15 +2247,15 @@ module.exports = {
 
 var global         = __webpack_require__(2)
   , DESCRIPTORS    = __webpack_require__(6)
-  , LIBRARY        = __webpack_require__(34)
+  , LIBRARY        = __webpack_require__(35)
   , $typed         = __webpack_require__(63)
   , hide           = __webpack_require__(12)
-  , redefineAll    = __webpack_require__(38)
+  , redefineAll    = __webpack_require__(39)
   , fails          = __webpack_require__(3)
-  , anInstance     = __webpack_require__(33)
+  , anInstance     = __webpack_require__(34)
   , toInteger      = __webpack_require__(32)
   , toLength       = __webpack_require__(8)
-  , gOPN           = __webpack_require__(36).f
+  , gOPN           = __webpack_require__(37).f
   , dP             = __webpack_require__(7).f
   , arrayFill      = __webpack_require__(64)
   , setToStringTag = __webpack_require__(46)
@@ -2524,7 +2524,7 @@ exports[DATA_VIEW] = $DataView;
 
 var global         = __webpack_require__(2)
   , core           = __webpack_require__(26)
-  , LIBRARY        = __webpack_require__(34)
+  , LIBRARY        = __webpack_require__(35)
   , wksExt         = __webpack_require__(117)
   , defineProperty = __webpack_require__(7).f;
 module.exports = function(name){
@@ -2646,7 +2646,6 @@ var Player = function (_Phaser$Group) {
     _this._position = null;
     _this._stats = null;
     _this._eq = null;
-    _this.live = true;
 
     _this.velocity = 300;
     _this.direction = null;
@@ -2658,7 +2657,7 @@ var Player = function (_Phaser$Group) {
     _this.game.add.existing(_this);
 
     _this.eventEmitter.once('value', function () {
-      return _this.positionObjectsUpdate(_this);
+      return _this.firstUpdate(_this);
     });
     _this._listenChange();
     _this._addAnimations();
@@ -2677,14 +2676,20 @@ var Player = function (_Phaser$Group) {
       this._dbRef.child('stats/deaths').update(_defineProperty({}, key, this.stats.deaths[key] + 1 || 1));
     }
   }, {
-    key: 'getPosition',
-
+    key: 'firstUpdate',
+    value: function firstUpdate() {
+      this.positionObjectsUpdate(this);
+      this.visible = this.online;
+    }
 
     /**
      * Returns player's position.
      *
      * @returns {object}
      */
+
+  }, {
+    key: 'getPosition',
     value: function getPosition() {
       return this._position;
     }
@@ -2752,6 +2757,8 @@ var Player = function (_Phaser$Group) {
         if (snapshot.exists() === false) return;
 
         var data = snapshot.val();
+        var connectState = false;
+        if (_this2._online !== data.online) connectState = true;
 
         _this2._key = snapshot.key;
         _this2._name = data.name;
@@ -2761,6 +2768,7 @@ var Player = function (_Phaser$Group) {
         _this2._stats = data.stats;
         _this2._eq = data.eq;
 
+        if (connectState) _this2.eventEmitter.emitEvent('connection', [_this2]);
         _this2.eventEmitter.emitEvent('value', [_this2]);
       });
     }
@@ -2986,6 +2994,13 @@ var Player = function (_Phaser$Group) {
     key: 'online',
     get: function get() {
       return this._online;
+    },
+    set: function set(online) {
+      if (typeof online !== 'boolean') throw new TypeError('`online` must be a boolean');
+
+      this._dbRef.update({
+        online: online
+      });
     }
   }, {
     key: 'hp',
@@ -3038,7 +3053,7 @@ module.exports = function(it, msg){
 // 22.1.3.3 Array.prototype.copyWithin(target, start, end = this.length)
 
 var toObject = __webpack_require__(9)
-  , toIndex  = __webpack_require__(40)
+  , toIndex  = __webpack_require__(41)
   , toLength = __webpack_require__(8);
 
 module.exports = [].copyWithin || function copyWithin(target/*= 0*/, start/*= 0, end = @length*/){
@@ -3145,15 +3160,15 @@ module.exports = Function.bind || function bind(that /*, args... */){
 "use strict";
 
 var dP          = __webpack_require__(7).f
-  , create      = __webpack_require__(35)
-  , redefineAll = __webpack_require__(38)
+  , create      = __webpack_require__(36)
+  , redefineAll = __webpack_require__(39)
   , ctx         = __webpack_require__(27)
-  , anInstance  = __webpack_require__(33)
+  , anInstance  = __webpack_require__(34)
   , defined     = __webpack_require__(20)
   , forOf       = __webpack_require__(44)
   , $iterDefine = __webpack_require__(74)
   , step        = __webpack_require__(105)
-  , setSpecies  = __webpack_require__(39)
+  , setSpecies  = __webpack_require__(40)
   , DESCRIPTORS = __webpack_require__(6)
   , fastKey     = __webpack_require__(30).fastKey
   , SIZE        = DESCRIPTORS ? '_s' : 'size';
@@ -3306,11 +3321,11 @@ module.exports = function(NAME){
 
 "use strict";
 
-var redefineAll       = __webpack_require__(38)
+var redefineAll       = __webpack_require__(39)
   , getWeak           = __webpack_require__(30).getWeak
   , anObject          = __webpack_require__(1)
   , isObject          = __webpack_require__(4)
-  , anInstance        = __webpack_require__(33)
+  , anInstance        = __webpack_require__(34)
   , forOf             = __webpack_require__(44)
   , createArrayMethod = __webpack_require__(22)
   , $has              = __webpack_require__(10)
@@ -3449,7 +3464,7 @@ module.exports = Math.log1p || function log1p(x){
 "use strict";
 
 // 19.1.2.1 Object.assign(target, source, ...)
-var getKeys  = __webpack_require__(37)
+var getKeys  = __webpack_require__(38)
   , gOPS     = __webpack_require__(61)
   , pIE      = __webpack_require__(51)
   , toObject = __webpack_require__(9)
@@ -3487,7 +3502,7 @@ module.exports = !$assign || __webpack_require__(3)(function(){
 
 var dP       = __webpack_require__(7)
   , anObject = __webpack_require__(1)
-  , getKeys  = __webpack_require__(37);
+  , getKeys  = __webpack_require__(38);
 
 module.exports = __webpack_require__(6) ? Object.defineProperties : function defineProperties(O, Properties){
   anObject(O);
@@ -3505,7 +3520,7 @@ module.exports = __webpack_require__(6) ? Object.defineProperties : function def
 
 // fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
 var toIObject = __webpack_require__(15)
-  , gOPN      = __webpack_require__(36).f
+  , gOPN      = __webpack_require__(37).f
   , toString  = {}.toString;
 
 var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNames
@@ -3550,7 +3565,7 @@ module.exports = function(object, names){
 /* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getKeys   = __webpack_require__(37)
+var getKeys   = __webpack_require__(38)
   , toIObject = __webpack_require__(15)
   , isEnum    = __webpack_require__(51).f;
 module.exports = function(isEntries){
@@ -3572,7 +3587,7 @@ module.exports = function(isEntries){
 /***/ (function(module, exports, __webpack_require__) {
 
 // all object keys, includes non-enumerable and symbols
-var gOPN     = __webpack_require__(36)
+var gOPN     = __webpack_require__(37)
   , gOPS     = __webpack_require__(61)
   , anObject = __webpack_require__(1)
   , Reflect  = __webpack_require__(2).Reflect;
@@ -4391,6 +4406,8 @@ var _webfontloader = __webpack_require__(92);
 
 var _webfontloader2 = _interopRequireDefault(_webfontloader);
 
+var _utils = __webpack_require__(33);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4415,6 +4432,7 @@ var _class = function (_Phaser$State) {
 
       this.stage.backgroundColor = '#1d1b19';
       this.fontsReady = false;
+      this.inGame = null;
     }
   }, {
     key: 'preload',
@@ -4432,6 +4450,8 @@ var _class = function (_Phaser$State) {
       this.load.image('logo', 'assets/images/logo.png');
       this.load.spritesheet('menu__join-button', 'assets/images/menu/join-button.png', 318, 50);
 
+      this.checkIfUserIsInGame();
+
       // Loading info
       var loadingText = this.add.text(this.world.centerX, this.world.centerY, 'Wczytywanie tajemniczych danych.', {
         font: '16px Arial',
@@ -4443,8 +4463,37 @@ var _class = function (_Phaser$State) {
   }, {
     key: 'render',
     value: function render() {
-      // FIXME(Ivan): Go to the Menu!
-      if (this.fontsReady) this.state.start('GameLoader', true, false, '-KhvNn6WQJHTkltP2Xlo');
+      if (this.fontsReady && this.inGame !== null) {
+        if (this.inGame === true) {
+          this.state.start('GameLoader', true, false, localStorage.getItem('firebase:game:id'));
+
+          return;
+        }
+
+        this.state.start('Menu');
+      }
+    }
+  }, {
+    key: 'checkIfUserIsInGame',
+    value: function checkIfUserIsInGame() {
+      var _this2 = this;
+
+      var gameKey = localStorage.getItem('firebase:game:id');
+      console.log(gameKey);
+      if (!gameKey) {
+        this.inGame = false;
+        return;
+      }
+
+      _utils.database.ref('games/' + gameKey).once('value').then(function (snapshot) {
+        if (snapshot.exists() === false) {
+          _this2.inGame = false;
+          return;
+        }
+        var data = snapshot.val();
+
+        _this2.inGame = Date.now() < data.endTimestamp;
+      });
     }
   }, {
     key: 'fontsLoaded',
@@ -4540,8 +4589,14 @@ var _class = function (_Phaser$State) {
     value: function createPlayers() {
       for (var playerKey in this.dbGame.players) {
         var player = playerKey === this.game.currentUser.key ? new _CurrentPlayer2.default(this.game, this.dbGame.getPlayerRef(playerKey)) : new _Player2.default(this.game, this.dbGame.getPlayerRef(playerKey));
+        player.eventEmitter.on('connection', this.onConnectionPlayer);
         this.players.set(playerKey, player);
       }
+    }
+  }, {
+    key: 'onConnectionPlayer',
+    value: function onConnectionPlayer(player) {
+      if (player.online) player.visible = true;else player.visible = false;
     }
   }, {
     key: 'update',
@@ -4566,7 +4621,7 @@ var _class = function (_Phaser$State) {
         player.update();
       });
 
-      this.bullets.set.forEach(function (bullet) {
+      this.bullets.forEach(function (bullet) {
         var layerCollide = _this2.game.physics.arcade.collide(bullet, _this2.game.layers.layer);
         var collidedPlayer = null;
 
@@ -4588,7 +4643,7 @@ var _class = function (_Phaser$State) {
 
         if (collidedPlayer) {
           if (bullet.owner === collidedPlayer.key) return;
-          if (collidedPlayer.hp <= 0) return;
+          if (collidedPlayer.hp <= 0 || collidedPlayer.visible === false) return;
 
           bullet.hit(_this2.players.get(bullet.owner), collidedPlayer);
           _this2.bullets.set.delete(bullet);
@@ -4660,6 +4715,8 @@ var _class = function (_Phaser$State) {
 
       // TODO(Ivan): Start game when all players all loaded
       this.allLoaded = false;
+
+      localStorage.setItem('firebase:game:id', gameKey);
     }
   }, {
     key: 'preload',
@@ -5425,6 +5482,8 @@ var Bullet = function (_Phaser$Sprite) {
     _this.body.collideWorldBounds = true;
 
     _this.game.add.existing(_this);
+
+    _this.removeOnDisconnect();
     return _this;
   }
 
@@ -5475,6 +5534,13 @@ var Bullet = function (_Phaser$Sprite) {
 
       return true;
     }
+  }, {
+    key: 'removeOnDisconnect',
+    value: function removeOnDisconnect() {
+      if (this.owner === this.game.currentUser.key) {
+        this._dbRef.onDisconnect().remove();
+      }
+    }
   }]);
 
   return Bullet;
@@ -5495,7 +5561,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _utils = __webpack_require__(42);
+var _utils = __webpack_require__(33);
 
 var _Bullet = __webpack_require__(132);
 
@@ -5531,6 +5597,13 @@ var Bullets = function () {
     value: function createBullet(ref, data) {
       this.set.add(new _Bullet2.default(this.game, data.x, data.y, data.size, data.angle, data.velocity, data.owner, data.power, ref));
     }
+  }, {
+    key: 'forEach',
+    value: function forEach() {
+      var _set;
+
+      (_set = this.set).forEach.apply(_set, arguments);
+    }
   }]);
 
   return Bullets;
@@ -5551,7 +5624,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _utils = __webpack_require__(42);
+var _utils = __webpack_require__(33);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -5673,6 +5746,12 @@ var CurrentPlayer = function (_Player) {
 
     _this.moveTestToPlayerAtStart();
     _this.addMovementKeyListeners();
+
+    _this.eventEmitter.once('value', function () {
+      return _this.firstUpdate(_this);
+    });
+    _this.online = true;
+    _this._onDisconnect();
     return _this;
   }
 
@@ -5765,7 +5844,6 @@ var CurrentPlayer = function (_Player) {
     value: function update() {
       _get(CurrentPlayer.prototype.__proto__ || Object.getPrototypeOf(CurrentPlayer.prototype), 'update', this).call(this);
       this.databaseUpdate();
-      this.healthUpdate();
     }
   }, {
     key: 'databaseUpdate',
@@ -5784,11 +5862,9 @@ var CurrentPlayer = function (_Player) {
       }
     }
   }, {
-    key: 'healthUpdate',
-    value: function healthUpdate() {
-      if (this.alive === false) {
-        // ...
-      }
+    key: '_onDisconnect',
+    value: function _onDisconnect() {
+      this._dbRef.child('online').onDisconnect().set(false);
     }
   }]);
 
@@ -5810,7 +5886,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _utils = __webpack_require__(42);
+var _utils = __webpack_require__(33);
 
 var _wolfy87Eventemitter = __webpack_require__(123);
 
@@ -5852,7 +5928,7 @@ var Game = function (_EventEmitter) {
 
       this._dbRef.on('value', function (snapshot) {
         var data = snapshot.val();
-
+        console.log(data);
         _this2._key = snapshot.key;
         _this2._name = data.name;
         _this2._map = data.map;
@@ -5922,7 +5998,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _utils = __webpack_require__(42);
+var _utils = __webpack_require__(33);
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -5965,7 +6041,9 @@ var GameCreator = function () {
         name: name,
         map: map,
         gameType: gameType,
-        players: this._createPlayersConfig(players)
+        players: this._createPlayersConfig(players),
+        startTimestamp: Date.now(),
+        endTimestamp: new Date(Date.now()).setMinutes(new Date(Date.now()).getMinutes() + 5)
       };
 
       this._db.update(_defineProperty({}, id, gameStartConfig));
@@ -5989,8 +6067,7 @@ var GameCreator = function () {
         playersConfig[pKey] = {
           name: players[pKey],
           champion: 'one',
-          online: true,
-          live: false,
+          online: false,
           hp: 100,
           position: {
             x: 32,
@@ -5999,11 +6076,6 @@ var GameCreator = function () {
           stats: {
             kills: 0,
             deaths: 0
-          },
-          eq: {
-            ak47: {
-              ammo: 240
-            }
           }
         };
       }
@@ -6034,7 +6106,7 @@ var _Lobby = __webpack_require__(139);
 
 var _Lobby2 = _interopRequireDefault(_Lobby);
 
-var _utils = __webpack_require__(42);
+var _utils = __webpack_require__(33);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -6561,7 +6633,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _utils = __webpack_require__(42);
+var _utils = __webpack_require__(33);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6828,7 +6900,7 @@ module.exports = function(hint){
 /***/ (function(module, exports, __webpack_require__) {
 
 // all enumerable object keys, includes symbols
-var getKeys = __webpack_require__(37)
+var getKeys = __webpack_require__(38)
   , gOPS    = __webpack_require__(61)
   , pIE     = __webpack_require__(51);
 module.exports = function(it){
@@ -6847,7 +6919,7 @@ module.exports = function(it){
 /* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getKeys   = __webpack_require__(37)
+var getKeys   = __webpack_require__(38)
   , toIObject = __webpack_require__(15);
 module.exports = function(object, el){
   var O      = toIObject(object)
@@ -7230,7 +7302,7 @@ $export($export.P + $export.F * !__webpack_require__(21)([].reduce, true), 'Arra
 var $export    = __webpack_require__(0)
   , html       = __webpack_require__(69)
   , cof        = __webpack_require__(19)
-  , toIndex    = __webpack_require__(40)
+  , toIndex    = __webpack_require__(41)
   , toLength   = __webpack_require__(8)
   , arraySlice = [].slice;
 
@@ -7304,7 +7376,7 @@ $export($export.P + $export.F * (fails(function(){
 /* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(39)('Array');
+__webpack_require__(40)('Array');
 
 /***/ }),
 /* 172 */
@@ -7745,7 +7817,7 @@ var global            = __webpack_require__(2)
   , inheritIfRequired = __webpack_require__(70)
   , toPrimitive       = __webpack_require__(24)
   , fails             = __webpack_require__(3)
-  , gOPN              = __webpack_require__(36).f
+  , gOPN              = __webpack_require__(37).f
   , gOPD              = __webpack_require__(17).f
   , dP                = __webpack_require__(7).f
   , $trim             = __webpack_require__(47).trim
@@ -7754,7 +7826,7 @@ var global            = __webpack_require__(2)
   , Base              = $Number
   , proto             = $Number.prototype
   // Opera ~12 has broken Object#toString
-  , BROKEN_COF        = cof(__webpack_require__(35)(proto)) == NUMBER
+  , BROKEN_COF        = cof(__webpack_require__(36)(proto)) == NUMBER
   , TRIM              = 'trim' in String.prototype;
 
 // 7.1.3 ToNumber(argument)
@@ -8062,7 +8134,7 @@ $export($export.S + $export.F, 'Object', {assign: __webpack_require__(107)});
 
 var $export = __webpack_require__(0)
 // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
-$export($export.S, 'Object', {create: __webpack_require__(35)});
+$export($export.S, 'Object', {create: __webpack_require__(36)});
 
 /***/ }),
 /* 211 */
@@ -8184,7 +8256,7 @@ $export($export.S, 'Object', {is: __webpack_require__(115)});
 
 // 19.1.2.14 Object.keys(O)
 var toObject = __webpack_require__(9)
-  , $keys    = __webpack_require__(37);
+  , $keys    = __webpack_require__(38);
 
 __webpack_require__(23)('keys', function(){
   return function keys(it){
@@ -8268,14 +8340,14 @@ $export($export.G + $export.F * (parseInt != $parseInt), {parseInt: $parseInt});
 
 "use strict";
 
-var LIBRARY            = __webpack_require__(34)
+var LIBRARY            = __webpack_require__(35)
   , global             = __webpack_require__(2)
   , ctx                = __webpack_require__(27)
   , classof            = __webpack_require__(49)
   , $export            = __webpack_require__(0)
   , isObject           = __webpack_require__(4)
   , aFunction          = __webpack_require__(11)
-  , anInstance         = __webpack_require__(33)
+  , anInstance         = __webpack_require__(34)
   , forOf              = __webpack_require__(44)
   , speciesConstructor = __webpack_require__(80)
   , task               = __webpack_require__(85).set
@@ -8471,7 +8543,7 @@ if(!USE_NATIVE){
     this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
     this._n = false;          // <- notify
   };
-  Internal.prototype = __webpack_require__(38)($Promise.prototype, {
+  Internal.prototype = __webpack_require__(39)($Promise.prototype, {
     // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
     then: function then(onFulfilled, onRejected){
       var reaction    = newPromiseCapability(speciesConstructor(this, $Promise));
@@ -8498,7 +8570,7 @@ if(!USE_NATIVE){
 
 $export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: $Promise});
 __webpack_require__(46)($Promise, PROMISE);
-__webpack_require__(39)(PROMISE);
+__webpack_require__(40)(PROMISE);
 Wrapper = __webpack_require__(26)[PROMISE];
 
 // statics
@@ -8594,7 +8666,7 @@ $export($export.S + $export.F * !__webpack_require__(3)(function(){
 
 // 26.1.2 Reflect.construct(target, argumentsList [, newTarget])
 var $export    = __webpack_require__(0)
-  , create     = __webpack_require__(35)
+  , create     = __webpack_require__(36)
   , aFunction  = __webpack_require__(11)
   , anObject   = __webpack_require__(1)
   , isObject   = __webpack_require__(4)
@@ -8893,7 +8965,7 @@ $export($export.S, 'Reflect', {set: set});
 var global            = __webpack_require__(2)
   , inheritIfRequired = __webpack_require__(70)
   , dP                = __webpack_require__(7).f
-  , gOPN              = __webpack_require__(36).f
+  , gOPN              = __webpack_require__(37).f
   , isRegExp          = __webpack_require__(58)
   , $flags            = __webpack_require__(56)
   , $RegExp           = global.RegExp
@@ -8932,7 +9004,7 @@ if(__webpack_require__(6) && (!CORRECT_NEW || __webpack_require__(3)(function(){
   __webpack_require__(13)(global, 'RegExp', $RegExp);
 }
 
-__webpack_require__(39)('RegExp');
+__webpack_require__(40)('RegExp');
 
 /***/ }),
 /* 244 */
@@ -9224,7 +9296,7 @@ __webpack_require__(14)('fontsize', function(createHTML){
 /***/ (function(module, exports, __webpack_require__) {
 
 var $export        = __webpack_require__(0)
-  , toIndex        = __webpack_require__(40)
+  , toIndex        = __webpack_require__(41)
   , fromCharCode   = String.fromCharCode
   , $fromCodePoint = String.fromCodePoint;
 
@@ -9453,7 +9525,7 @@ var global         = __webpack_require__(2)
   , $fails         = __webpack_require__(3)
   , shared         = __webpack_require__(62)
   , setToStringTag = __webpack_require__(46)
-  , uid            = __webpack_require__(41)
+  , uid            = __webpack_require__(42)
   , wks            = __webpack_require__(5)
   , wksExt         = __webpack_require__(117)
   , wksDefine      = __webpack_require__(87)
@@ -9464,11 +9536,11 @@ var global         = __webpack_require__(2)
   , toIObject      = __webpack_require__(15)
   , toPrimitive    = __webpack_require__(24)
   , createDesc     = __webpack_require__(31)
-  , _create        = __webpack_require__(35)
+  , _create        = __webpack_require__(36)
   , gOPNExt        = __webpack_require__(109)
   , $GOPD          = __webpack_require__(17)
   , $DP            = __webpack_require__(7)
-  , $keys          = __webpack_require__(37)
+  , $keys          = __webpack_require__(38)
   , gOPD           = $GOPD.f
   , dP             = $DP.f
   , gOPN           = gOPNExt.f
@@ -9591,11 +9663,11 @@ if(!USE_NATIVE){
 
   $GOPD.f = $getOwnPropertyDescriptor;
   $DP.f   = $defineProperty;
-  __webpack_require__(36).f = gOPNExt.f = $getOwnPropertyNames;
+  __webpack_require__(37).f = gOPNExt.f = $getOwnPropertyNames;
   __webpack_require__(51).f  = $propertyIsEnumerable;
   __webpack_require__(61).f = $getOwnPropertySymbols;
 
-  if(DESCRIPTORS && !__webpack_require__(34)){
+  if(DESCRIPTORS && !__webpack_require__(35)){
     redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
   }
 
@@ -9688,7 +9760,7 @@ var $export      = __webpack_require__(0)
   , $typed       = __webpack_require__(63)
   , buffer       = __webpack_require__(86)
   , anObject     = __webpack_require__(1)
-  , toIndex      = __webpack_require__(40)
+  , toIndex      = __webpack_require__(41)
   , toLength     = __webpack_require__(8)
   , isObject     = __webpack_require__(4)
   , ArrayBuffer  = __webpack_require__(2).ArrayBuffer
@@ -9728,7 +9800,7 @@ $export($export.P + $export.U + $export.F * __webpack_require__(3)(function(){
   }
 });
 
-__webpack_require__(39)(ARRAY_BUFFER);
+__webpack_require__(40)(ARRAY_BUFFER);
 
 /***/ }),
 /* 273 */
@@ -10129,8 +10201,8 @@ var $export     = __webpack_require__(0)
   , OBSERVABLE  = __webpack_require__(5)('observable')
   , aFunction   = __webpack_require__(11)
   , anObject    = __webpack_require__(1)
-  , anInstance  = __webpack_require__(33)
-  , redefineAll = __webpack_require__(38)
+  , anInstance  = __webpack_require__(34)
+  , redefineAll = __webpack_require__(39)
   , hide        = __webpack_require__(12)
   , forOf       = __webpack_require__(44)
   , RETURN      = forOf.RETURN;
@@ -10318,7 +10390,7 @@ hide($Observable.prototype, OBSERVABLE, function(){ return this; });
 
 $export($export.G, {Observable: $Observable});
 
-__webpack_require__(39)('Observable');
+__webpack_require__(40)('Observable');
 
 /***/ }),
 /* 300 */

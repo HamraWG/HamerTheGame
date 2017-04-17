@@ -27,7 +27,6 @@ class Player extends Phaser.Group
     this._position = null;
     this._stats = null;
     this._eq = null;
-    this.live = true;
 
     this.velocity = 300;
     this.direction = null;
@@ -38,7 +37,7 @@ class Player extends Phaser.Group
     this.createWeaponSprite();
     this.game.add.existing(this);
 
-    this.eventEmitter.once('value', () => this.positionObjectsUpdate(this));
+    this.eventEmitter.once('value', () => this.firstUpdate(this));
     this._listenChange();
     this._addAnimations();
     this._onResume();
@@ -57,6 +56,15 @@ class Player extends Phaser.Group
   get online ()
   {
     return this._online;
+  }
+
+  set online (online)
+  {
+    if (typeof online !== 'boolean') throw new TypeError('`online` must be a boolean');
+
+    this._dbRef.update({
+      online: online
+    });
   }
 
   get hp ()
@@ -100,6 +108,12 @@ class Player extends Phaser.Group
   get eq ()
   {
     return this._eq;
+  }
+
+  firstUpdate ()
+  {
+    this.positionObjectsUpdate(this);
+    this.visible = this.online;
   }
 
   /**
@@ -172,6 +186,8 @@ class Player extends Phaser.Group
       if (snapshot.exists() === false) return;
 
       let data = snapshot.val();
+      let connectState = false;
+      if (this._online !== data.online) connectState = true;
 
       this._key = snapshot.key;
       this._name = data.name;
@@ -181,6 +197,7 @@ class Player extends Phaser.Group
       this._stats = data.stats;
       this._eq = data.eq;
 
+      if (connectState) this.eventEmitter.emitEvent('connection', [this]);
       this.eventEmitter.emitEvent('value', [this]);
     });
   }

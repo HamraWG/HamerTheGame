@@ -14,6 +14,8 @@ export default class extends Phaser.State
 
     // TODO(Ivan): Start game when all players all loaded
     this.allLoaded = false;
+
+    localStorage.setItem('firebase:game:id', gameKey);
   }
 
   preload ()

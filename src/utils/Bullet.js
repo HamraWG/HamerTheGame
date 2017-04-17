@@ -30,6 +30,8 @@ class Bullet extends Phaser.Sprite
     this.body.collideWorldBounds = true;
 
     this.game.add.existing(this);
+
+    this.removeOnDisconnect();
   }
 
   update ()
@@ -77,6 +79,14 @@ class Bullet extends Phaser.Sprite
     this.destroy();
 
     return true;
+  }
+
+  removeOnDisconnect ()
+  {
+    if (this.owner === this.game.currentUser.key)
+    {
+      this._dbRef.onDisconnect().remove();
+    }
   }
 }
 

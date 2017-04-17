@@ -2,6 +2,7 @@
 
 import Phaser from 'phaser';
 import WebFont from 'webfontloader';
+import {database} from '../utils';
 
 export default class extends Phaser.State
 {
@@ -11,6 +12,7 @@ export default class extends Phaser.State
 
     this.stage.backgroundColor = '#1d1b19';
     this.fontsReady = false;
+    this.inGame = null;
   }
 
   preload ()
@@ -28,6 +30,8 @@ export default class extends Phaser.State
     this.load.image('logo', 'assets/images/logo.png');
     this.load.spritesheet('menu__join-button', 'assets/images/menu/join-button.png', 318, 50);
 
+    this.checkIfUserIsInGame();
+
     // Loading info
     let loadingText = this.add.text(
       this.world.centerX,
@@ -44,8 +48,40 @@ export default class extends Phaser.State
 
   render ()
   {
-    // FIXME(Ivan): Go to the Menu!
-    if (this.fontsReady) this.state.start('GameLoader', true, false, '-KhvNn6WQJHTkltP2Xlo');
+    if (this.fontsReady && this.inGame !== null)
+    {
+      if (this.inGame === true)
+      {
+        this.state.start('GameLoader', true, false, localStorage.getItem('firebase:game:id'));
+
+        return;
+      }
+
+      this.state.start('Menu');
+    }
+  }
+
+  checkIfUserIsInGame ()
+  {
+    let gameKey = localStorage.getItem('firebase:game:id');
+    console.log(gameKey);
+    if (!gameKey)
+    {
+      this.inGame = false;
+      return;
+    }
+
+    database.ref(`games/${gameKey}`).once('value').then((snapshot) =>
+    {
+      if (snapshot.exists() === false)
+      {
+        this.inGame = false;
+        return;
+      }
+      let data = snapshot.val();
+
+      this.inGame = Date.now() < data.endTimestamp;
+    });
   }
 
   fontsLoaded ()

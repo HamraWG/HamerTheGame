@@ -36,7 +36,9 @@ class GameCreator
       name: name,
       map: map,
       gameType: gameType,
-      players: this._createPlayersConfig(players)
+      players: this._createPlayersConfig(players),
+      startTimestamp: Date.now(),
+      endTimestamp: new Date(Date.now()).setMinutes(new Date(Date.now()).getMinutes() + 5)
     };
 
     this._db.update({
@@ -61,8 +63,7 @@ class GameCreator
       playersConfig[pKey] = {
         name: players[pKey],
         champion: 'one',
-        online: true,
-        live: false,
+        online: false,
         hp: 100,
         position: {
           x: 32,
@@ -71,11 +72,6 @@ class GameCreator
         stats: {
           kills: 0,
           deaths: 0
-        },
-        eq: {
-          ak47: {
-            ammo: 240
-          }
         }
       };
     }

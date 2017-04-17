@@ -43,8 +43,15 @@ export default class extends Phaser.State
     for (let playerKey in this.dbGame.players)
     {
       let player = playerKey === this.game.currentUser.key ? new CurrentPlayer(this.game, this.dbGame.getPlayerRef(playerKey)) : new Player(this.game, this.dbGame.getPlayerRef(playerKey));
+      player.eventEmitter.on('connection', this.onConnectionPlayer);
       this.players.set(playerKey, player);
     }
+  }
+
+  onConnectionPlayer (player)
+  {
+    if (player.online) player.visible = true;
+    else player.visible = false;
   }
 
   update ()
@@ -69,7 +76,7 @@ export default class extends Phaser.State
       player.update();
     });
 
-    this.bullets.set.forEach((bullet) =>
+    this.bullets.forEach((bullet) =>
     {
       let layerCollide = this.game.physics.arcade.collide(bullet, this.game.layers.layer);
       let collidedPlayer = null;
@@ -96,7 +103,7 @@ export default class extends Phaser.State
       if (collidedPlayer)
       {
         if (bullet.owner === collidedPlayer.key) return;
-        if (collidedPlayer.hp <= 0) return;
+        if (collidedPlayer.hp <= 0 || collidedPlayer.visible === false) return;
 
         bullet.hit(this.players.get(bullet.owner), collidedPlayer);
         this.bullets.set.delete(bullet);

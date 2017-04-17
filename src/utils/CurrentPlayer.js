@@ -23,6 +23,10 @@ class CurrentPlayer extends Player
 
     this.moveTestToPlayerAtStart();
     this.addMovementKeyListeners();
+
+    this.eventEmitter.once('value', () => this.firstUpdate(this));
+    this.online = true;
+    this._onDisconnect();
   }
 
   createHitTestObject ()
@@ -102,7 +106,6 @@ class CurrentPlayer extends Player
   {
     super.update();
     this.databaseUpdate();
-    this.healthUpdate();
   }
 
   databaseUpdate ()
@@ -122,12 +125,9 @@ class CurrentPlayer extends Player
     }
   }
 
-  healthUpdate ()
+  _onDisconnect ()
   {
-    if (this.alive === false)
-    {
-      // ...
-    }
+    this._dbRef.child('online').onDisconnect().set(false);
   }
 }
 
