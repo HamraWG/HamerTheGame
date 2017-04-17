@@ -20,6 +20,15 @@ class Player extends Phaser.Group
     this._dbRef = dbRef;
     this.eventEmitter = new EventEmitter();
 
+    this._key = null;
+    this._name = null;
+    this._online = null;
+    this._hp = null;
+    this._position = null;
+    this._stats = null;
+    this._eq = null;
+    this.live = true;
+
     this.velocity = 300;
     this.direction = null;
 
@@ -32,6 +41,81 @@ class Player extends Phaser.Group
     this.eventEmitter.once('value', () => this.positionObjectsUpdate(this));
     this._listenChange();
     this._addAnimations();
+    this._onResume();
+  }
+
+  get key ()
+  {
+    return this._key;
+  }
+
+  get name ()
+  {
+    return this._name;
+  }
+
+  get online ()
+  {
+    return this._online;
+  }
+
+  get hp ()
+  {
+    return this._hp;
+  }
+
+  set hp (hp)
+  {
+    if (typeof hp !== 'number') throw new TypeError('`hp` must be a number');
+
+    if (hp <= 0)
+    {
+      this.kill();
+    }
+
+    this._dbRef.update({
+      hp: hp
+    });
+  }
+
+  get stats ()
+  {
+    return this._stats;
+  }
+
+  addKill (key)
+  {
+    this._dbRef.child('stats/kills').update({
+      [key]: this.stats.kills[key] + 1 || 1
+    });
+  }
+
+  addDeath (key)
+  {
+    this._dbRef.child('stats/deaths').update({
+      [key]: this.stats.deaths[key] + 1 || 1
+    });
+  }
+
+  get eq ()
+  {
+    return this._eq;
+  }
+
+  /**
+   * Returns player's position.
+   *
+   * @returns {object}
+   */
+  getPosition ()
+  {
+    return this._position;
+  }
+
+  kill ()
+  {
+    this.lastHit.addKill(this.key);
+    this.addDeath(this.lastHit.key);
   }
 
   createChampion ()
@@ -93,7 +177,6 @@ class Player extends Phaser.Group
       this._name = data.name;
       this._online = data.online;
       this._hp = data.hp;
-      this._alive = data.alive;
       this._position = data.position;
       this._stats = data.stats;
       this._eq = data.eq;
@@ -109,16 +192,6 @@ class Player extends Phaser.Group
     this.champion.visible = true;
 
     this.playerName.text = this._name;
-  }
-
-  /**
-   * Returns player's position.
-   *
-   * @returns {object}
-   */
-  getPosition ()
-  {
-    return this._position;
   }
 
   update ()
@@ -324,6 +397,14 @@ class Player extends Phaser.Group
     this.champion.animations.add('left', [4, 5, 6, 7], animationSpeed, true);
     this.champion.animations.add('right', [8, 9, 10, 11], animationSpeed, true);
     this.champion.animations.add('up', [12, 13, 14, 15], animationSpeed, true);
+  }
+
+  _onResume ()
+  {
+    this.game.onResume.add(() =>
+    {
+      this.positionObjectsUpdate();
+    }, this);
   }
 }
 

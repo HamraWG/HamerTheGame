@@ -32,7 +32,7 @@ export default class extends Phaser.State
     this.game.map.setCollisionBetween(2, 12);
 
     this.keyboard = this.game.input.keyboard;
-    this.players = new Set();
+    this.players = new Map();
     this.createPlayers();
 
     this.bullets = new Bullets(this.game, this.dbGame.key);
@@ -43,7 +43,7 @@ export default class extends Phaser.State
     for (let playerKey in this.dbGame.players)
     {
       let player = playerKey === this.game.currentUser.key ? new CurrentPlayer(this.game, this.dbGame.getPlayerRef(playerKey)) : new Player(this.game, this.dbGame.getPlayerRef(playerKey));
-      this.players.add(player);
+      this.players.set(playerKey, player);
     }
   }
 
@@ -71,11 +71,34 @@ export default class extends Phaser.State
 
     this.bullets.set.forEach((bullet) =>
     {
-      let collide = this.game.physics.arcade.collide(bullet, this.game.layers.layer);
+      let layerCollide = this.game.physics.arcade.collide(bullet, this.game.layers.layer);
+      let collidedPlayer = null;
 
-      if (collide === true)
+      this.players.forEach((player) =>
+      {
+        if (collidedPlayer !== null) return;
+        if (player.live === false) return;
+
+        this.game.physics.arcade.overlap(player.champion, bullet, () =>
+        {
+          collidedPlayer = player;
+        });
+      });
+
+      if (layerCollide === true)
       {
         bullet.remove();
+        this.bullets.set.delete(bullet);
+
+        return;
+      }
+
+      if (collidedPlayer)
+      {
+        if (bullet.owner === collidedPlayer.key) return;
+        if (collidedPlayer.hp <= 0) return;
+
+        bullet.hit(this.players.get(bullet.owner), collidedPlayer);
         this.bullets.set.delete(bullet);
 
         return;

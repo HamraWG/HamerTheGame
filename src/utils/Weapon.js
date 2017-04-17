@@ -2,10 +2,11 @@
 
 class Weapon
 {
-  constructor (weaponSprite, dbBulletsRef)
+  constructor (owner, dbBulletsRef)
   {
-    this.sprite = weaponSprite;
-    this.game = weaponSprite.game;
+    this.owner = owner;
+    this.sprite = owner.weaponSprite;
+    this.game = owner.game;
     this._bulletsRef = dbBulletsRef;
 
     this.type = 'ak47';
@@ -59,6 +60,8 @@ class Weapon
 
   fire ()
   {
+    if (this.owner.hp <= 0) return;
+
     let angle = this.game.physics.arcade.angleToPointer(this.sprite);
 
     this._bulletsRef.push({

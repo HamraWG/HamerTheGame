@@ -45,7 +45,7 @@ export default class extends Phaser.State
   render ()
   {
     // FIXME(Ivan): Go to the Menu!
-    if (this.fontsReady) this.state.start('GameLoader', true, false, '-KhSRxUVvyuJEXT-FsRd');
+    if (this.fontsReady) this.state.start('GameLoader', true, false, '-KhvNn6WQJHTkltP2Xlo');
   }
 
   fontsLoaded ()

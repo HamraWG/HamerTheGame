@@ -19,7 +19,7 @@ class CurrentPlayer extends Player
     this.game.camera.follow(this.champion);
     this.createHitTestObject();
 
-    this.weapon = new Weapon(this.weaponSprite, dbRef.parent.parent.child('bullets'));
+    this.weapon = new Weapon(this, dbRef.parent.parent.child('bullets'));
 
     this.moveTestToPlayerAtStart();
     this.addMovementKeyListeners();
@@ -101,7 +101,12 @@ class CurrentPlayer extends Player
   update ()
   {
     super.update();
+    this.databaseUpdate();
+    this.healthUpdate();
+  }
 
+  databaseUpdate ()
+  {
     /**
      * Update iteration.
      * It blocks update database position every frame.
@@ -114,6 +119,14 @@ class CurrentPlayer extends Player
     if ((this.hitTestObject.body.x !== playerPos.x || this.hitTestObject.body.y !== playerPos.y) && this.updateTime === true)
     {
       this.updatePositionRelativeToTest();
+    }
+  }
+
+  healthUpdate ()
+  {
+    if (this.alive === false)
+    {
+      // ...
     }
   }
 }

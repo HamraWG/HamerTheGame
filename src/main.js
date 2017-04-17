@@ -29,6 +29,7 @@ class Game extends Phaser.Game
     this.state.add('Game', GameState, false);
 
     this.currentUser = new User();
+    // FIXME(Ivan): Check if user is already logged in.
 
     this.state.start('Boot');
   }

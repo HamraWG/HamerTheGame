@@ -2611,6 +2611,8 @@ var _wolfy87Eventemitter2 = _interopRequireDefault(_wolfy87Eventemitter);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -2637,6 +2639,15 @@ var Player = function (_Phaser$Group) {
     _this._dbRef = dbRef;
     _this.eventEmitter = new _wolfy87Eventemitter2.default();
 
+    _this._key = null;
+    _this._name = null;
+    _this._online = null;
+    _this._hp = null;
+    _this._position = null;
+    _this._stats = null;
+    _this._eq = null;
+    _this.live = true;
+
     _this.velocity = 300;
     _this.direction = null;
 
@@ -2651,10 +2662,39 @@ var Player = function (_Phaser$Group) {
     });
     _this._listenChange();
     _this._addAnimations();
+    _this._onResume();
     return _this;
   }
 
   _createClass(Player, [{
+    key: 'addKill',
+    value: function addKill(key) {
+      this._dbRef.child('stats/kills').update(_defineProperty({}, key, this.stats.kills[key] + 1 || 1));
+    }
+  }, {
+    key: 'addDeath',
+    value: function addDeath(key) {
+      this._dbRef.child('stats/deaths').update(_defineProperty({}, key, this.stats.deaths[key] + 1 || 1));
+    }
+  }, {
+    key: 'getPosition',
+
+
+    /**
+     * Returns player's position.
+     *
+     * @returns {object}
+     */
+    value: function getPosition() {
+      return this._position;
+    }
+  }, {
+    key: 'kill',
+    value: function kill() {
+      this.lastHit.addKill(this.key);
+      this.addDeath(this.lastHit.key);
+    }
+  }, {
     key: 'createChampion',
     value: function createChampion() {
       this.champion = new _phaser2.default.Sprite(this.game, 0, 0, 'champ:one', 0);
@@ -2717,7 +2757,6 @@ var Player = function (_Phaser$Group) {
         _this2._name = data.name;
         _this2._online = data.online;
         _this2._hp = data.hp;
-        _this2._alive = data.alive;
         _this2._position = data.position;
         _this2._stats = data.stats;
         _this2._eq = data.eq;
@@ -2733,18 +2772,6 @@ var Player = function (_Phaser$Group) {
       this.champion.visible = true;
 
       this.playerName.text = this._name;
-    }
-
-    /**
-     * Returns player's position.
-     *
-     * @returns {object}
-     */
-
-  }, {
-    key: 'getPosition',
-    value: function getPosition() {
-      return this._position;
     }
   }, {
     key: 'update',
@@ -2935,6 +2962,56 @@ var Player = function (_Phaser$Group) {
       this.champion.animations.add('left', [4, 5, 6, 7], animationSpeed, true);
       this.champion.animations.add('right', [8, 9, 10, 11], animationSpeed, true);
       this.champion.animations.add('up', [12, 13, 14, 15], animationSpeed, true);
+    }
+  }, {
+    key: '_onResume',
+    value: function _onResume() {
+      var _this3 = this;
+
+      this.game.onResume.add(function () {
+        _this3.positionObjectsUpdate();
+      }, this);
+    }
+  }, {
+    key: 'key',
+    get: function get() {
+      return this._key;
+    }
+  }, {
+    key: 'name',
+    get: function get() {
+      return this._name;
+    }
+  }, {
+    key: 'online',
+    get: function get() {
+      return this._online;
+    }
+  }, {
+    key: 'hp',
+    get: function get() {
+      return this._hp;
+    },
+    set: function set(hp) {
+      if (typeof hp !== 'number') throw new TypeError('`hp` must be a number');
+
+      if (hp <= 0) {
+        this.kill();
+      }
+
+      this._dbRef.update({
+        hp: hp
+      });
+    }
+  }, {
+    key: 'stats',
+    get: function get() {
+      return this._stats;
+    }
+  }, {
+    key: 'eq',
+    get: function get() {
+      return this._eq;
     }
   }]);
 
@@ -4247,6 +4324,7 @@ var Game = function (_Phaser$Game) {
         _this.state.add('Game', _Game2.default, false);
 
         _this.currentUser = new _User2.default();
+        // FIXME(Ivan): Check if user is already logged in.
 
         _this.state.start('Boot');
         return _this;
@@ -4366,7 +4444,7 @@ var _class = function (_Phaser$State) {
     key: 'render',
     value: function render() {
       // FIXME(Ivan): Go to the Menu!
-      if (this.fontsReady) this.state.start('GameLoader', true, false, '-KhSRxUVvyuJEXT-FsRd');
+      if (this.fontsReady) this.state.start('GameLoader', true, false, '-KhvNn6WQJHTkltP2Xlo');
     }
   }, {
     key: 'fontsLoaded',
@@ -4452,7 +4530,7 @@ var _class = function (_Phaser$State) {
       this.game.map.setCollisionBetween(2, 12);
 
       this.keyboard = this.game.input.keyboard;
-      this.players = new Set();
+      this.players = new Map();
       this.createPlayers();
 
       this.bullets = new _Bullets2.default(this.game, this.dbGame.key);
@@ -4462,7 +4540,7 @@ var _class = function (_Phaser$State) {
     value: function createPlayers() {
       for (var playerKey in this.dbGame.players) {
         var player = playerKey === this.game.currentUser.key ? new _CurrentPlayer2.default(this.game, this.dbGame.getPlayerRef(playerKey)) : new _Player2.default(this.game, this.dbGame.getPlayerRef(playerKey));
-        this.players.add(player);
+        this.players.set(playerKey, player);
       }
     }
   }, {
@@ -4489,10 +4567,30 @@ var _class = function (_Phaser$State) {
       });
 
       this.bullets.set.forEach(function (bullet) {
-        var collide = _this2.game.physics.arcade.collide(bullet, _this2.game.layers.layer);
+        var layerCollide = _this2.game.physics.arcade.collide(bullet, _this2.game.layers.layer);
+        var collidedPlayer = null;
 
-        if (collide === true) {
+        _this2.players.forEach(function (player) {
+          if (collidedPlayer !== null) return;
+          if (player.live === false) return;
+
+          _this2.game.physics.arcade.overlap(player.champion, bullet, function () {
+            collidedPlayer = player;
+          });
+        });
+
+        if (layerCollide === true) {
           bullet.remove();
+          _this2.bullets.set.delete(bullet);
+
+          return;
+        }
+
+        if (collidedPlayer) {
+          if (bullet.owner === collidedPlayer.key) return;
+          if (collidedPlayer.hp <= 0) return;
+
+          bullet.hit(_this2.players.get(bullet.owner), collidedPlayer);
           _this2.bullets.set.delete(bullet);
 
           return;
@@ -5336,6 +5434,7 @@ var Bullet = function (_Phaser$Sprite) {
       this.body.velocity.x = 0;
       this.body.velocity.y = 0;
 
+      // FIXME(Ivan): If game is paused, it is bugged.
       this.game.physics.arcade.velocityFromRotation(this.angle, this.velocity, this.body.velocity);
     }
   }, {
@@ -5347,6 +5446,28 @@ var Bullet = function (_Phaser$Sprite) {
     key: 'remove',
     value: function remove() {
       if (this.owner === this.game.currentUser.key) {
+        this._removeDBData();
+      }
+
+      this.destroy();
+
+      return true;
+    }
+
+    /**
+     *
+     * @param {Player|CurrentPlayer} bulletOwner
+     * @param {Player} hittedPlayer
+     * @returns {boolean}
+     */
+
+  }, {
+    key: 'hit',
+    value: function hit(bulletOwner, hittedPlayer) {
+      if (this.owner === this.game.currentUser.key) {
+        hittedPlayer.hp -= this.power;
+        hittedPlayer.lastHit = bulletOwner;
+
         this._removeDBData();
       }
 
@@ -5548,7 +5669,7 @@ var CurrentPlayer = function (_Player) {
     _this.game.camera.follow(_this.champion);
     _this.createHitTestObject();
 
-    _this.weapon = new _Weapon2.default(_this.weaponSprite, dbRef.parent.parent.child('bullets'));
+    _this.weapon = new _Weapon2.default(_this, dbRef.parent.parent.child('bullets'));
 
     _this.moveTestToPlayerAtStart();
     _this.addMovementKeyListeners();
@@ -5643,7 +5764,12 @@ var CurrentPlayer = function (_Player) {
     key: 'update',
     value: function update() {
       _get(CurrentPlayer.prototype.__proto__ || Object.getPrototypeOf(CurrentPlayer.prototype), 'update', this).call(this);
-
+      this.databaseUpdate();
+      this.healthUpdate();
+    }
+  }, {
+    key: 'databaseUpdate',
+    value: function databaseUpdate() {
       /**
        * Update iteration.
        * It blocks update database position every frame.
@@ -5655,6 +5781,13 @@ var CurrentPlayer = function (_Player) {
       var playerPos = this.getPosition();
       if ((this.hitTestObject.body.x !== playerPos.x || this.hitTestObject.body.y !== playerPos.y) && this.updateTime === true) {
         this.updatePositionRelativeToTest();
+      }
+    }
+  }, {
+    key: 'healthUpdate',
+    value: function healthUpdate() {
+      if (this.alive === false) {
+        // ...
       }
     }
   }]);
@@ -5857,7 +5990,7 @@ var GameCreator = function () {
           name: players[pKey],
           champion: 'one',
           online: true,
-          alive: false,
+          live: false,
           hp: 100,
           position: {
             x: 32,
@@ -5865,10 +5998,13 @@ var GameCreator = function () {
           },
           stats: {
             kills: 0,
-            deaths: 0,
-            assists: 0
+            deaths: 0
           },
-          eq: {}
+          eq: {
+            ak47: {
+              ammo: 240
+            }
+          }
         };
       }
 
@@ -6555,11 +6691,12 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Weapon = function () {
-  function Weapon(weaponSprite, dbBulletsRef) {
+  function Weapon(owner, dbBulletsRef) {
     _classCallCheck(this, Weapon);
 
-    this.sprite = weaponSprite;
-    this.game = weaponSprite.game;
+    this.owner = owner;
+    this.sprite = owner.weaponSprite;
+    this.game = owner.game;
     this._bulletsRef = dbBulletsRef;
 
     this.type = 'ak47';
@@ -6611,6 +6748,8 @@ var Weapon = function () {
   }, {
     key: 'fire',
     value: function fire() {
+      if (this.owner.hp <= 0) return;
+
       var angle = this.game.physics.arcade.angleToPointer(this.sprite);
 
       this._bulletsRef.push({

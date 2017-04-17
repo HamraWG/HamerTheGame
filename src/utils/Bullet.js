@@ -37,6 +37,7 @@ class Bullet extends Phaser.Sprite
     this.body.velocity.x = 0;
     this.body.velocity.y = 0;
 
+    // FIXME(Ivan): If game is paused, it is bugged.
     this.game.physics.arcade.velocityFromRotation(this.angle, this.velocity, this.body.velocity);
   }
 
@@ -49,6 +50,27 @@ class Bullet extends Phaser.Sprite
   {
     if (this.owner === this.game.currentUser.key)
     {
+      this._removeDBData();
+    }
+
+    this.destroy();
+
+    return true;
+  }
+
+  /**
+   *
+   * @param {Player|CurrentPlayer} bulletOwner
+   * @param {Player} hittedPlayer
+   * @returns {boolean}
+   */
+  hit (bulletOwner, hittedPlayer)
+  {
+    if (this.owner === this.game.currentUser.key)
+    {
+      hittedPlayer.hp -= this.power;
+      hittedPlayer.lastHit = bulletOwner;
+
       this._removeDBData();
     }
 

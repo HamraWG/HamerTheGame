@@ -62,7 +62,7 @@ class GameCreator
         name: players[pKey],
         champion: 'one',
         online: true,
-        alive: false,
+        live: false,
         hp: 100,
         position: {
           x: 32,
@@ -70,10 +70,13 @@ class GameCreator
         },
         stats: {
           kills: 0,
-          deaths: 0,
-          assists: 0
+          deaths: 0
         },
-        eq: {}
+        eq: {
+          ak47: {
+            ammo: 240
+          }
+        }
       };
     }
 
