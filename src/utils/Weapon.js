@@ -38,7 +38,7 @@ class Weapon
     switch (type || this.type)
     {
       case 'ak47':
-        velocity = 600;
+        velocity = 1000;
         break;
     }
 
