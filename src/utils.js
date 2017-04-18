@@ -11,7 +11,7 @@ export const padNumber = (n, pad) =>
   let number = n.toString();
 
   let padZero = pad - number.length;
-  for (let i=1;i<=padZero;i++)
+  for (let i = 1; i <= padZero; i++)
   {
     number = '0' + number;
   }

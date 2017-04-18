@@ -75,6 +75,7 @@ class GameCreator
         skin: this.champions[championIndex],
         online: false,
         hp: 100,
+        respawn: 0,
         position: {
           x: 32,
           y: 32

@@ -77,8 +77,7 @@ export default class extends Phaser.State
 
     let respawnTile = this.game.map.getTile(respawns[randomIndex][0], respawns[randomIndex][1], this.game.layers.layer);
 
-    player.hp = 100;
-    player.setInstantlyPosition(respawnTile.worldX, respawnTile.worldY);
+    player.respawn(respawnTile.worldX, respawnTile.worldY);
   }
 
   update ()
@@ -399,6 +398,5 @@ export default class extends Phaser.State
     this.game.add.existing(this.endScreen);
 
     this.game.add.tween(this.endScreen).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
-    console.log(this.endScreen);
   }
 }

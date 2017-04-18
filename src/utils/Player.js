@@ -27,7 +27,8 @@ class Player extends Phaser.Group
     this._hp = null;
     this._position = null;
     this._stats = null;
-    this._eq = null;
+    this.lastRespawn = 0;
+    this._respawn = 0;
     this.created = false;
 
     this.velocity = 300;
@@ -126,6 +127,7 @@ class Player extends Phaser.Group
     }
 
     this.instantlyPositionUpdate(this);
+    this.lastRespawn = this._respawn;
     this.champion.visible = true;
     this.visible = this.online;
   }
@@ -210,7 +212,7 @@ class Player extends Phaser.Group
       this._hp = data.hp;
       this._position = data.position;
       this._stats = data.stats;
-      this._eq = data.eq;
+      this._respawn = data.respawn;
 
       if (connectState) this.eventEmitter.emitEvent('connection', [this]);
       this.eventEmitter.emitEvent('value', [this]);
@@ -223,6 +225,18 @@ class Player extends Phaser.Group
     this.champion.y = this._position.y;
 
     this.playerName.text = this._name;
+  }
+
+  respawn (x, y)
+  {
+    this._dbRef.update({
+      hp: 100,
+      respawn: this._respawn + 1,
+      position: {
+        x: x,
+        y: y
+      }
+    });
   }
 
   update ()
@@ -249,6 +263,16 @@ class Player extends Phaser.Group
   {
     let playerPos = this.getPosition();
     let bodyPos = this.champion.body;
+
+    if (this.lastRespawn !== this._respawn)
+    {
+      this.instantlyPositionUpdate();
+      if (this.hitTestObject) this.moveTestToPlayer();
+
+      this.lastRespawn = this._respawn;
+      return;
+    }
+
     if (bodyPos.x !== playerPos.x)
     {
       bodyPos.velocity.x = playerPos.x > bodyPos.x ? this.velocity : -this.velocity;
