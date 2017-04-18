@@ -1074,7 +1074,7 @@ module.exports = function(it){
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.database = exports.firebaseApp = undefined;
+exports.padNumber = exports.database = exports.firebaseApp = undefined;
 
 var _firebase = __webpack_require__(325);
 
@@ -1088,6 +1088,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var firebaseApp = exports.firebaseApp = _firebase2.default.initializeApp(_config2.default.firebase);
 var database = exports.database = firebaseApp.database();
+
+var padNumber = exports.padNumber = function padNumber(n, pad) {
+  var number = n.toString();
+
+  var padZero = pad - number.length;
+  for (var i = 1; i <= padZero; i++) {
+    number = '0' + number;
+  }
+
+  return number;
+};
 
 /***/ }),
 /* 34 */
@@ -4548,6 +4559,8 @@ var _Bullets = __webpack_require__(133);
 
 var _Bullets2 = _interopRequireDefault(_Bullets);
 
+var _utils = __webpack_require__(33);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4569,7 +4582,7 @@ var _class = function (_Phaser$State) {
     key: 'init',
     value: function init(dbGame) {
       this.dbGame = dbGame;
-      this.deathTime = 1;
+      this.deathTime = 5;
       this.deathStateStatus = false;
     }
   }, {
@@ -4705,7 +4718,7 @@ var _class = function (_Phaser$State) {
     key: 'updateTimer',
     value: function updateTimer() {
       var toTheEnd = this.dbGame.end - Date.now();
-      this.timer.time.setText(toTheEnd);
+      this.timer.time.setText((0, _utils.padNumber)(toTheEnd, 6));
     }
   }, {
     key: 'createTimer',
@@ -4715,7 +4728,7 @@ var _class = function (_Phaser$State) {
 
       var background = new _phaser2.default.Graphics(this.game);
       background.beginFill(0x151515);
-      background.drawRect(0, 0, 80, 40);
+      background.drawRect(0, 0, 70, 40);
 
       var time = new _phaser2.default.Text(this.game, 5, 10, '00:00', {
         fill: '#fff',
@@ -6179,7 +6192,7 @@ var GameCreator = function () {
     this._db = _utils.database.ref('games');
 
     // TODO(Ivan): CHANGE IT!
-    this.gameLast = 1;
+    this.gameLast = 5;
 
     this.champions = ['ninja', 'kamil'];
   }

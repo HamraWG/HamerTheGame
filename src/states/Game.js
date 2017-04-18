@@ -5,12 +5,14 @@ import CurrentPlayer from '../utils/CurrentPlayer';
 import Player from '../utils/Player';
 import Bullets from '../utils/Bullets';
 
+import {padNumber} from '../utils';
+
 export default class extends Phaser.State
 {
   init (dbGame)
   {
     this.dbGame = dbGame;
-    this.deathTime = 1;
+    this.deathTime = 5;
     this.deathStateStatus = false;
   }
 
@@ -152,7 +154,7 @@ export default class extends Phaser.State
   updateTimer ()
   {
     let toTheEnd = this.dbGame.end - Date.now();
-    this.timer.time.setText(toTheEnd);
+    this.timer.time.setText(padNumber(toTheEnd, 6));
   }
 
   createTimer ()
@@ -162,7 +164,7 @@ export default class extends Phaser.State
 
     let background = new Phaser.Graphics(this.game);
     background.beginFill(0x151515);
-    background.drawRect(0, 0, 80, 40);
+    background.drawRect(0, 0, 70, 40);
 
     let time = new Phaser.Text(
       this.game,
