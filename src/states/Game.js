@@ -39,6 +39,7 @@ export default class extends Phaser.State
 
     this.bullets = new Bullets(this.game, this.dbGame.key);
 
+    this.createTimer();
     this.createDeathState();
   }
 
@@ -64,12 +65,24 @@ export default class extends Phaser.State
     else player.visible = false;
   }
 
+  respawnPlayer (player)
+  {
+    let respawns = this.game.map.properties.respawn;
+    let randomIndex = Math.floor(Math.random() * respawns.length);
+
+    let respawnTile = this.game.map.getTile(respawns[randomIndex][0], respawns[randomIndex][1], this.game.layers.layer);
+
+    player.hp = 100;
+    player.setInstantlyPosition(respawnTile.worldX, respawnTile.worldY);
+  }
+
   update ()
   {
     if (this.deathState.visible === false) this.game.canvas.style.cursor = 'crosshair';
 
     this.updatePlayersPosition();
     this.updateBullets();
+    this.updateTimer();
   }
 
   updatePlayersPosition ()
@@ -136,6 +149,39 @@ export default class extends Phaser.State
     });
   }
 
+  updateTimer ()
+  {
+    let toTheEnd = this.dbGame.end - Date.now();
+    this.timer.time.setText(toTheEnd);
+  }
+
+  createTimer ()
+  {
+    this.timer = new Phaser.Group(this.game);
+    this.timer.fixedToCamera = true;
+
+    let background = new Phaser.Graphics(this.game);
+    background.beginFill(0x151515);
+    background.drawRect(0, 0, 80, 40);
+
+    let time = new Phaser.Text(
+      this.game,
+      5,
+      10,
+      '00:00',
+      {
+        fill: '#fff',
+        font: '400 16px Exo'
+      }
+    );
+
+    this.timer.add(background);
+    this.timer.time = time;
+    this.timer.add(time);
+
+    this.game.add.existing(this.timer);
+  }
+
   updateDeathState (player)
   {
     if (this.deathStateStatus === false)
@@ -166,17 +212,6 @@ export default class extends Phaser.State
 
       this.game.add.tween(this.deathState).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
     }
-  }
-
-  respawnPlayer (player)
-  {
-    let respawns = this.game.map.properties.respawn;
-    let randomIndex = Math.floor(Math.random() * respawns.length);
-
-    let respawnTile = this.game.map.getTile(respawns[randomIndex][0], respawns[randomIndex][1], this.game.layers.layer);
-
-    player.hp = 100;
-    player.setInstantlyPosition(respawnTile.worldX, respawnTile.worldY);
   }
 
   createDeathState ()

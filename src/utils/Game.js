@@ -17,6 +17,8 @@ class Game extends EventEmitter
     this._gameType = null;
     this._players = null;
     this._bullets = null;
+    this._start = null;
+    this._end = null;
 
     this.listenData();
   }
@@ -33,6 +35,8 @@ class Game extends EventEmitter
       this._gameType = data.gameType;
       this._players = data.players;
       this._bullets = data.bullets;
+      this._start = data.startTimestamp;
+      this._end = data.endTimestamp;
 
       this.emitEvent('value');
     });
@@ -73,6 +77,16 @@ class Game extends EventEmitter
   get bullets ()
   {
     return this._bullets;
+  }
+
+  get start ()
+  {
+    return this._start;
+  }
+
+  get end ()
+  {
+    return this._end;
   }
 }
 

@@ -4598,6 +4598,7 @@ var _class = function (_Phaser$State) {
 
       this.bullets = new _Bullets2.default(this.game, this.dbGame.key);
 
+      this.createTimer();
       this.createDeathState();
     }
   }, {
@@ -4620,12 +4621,24 @@ var _class = function (_Phaser$State) {
       if (player.online) player.visible = true;else player.visible = false;
     }
   }, {
+    key: 'respawnPlayer',
+    value: function respawnPlayer(player) {
+      var respawns = this.game.map.properties.respawn;
+      var randomIndex = Math.floor(Math.random() * respawns.length);
+
+      var respawnTile = this.game.map.getTile(respawns[randomIndex][0], respawns[randomIndex][1], this.game.layers.layer);
+
+      player.hp = 100;
+      player.setInstantlyPosition(respawnTile.worldX, respawnTile.worldY);
+    }
+  }, {
     key: 'update',
     value: function update() {
       if (this.deathState.visible === false) this.game.canvas.style.cursor = 'crosshair';
 
       this.updatePlayersPosition();
       this.updateBullets();
+      this.updateTimer();
     }
   }, {
     key: 'updatePlayersPosition',
@@ -4689,6 +4702,33 @@ var _class = function (_Phaser$State) {
       });
     }
   }, {
+    key: 'updateTimer',
+    value: function updateTimer() {
+      var toTheEnd = this.dbGame.end - Date.now();
+      this.timer.time.setText(toTheEnd);
+    }
+  }, {
+    key: 'createTimer',
+    value: function createTimer() {
+      this.timer = new _phaser2.default.Group(this.game);
+      this.timer.fixedToCamera = true;
+
+      var background = new _phaser2.default.Graphics(this.game);
+      background.beginFill(0x151515);
+      background.drawRect(0, 0, 80, 40);
+
+      var time = new _phaser2.default.Text(this.game, 5, 10, '00:00', {
+        fill: '#fff',
+        font: '400 16px Exo'
+      });
+
+      this.timer.add(background);
+      this.timer.time = time;
+      this.timer.add(time);
+
+      this.game.add.existing(this.timer);
+    }
+  }, {
     key: 'updateDeathState',
     value: function updateDeathState(player) {
       var _this4 = this;
@@ -4717,17 +4757,6 @@ var _class = function (_Phaser$State) {
 
         this.game.add.tween(this.deathState).to({ alpha: 1 }, 500, _phaser2.default.Easing.Linear.None, true);
       }
-    }
-  }, {
-    key: 'respawnPlayer',
-    value: function respawnPlayer(player) {
-      var respawns = this.game.map.properties.respawn;
-      var randomIndex = Math.floor(Math.random() * respawns.length);
-
-      var respawnTile = this.game.map.getTile(respawns[randomIndex][0], respawns[randomIndex][1], this.game.layers.layer);
-
-      player.hp = 100;
-      player.setInstantlyPosition(respawnTile.worldX, respawnTile.worldY);
     }
   }, {
     key: 'createDeathState',
@@ -6035,6 +6064,8 @@ var Game = function (_EventEmitter) {
     _this._gameType = null;
     _this._players = null;
     _this._bullets = null;
+    _this._start = null;
+    _this._end = null;
 
     _this.listenData();
     return _this;
@@ -6054,6 +6085,8 @@ var Game = function (_EventEmitter) {
         _this2._gameType = data.gameType;
         _this2._players = data.players;
         _this2._bullets = data.bullets;
+        _this2._start = data.startTimestamp;
+        _this2._end = data.endTimestamp;
 
         _this2.emitEvent('value');
       });
@@ -6094,6 +6127,16 @@ var Game = function (_EventEmitter) {
     key: 'bullets',
     get: function get() {
       return this._bullets;
+    }
+  }, {
+    key: 'start',
+    get: function get() {
+      return this._start;
+    }
+  }, {
+    key: 'end',
+    get: function get() {
+      return this._end;
     }
   }]);
 
