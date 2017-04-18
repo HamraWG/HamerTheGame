@@ -12,7 +12,7 @@ export default class extends Phaser.State
   init (dbGame)
   {
     this.dbGame = dbGame;
-    this.deathTime = 3;
+    this.deathTime = 2;
     this.timeToEnd = null;
     this.deathStateStatus = false;
     this.endScreenStatus = false;
