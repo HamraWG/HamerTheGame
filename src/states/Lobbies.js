@@ -126,6 +126,8 @@ export default class extends Phaser.State
 
     this.lobbies.on('create', (lobby) =>
     {
+      if (!lobby.name) return;
+
       lobbiesList.appendChild(this._createLobbyElement(lobby));
     });
 

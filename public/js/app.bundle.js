@@ -2817,7 +2817,10 @@ var Player = function (_Phaser$Group) {
   }, {
     key: 'update',
     value: function update() {
-      this.direction = this.countPlayerDirection(this.game.input.worldX, this.game.input.worldY, this.champion.body, {
+      var cursorX = this.game.input.worldX;
+      var cursorY = this.game.input.worldY;
+
+      this.direction = this.countPlayerDirection(cursorX, cursorY, this.champion.body, {
         x: this.champion.width,
         y: this.champion.height
       });
@@ -2837,7 +2840,7 @@ var Player = function (_Phaser$Group) {
 
       if (this.lastRespawn !== this._respawn) {
         this.instantlyPositionUpdate();
-        if (this.hitTestObject) this.moveTestToPlayer();
+        if (this.isCP) this.moveTestToPlayer();
 
         this.lastRespawn = this._respawn;
         return;
@@ -5251,6 +5254,8 @@ var _class = function (_Phaser$State) {
       lobbiesList.classList.add('lobbies');
 
       this.lobbies.on('create', function (lobby) {
+        if (!lobby.name) return;
+
         lobbiesList.appendChild(_this3._createLobbyElement(lobby));
       });
 
@@ -5517,6 +5522,7 @@ var _class = function (_Phaser$State) {
     key: 'updateLobby',
     value: function updateLobby(data) {
       var lobbyPlayerBox = document.querySelector('.lobby');
+      if (!lobbyPlayerBox) return;
 
       var lobbyName = lobbyPlayerBox.querySelector('.lobby__name');
       lobbyName.innerHTML = data.name;
@@ -6059,9 +6065,11 @@ var CurrentPlayer = function (_Player) {
   function CurrentPlayer(game, dbRef) {
     _classCallCheck(this, CurrentPlayer);
 
-    // Database update helpers.
     var _this = _possibleConstructorReturn(this, (CurrentPlayer.__proto__ || Object.getPrototypeOf(CurrentPlayer)).call(this, game, dbRef));
 
+    _this.isCP = true;
+
+    // Database update helpers.
     _this.updateTime = true;
     _this.updateIteration = 1;
     _this.updateEveryFrame = 5;
@@ -6374,7 +6382,6 @@ var GameCreator = function () {
 
     this._db = _utils.database.ref('games');
 
-    // TODO(Ivan): CHANGE IT!
     this.gameLast = 5;
 
     this.champions = ['ninja', 'kamil'];
@@ -6511,13 +6518,17 @@ var Lobbies = function () {
     value: function createLobby(name, owner) {
       if (typeof name !== 'string') throw new TypeError('name must be a non-empty string');
 
+      var maps = ['pixel_dust', 'pixel_cache'];
+
+      var mapIndex = Math.floor(Math.random() * maps.length);
+
       var lobby = this._dbRef.push({
         name: name,
         owner: owner.key,
         players: _defineProperty({}, owner.key, owner.name),
 
         gameType: 'deathmatch',
-        map: 'pixel_dust'
+        map: maps[mapIndex]
       });
 
       this._lobbies.set(lobby.key, new _Lobby2.default(lobby));

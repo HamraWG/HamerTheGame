@@ -10,6 +10,7 @@ class CurrentPlayer extends Player
   constructor (game, dbRef)
   {
     super(game, dbRef);
+    this.isCP = true;
 
     // Database update helpers.
     this.updateTime = true;

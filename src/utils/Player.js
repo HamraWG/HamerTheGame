@@ -241,9 +241,12 @@ class Player extends Phaser.Group
 
   update ()
   {
+    let cursorX = this.game.input.worldX;
+    let cursorY = this.game.input.worldY;
+
     this.direction = this.countPlayerDirection(
-      this.game.input.worldX,
-      this.game.input.worldY,
+      cursorX,
+      cursorY,
       this.champion.body,
       {
         x: this.champion.width,
@@ -267,7 +270,7 @@ class Player extends Phaser.Group
     if (this.lastRespawn !== this._respawn)
     {
       this.instantlyPositionUpdate();
-      if (this.hitTestObject) this.moveTestToPlayer();
+      if (this.isCP) this.moveTestToPlayer();
 
       this.lastRespawn = this._respawn;
       return;

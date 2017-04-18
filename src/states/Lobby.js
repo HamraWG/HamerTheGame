@@ -119,6 +119,7 @@ export default class extends Phaser.State
   updateLobby (data)
   {
     let lobbyPlayerBox = document.querySelector('.lobby');
+    if (!lobbyPlayerBox) return;
 
     let lobbyName = lobbyPlayerBox.querySelector('.lobby__name');
     lobbyName.innerHTML = data.name;

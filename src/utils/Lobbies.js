@@ -31,6 +31,13 @@ class Lobbies
   {
     if (typeof name !== 'string') throw new TypeError('name must be a non-empty string');
 
+    let maps = [
+      'pixel_dust',
+      'pixel_cache'
+    ];
+
+    let mapIndex = Math.floor(Math.random() * maps.length);
+
     let lobby = this._dbRef.push({
       name: name,
       owner: owner.key,
@@ -39,7 +46,7 @@ class Lobbies
       },
 
       gameType: 'deathmatch',
-      map: 'pixel_dust'
+      map: maps[mapIndex]
     });
 
     this._lobbies.set(lobby.key, new Lobby(lobby));
