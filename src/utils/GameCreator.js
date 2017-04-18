@@ -15,7 +15,12 @@ class GameCreator
     this._db = database.ref('games');
 
     // TODO(Ivan): CHANGE IT!
-    this.gameLast = 60;
+    this.gameLast = 1;
+
+    this.champions = [
+      'ninja',
+      'kamil'
+    ];
   }
 
   /**
@@ -63,9 +68,11 @@ class GameCreator
     {
       if (players.hasOwnProperty(pKey) === false) continue;
 
+      let championIndex = Math.floor(Math.random() * this.champions.length);
+
       playersConfig[pKey] = {
         name: players[pKey],
-        champion: 'one',
+        skin: this.champions[championIndex],
         online: false,
         hp: 100,
         position: {

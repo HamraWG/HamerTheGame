@@ -2641,27 +2641,21 @@ var Player = function (_Phaser$Group) {
 
     _this._key = null;
     _this._name = null;
+    _this._skin = null;
     _this._online = null;
     _this._hp = null;
     _this._position = null;
     _this._stats = null;
     _this._eq = null;
+    _this.created = false;
 
     _this.velocity = 300;
     _this.direction = null;
-
-    _this.createChampion();
-    _this.createPlayerName();
-    _this.createPlayerHands();
-    _this.createWeaponSprite();
-    _this.game.add.existing(_this);
 
     _this.eventEmitter.once('value', function () {
       return _this.firstUpdate(_this);
     });
     _this._listenChange();
-    _this._addAnimations();
-    _this._onResume();
     return _this;
   }
 
@@ -2678,6 +2672,19 @@ var Player = function (_Phaser$Group) {
   }, {
     key: 'firstUpdate',
     value: function firstUpdate() {
+      if (this.created === false) {
+        this.createChampion();
+        this.createPlayerName();
+        this.createPlayerHands();
+        this.createWeaponSprite();
+        this.game.add.existing(this);
+
+        this._addAnimations();
+        this._onResume();
+
+        this.created = true;
+      }
+
       this.instantlyPositionUpdate(this);
       this.champion.visible = true;
       this.visible = this.online;
@@ -2703,7 +2710,7 @@ var Player = function (_Phaser$Group) {
   }, {
     key: 'createChampion',
     value: function createChampion() {
-      this.champion = new _phaser2.default.Sprite(this.game, 0, 0, 'champ:one', 0);
+      this.champion = new _phaser2.default.Sprite(this.game, 0, 0, 'champ:' + this.skin, 0);
       this.champion.visible = false;
       this.game.physics.enable(this.champion);
       this.champion.body.collideWorldBounds = true;
@@ -2726,8 +2733,8 @@ var Player = function (_Phaser$Group) {
     key: 'createPlayerHands',
     value: function createPlayerHands() {
       this.hands = {
-        left: new _phaser2.default.Sprite(this.game, 20, 20, 'champ:one:hand', 0),
-        right: new _phaser2.default.Sprite(this.game, 20, 20, 'champ:one:hand', 0)
+        left: new _phaser2.default.Sprite(this.game, 0, 0, 'champ:' + this.skin + ':hand', 0),
+        right: new _phaser2.default.Sprite(this.game, 0, 0, 'champ:' + this.skin + ':hand', 0)
       };
 
       this.hands.left.anchor.set(0.5, 1);
@@ -2762,6 +2769,7 @@ var Player = function (_Phaser$Group) {
         if (_this2._online !== data.online) connectState = true;
 
         _this2._key = snapshot.key;
+        _this2._skin = data.skin;
         _this2._name = data.name;
         _this2._online = data.online;
         _this2._hp = data.hp;
@@ -2989,6 +2997,11 @@ var Player = function (_Phaser$Group) {
     key: 'name',
     get: function get() {
       return this._name;
+    }
+  }, {
+    key: 'skin',
+    get: function get() {
+      return this._skin;
     }
   }, {
     key: 'online',
@@ -4593,6 +4606,11 @@ var _class = function (_Phaser$State) {
       for (var playerKey in this.dbGame.players) {
         var player = playerKey === this.game.currentUser.key ? new _CurrentPlayer2.default(this.game, this.dbGame.getPlayerRef(playerKey)) : new _Player2.default(this.game, this.dbGame.getPlayerRef(playerKey));
         player.eventEmitter.on('connection', this.onConnectionPlayer);
+
+        if (player instanceof _CurrentPlayer2.default) {
+          this.respawnPlayer(player);
+        }
+
         this.players.set(playerKey, player);
       }
     }
@@ -4802,10 +4820,10 @@ var _class = function (_Phaser$State) {
   }, {
     key: 'preload',
     value: function preload() {
-      this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 64);
-      this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
-      this.game.load.spritesheet('champ:two', 'assets/champions/two.png', 32, 64);
-      this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
+      this.game.load.spritesheet('champ:kamil', 'assets/champions/kamil.png', 32, 64);
+      this.game.load.spritesheet('champ:kamil:hand', 'assets/champions/kamil-hand.png', 6, 16);
+      this.game.load.spritesheet('champ:ninja', 'assets/champions/ninja.png', 32, 64);
+      this.game.load.spritesheet('champ:ninja:hand', 'assets/champions/ninja-hand.png', 6, 16);
       this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
       this.game.load.spritesheet('respawn-button', 'assets/images/respawn-button.png', 240, 60);
       this.game.load.image('bullet', 'assets/bullet.png');
@@ -5842,7 +5860,7 @@ var CurrentPlayer = function (_Player) {
   _createClass(CurrentPlayer, [{
     key: 'createHitTestObject',
     value: function createHitTestObject() {
-      this.hitTestObject = new _phaser2.default.Sprite(this.game, this.champion.x, this.champion.y, 'champ:one', 0);
+      this.hitTestObject = new _phaser2.default.Sprite(this.game, this.champion.x, this.champion.y, 'champ:' + this.skin, 0);
       this.game.physics.enable(this.hitTestObject);
       this.hitTestObject.body.collideWorldBounds = true;
       this.hitTestObject.alpha = 0;
@@ -6118,7 +6136,9 @@ var GameCreator = function () {
     this._db = _utils.database.ref('games');
 
     // TODO(Ivan): CHANGE IT!
-    this.gameLast = 60;
+    this.gameLast = 1;
+
+    this.champions = ['ninja', 'kamil'];
   }
 
   /**
@@ -6168,9 +6188,11 @@ var GameCreator = function () {
       for (var pKey in players) {
         if (players.hasOwnProperty(pKey) === false) continue;
 
+        var championIndex = Math.floor(Math.random() * this.champions.length);
+
         playersConfig[pKey] = {
           name: players[pKey],
-          champion: 'one',
+          skin: this.champions[championIndex],
           online: false,
           hp: 100,
           position: {

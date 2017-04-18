@@ -46,8 +46,14 @@ export default class extends Phaser.State
   {
     for (let playerKey in this.dbGame.players)
     {
-      let player = playerKey === this.game.currentUser.key ? new CurrentPlayer(this.game, this.dbGame.getPlayerRef(playerKey)) : new Player(this.game, this.dbGame.getPlayerRef(playerKey));
+      let player = playerKey === this.game.currentUser.key ? new CurrentPlayer(this.game, this.dbGame.getPlayerRef(playerKey)) : new Player(this.game, this.dbGame.getPlayerRef(playerKey))
       player.eventEmitter.on('connection', this.onConnectionPlayer);
+
+      if (player instanceof CurrentPlayer)
+      {
+        this.respawnPlayer(player);
+      }
+
       this.players.set(playerKey, player);
     }
   }

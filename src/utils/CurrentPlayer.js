@@ -31,7 +31,7 @@ class CurrentPlayer extends Player
 
   createHitTestObject ()
   {
-    this.hitTestObject = new Phaser.Sprite(this.game, this.champion.x, this.champion.y, 'champ:one', 0);
+    this.hitTestObject = new Phaser.Sprite(this.game, this.champion.x, this.champion.y, `champ:${this.skin}`, 0);
     this.game.physics.enable(this.hitTestObject);
     this.hitTestObject.body.collideWorldBounds = true;
     this.hitTestObject.alpha = 0;

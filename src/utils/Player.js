@@ -22,25 +22,19 @@ class Player extends Phaser.Group
 
     this._key = null;
     this._name = null;
+    this._skin = null;
     this._online = null;
     this._hp = null;
     this._position = null;
     this._stats = null;
     this._eq = null;
+    this.created = false;
 
     this.velocity = 300;
     this.direction = null;
 
-    this.createChampion();
-    this.createPlayerName();
-    this.createPlayerHands();
-    this.createWeaponSprite();
-    this.game.add.existing(this);
-
     this.eventEmitter.once('value', () => this.firstUpdate(this));
     this._listenChange();
-    this._addAnimations();
-    this._onResume();
   }
 
   get key ()
@@ -51,6 +45,11 @@ class Player extends Phaser.Group
   get name ()
   {
     return this._name;
+  }
+
+  get skin ()
+  {
+    return this._skin;
   }
 
   get online ()
@@ -112,6 +111,20 @@ class Player extends Phaser.Group
 
   firstUpdate ()
   {
+    if (this.created === false)
+    {
+      this.createChampion();
+      this.createPlayerName();
+      this.createPlayerHands();
+      this.createWeaponSprite();
+      this.game.add.existing(this);
+
+      this._addAnimations();
+      this._onResume();
+
+      this.created = true;
+    }
+
     this.instantlyPositionUpdate(this);
     this.champion.visible = true;
     this.visible = this.online;
@@ -135,7 +148,7 @@ class Player extends Phaser.Group
 
   createChampion ()
   {
-    this.champion = new Phaser.Sprite(this.game, 0, 0, 'champ:one', 0);
+    this.champion = new Phaser.Sprite(this.game, 0, 0, `champ:${this.skin}`, 0);
     this.champion.visible = false;
     this.game.physics.enable(this.champion);
     this.champion.body.collideWorldBounds = true;
@@ -158,8 +171,8 @@ class Player extends Phaser.Group
   createPlayerHands ()
   {
     this.hands = {
-      left: new Phaser.Sprite(this.game, 20, 20, 'champ:one:hand', 0),
-      right: new Phaser.Sprite(this.game, 20, 20, 'champ:one:hand', 0)
+      left: new Phaser.Sprite(this.game, 0, 0, `champ:${this.skin}:hand`, 0),
+      right: new Phaser.Sprite(this.game, 0, 0, `champ:${this.skin}:hand`, 0)
     };
 
     this.hands.left.anchor.set(0.5, 1);
@@ -191,6 +204,7 @@ class Player extends Phaser.Group
       if (this._online !== data.online) connectState = true;
 
       this._key = snapshot.key;
+      this._skin = data.skin;
       this._name = data.name;
       this._online = data.online;
       this._hp = data.hp;

@@ -19,10 +19,10 @@ export default class extends Phaser.State
 
   preload ()
   {
-    this.game.load.spritesheet('champ:one', 'assets/champions/one.png', 32, 64);
-    this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
-    this.game.load.spritesheet('champ:two', 'assets/champions/two.png', 32, 64);
-    this.game.load.spritesheet('champ:one:hand', 'assets/champions/one-hand.png', 6, 16);
+    this.game.load.spritesheet('champ:kamil', 'assets/champions/kamil.png', 32, 64);
+    this.game.load.spritesheet('champ:kamil:hand', 'assets/champions/kamil-hand.png', 6, 16);
+    this.game.load.spritesheet('champ:ninja', 'assets/champions/ninja.png', 32, 64);
+    this.game.load.spritesheet('champ:ninja:hand', 'assets/champions/ninja-hand.png', 6, 16);
     this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
     this.game.load.spritesheet('respawn-button', 'assets/images/respawn-button.png', 240, 60);
     this.game.load.image('bullet', 'assets/bullet.png');
