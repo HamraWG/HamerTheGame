@@ -15,7 +15,7 @@ class GameCreator
     this._db = database.ref('games');
 
     // TODO(Ivan): CHANGE IT!
-    this.gameLast = 5;
+    this.gameLast = 35;
 
     this.champions = [
       'ninja',

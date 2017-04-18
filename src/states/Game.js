@@ -12,7 +12,8 @@ export default class extends Phaser.State
   init (dbGame)
   {
     this.dbGame = dbGame;
-    this.deathTime = 5;
+    this.deathTime = 3;
+    this.timeToEnd = null;
     this.deathStateStatus = false;
   }
 
@@ -42,6 +43,7 @@ export default class extends Phaser.State
     this.bullets = new Bullets(this.game, this.dbGame.key);
 
     this.createTimer();
+    this.createEndScreen();
     this.createDeathState();
   }
 
@@ -82,9 +84,15 @@ export default class extends Phaser.State
   {
     if (this.deathState.visible === false) this.game.canvas.style.cursor = 'crosshair';
 
+    this.updateTimeToEnd();
     this.updatePlayersPosition();
     this.updateBullets();
     this.updateTimer();
+  }
+
+  updateTimeToEnd ()
+  {
+    this.timeToEnd = this.dbGame.end - Date.now();
   }
 
   updatePlayersPosition ()
@@ -153,8 +161,7 @@ export default class extends Phaser.State
 
   updateTimer ()
   {
-    let toTheEnd = this.dbGame.end - Date.now();
-    this.timer.time.setText(padNumber(toTheEnd, 6));
+    this.timer.time.setText(padNumber(this.timeToEnd, 6));
   }
 
   createTimer ()
@@ -164,7 +171,7 @@ export default class extends Phaser.State
 
     let background = new Phaser.Graphics(this.game);
     background.beginFill(0x151515);
-    background.drawRect(0, 0, 70, 40);
+    background.drawRect(0, 0, 80, 40);
 
     let time = new Phaser.Text(
       this.game,
@@ -253,5 +260,117 @@ export default class extends Phaser.State
 
     this.deathState.visible = false;
     this.game.add.existing(this.deathState);
+  }
+
+  createEndScreen ()
+  {
+    this.endScreen = new Phaser.Group(this.game);
+    this.endScreen.fixedToCamera = true;
+
+    let background = new Phaser.Graphics(this.game);
+    background.beginFill(0x222222);
+    background.drawRect(0, 0, this.game.width, this.game.height);
+
+    background.beginFill(0x111111);
+    background.drawRect(this.game.width * 0.05 / 2, this.game.height * 0.25 / 2, this.game.width * 0.95, this.game.height * 0.75);
+
+    let menuButton = new Phaser.Button(
+      this.game,
+      this.game.width * 0.95 + this.game.width * 0.05 / 2,
+      this.game.height * 0.25 / 2,
+      'menu-button',
+      () =>
+      {
+        this.state.start('Lobbies');
+      },
+      this,
+      1,
+      0
+    );
+    menuButton.anchor.set(1, 1);
+
+    this.endScreen.add(background);
+    this.endScreen.add(menuButton);
+
+    this.game.add.existing(this.endScreen);
+  }
+
+  addPlayersToEndScreen ()
+  {
+    let ranking = new Phaser.Group(this.game);
+    let index = 0;
+
+    this.players.forEach((player) =>
+    {
+      let stats = player.stats;
+      let allKills = 0;
+      let allDeaths = 0;
+
+      for (let kill of Object.values(stats.kills)) allKills += kill;
+      for (let death of Object.values(stats.deaths)) allDeaths += death;
+
+      let playerStats = new Phaser.Group(this.game);
+
+      let name = new Phaser.Text(
+        this.game,
+        this.game.width * 0.05 / 2 + 10,
+        this.game.height * 0.25 / 2 + 15,
+        player.name,
+        {
+          fill: '#fff',
+          font: '600 14px Exo'
+        }
+      );
+
+      let kills = `Zabójstwa: ${allKills}`;
+      for (let kill in stats.kills)
+      {
+        if (stats.kills.hasOwnProperty(kill) === false) return;
+
+        let text = ` | ${this.players.get(kill).name} - ${stats.kills[kill]}`;
+        kills += text;
+      }
+
+      let killsText = new Phaser.Text(
+        this.game,
+        this.game.width * 0.05 / 2 + name.width + 20,
+        this.game.height * 0.25 / 2 + 10,
+        kills,
+        {
+          fill: '#fff',
+          font: '400 12px Exo'
+        }
+      );
+
+      let deaths = `Śmierci: ${allDeaths}`;
+      for (let death in stats.deaths)
+      {
+        if (stats.deaths.hasOwnProperty(death) === false) return;
+
+        let text = ` | ${this.players.get(death).name} - ${stats.deaths[death]}`;
+        deaths += text;
+      }
+
+      let deathsText = new Phaser.Text(
+        this.game,
+        this.game.width * 0.05 / 2 + name.width + 25,
+        this.game.height * 0.25 / 2 + 25,
+        deaths,
+        {
+          fill: '#fff',
+          font: '400 12px Exo'
+        }
+      );
+
+      playerStats.add(name);
+      playerStats.add(killsText);
+      playerStats.add(deathsText);
+      playerStats.y = 40 * index;
+
+      ranking.add(playerStats);
+      index++;
+    });
+
+    this.endScreen.add(ranking);
   }
 }

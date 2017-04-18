@@ -4582,7 +4582,8 @@ var _class = function (_Phaser$State) {
     key: 'init',
     value: function init(dbGame) {
       this.dbGame = dbGame;
-      this.deathTime = 5;
+      this.deathTime = 3;
+      this.timeToEnd = null;
       this.deathStateStatus = false;
     }
   }, {
@@ -4612,6 +4613,7 @@ var _class = function (_Phaser$State) {
       this.bullets = new _Bullets2.default(this.game, this.dbGame.key);
 
       this.createTimer();
+      this.createEndScreen();
       this.createDeathState();
     }
   }, {
@@ -4649,9 +4651,15 @@ var _class = function (_Phaser$State) {
     value: function update() {
       if (this.deathState.visible === false) this.game.canvas.style.cursor = 'crosshair';
 
+      this.updateTimeToEnd();
       this.updatePlayersPosition();
       this.updateBullets();
       this.updateTimer();
+    }
+  }, {
+    key: 'updateTimeToEnd',
+    value: function updateTimeToEnd() {
+      this.timeToEnd = this.dbGame.end - Date.now();
     }
   }, {
     key: 'updatePlayersPosition',
@@ -4717,8 +4725,7 @@ var _class = function (_Phaser$State) {
   }, {
     key: 'updateTimer',
     value: function updateTimer() {
-      var toTheEnd = this.dbGame.end - Date.now();
-      this.timer.time.setText((0, _utils.padNumber)(toTheEnd, 6));
+      this.timer.time.setText((0, _utils.padNumber)(this.timeToEnd, 6));
     }
   }, {
     key: 'createTimer',
@@ -4728,7 +4735,7 @@ var _class = function (_Phaser$State) {
 
       var background = new _phaser2.default.Graphics(this.game);
       background.beginFill(0x151515);
-      background.drawRect(0, 0, 70, 40);
+      background.drawRect(0, 0, 80, 40);
 
       var time = new _phaser2.default.Text(this.game, 5, 10, '00:00', {
         fill: '#fff',
@@ -4798,6 +4805,136 @@ var _class = function (_Phaser$State) {
 
       this.deathState.visible = false;
       this.game.add.existing(this.deathState);
+    }
+  }, {
+    key: 'createEndScreen',
+    value: function createEndScreen() {
+      var _this5 = this;
+
+      this.endScreen = new _phaser2.default.Group(this.game);
+      this.endScreen.fixedToCamera = true;
+
+      var background = new _phaser2.default.Graphics(this.game);
+      background.beginFill(0x222222);
+      background.drawRect(0, 0, this.game.width, this.game.height);
+
+      background.beginFill(0x111111);
+      background.drawRect(this.game.width * 0.05 / 2, this.game.height * 0.25 / 2, this.game.width * 0.95, this.game.height * 0.75);
+
+      var menuButton = new _phaser2.default.Button(this.game, this.game.width * 0.95 + this.game.width * 0.05 / 2, this.game.height * 0.25 / 2, 'menu-button', function () {
+        _this5.state.start('Lobbies');
+      }, this, 1, 0);
+      menuButton.anchor.set(1, 1);
+
+      this.endScreen.add(background);
+      this.endScreen.add(menuButton);
+
+      this.game.add.existing(this.endScreen);
+    }
+  }, {
+    key: 'addPlayersToEndScreen',
+    value: function addPlayersToEndScreen() {
+      var _this6 = this;
+
+      var ranking = new _phaser2.default.Group(this.game);
+      var index = 0;
+
+      this.players.forEach(function (player) {
+        var stats = player.stats;
+        var allKills = 0;
+        var allDeaths = 0;
+
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = Object.values(stats.kills)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var _kill = _step.value;
+            allKills += _kill;
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+          for (var _iterator2 = Object.values(stats.deaths)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var _death = _step2.value;
+            allDeaths += _death;
+          }
+        } catch (err) {
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
+            }
+          } finally {
+            if (_didIteratorError2) {
+              throw _iteratorError2;
+            }
+          }
+        }
+
+        var playerStats = new _phaser2.default.Group(_this6.game);
+
+        var name = new _phaser2.default.Text(_this6.game, _this6.game.width * 0.05 / 2 + 10, _this6.game.height * 0.25 / 2 + 15, player.name, {
+          fill: '#fff',
+          font: '600 14px Exo'
+        });
+
+        var kills = 'Zab\xF3jstwa: ' + allKills;
+        for (var kill in stats.kills) {
+          if (stats.kills.hasOwnProperty(kill) === false) return;
+
+          var text = ' | ' + _this6.players.get(kill).name + ' - ' + stats.kills[kill];
+          kills += text;
+        }
+
+        var killsText = new _phaser2.default.Text(_this6.game, _this6.game.width * 0.05 / 2 + name.width + 20, _this6.game.height * 0.25 / 2 + 10, kills, {
+          fill: '#fff',
+          font: '400 12px Exo'
+        });
+
+        var deaths = '\u015Amierci: ' + allDeaths;
+        for (var death in stats.deaths) {
+          if (stats.deaths.hasOwnProperty(death) === false) return;
+
+          var _text = ' | ' + _this6.players.get(death).name + ' - ' + stats.deaths[death];
+          deaths += _text;
+        }
+
+        var deathsText = new _phaser2.default.Text(_this6.game, _this6.game.width * 0.05 / 2 + name.width + 25, _this6.game.height * 0.25 / 2 + 25, deaths, {
+          fill: '#fff',
+          font: '400 12px Exo'
+        });
+
+        playerStats.add(name);
+        playerStats.add(killsText);
+        playerStats.add(deathsText);
+        playerStats.y = 40 * index;
+
+        ranking.add(playerStats);
+        index++;
+      });
+
+      this.endScreen.add(ranking);
     }
   }]);
 
@@ -4869,6 +5006,7 @@ var _class = function (_Phaser$State) {
       this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
       this.game.load.spritesheet('respawn-button', 'assets/images/respawn-button.png', 240, 60);
       this.game.load.image('bullet', 'assets/bullet.png');
+      this.game.load.spritesheet('menu-button', 'assets/images/menu-button.png', 200, 50);
 
       // Loading info
       var loadingText = this.add.text(this.world.centerX, this.world.centerY, 'Wczytywanie tajemniczych danych...', {
@@ -6192,7 +6330,7 @@ var GameCreator = function () {
     this._db = _utils.database.ref('games');
 
     // TODO(Ivan): CHANGE IT!
-    this.gameLast = 5;
+    this.gameLast = 35;
 
     this.champions = ['ninja', 'kamil'];
   }

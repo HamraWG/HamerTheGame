@@ -26,6 +26,7 @@ export default class extends Phaser.State
     this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
     this.game.load.spritesheet('respawn-button', 'assets/images/respawn-button.png', 240, 60);
     this.game.load.image('bullet', 'assets/bullet.png');
+    this.game.load.spritesheet('menu-button', 'assets/images/menu-button.png', 200, 50);
 
     // Loading info
     let loadingText = this.add.text(
