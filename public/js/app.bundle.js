@@ -4585,6 +4585,7 @@ var _class = function (_Phaser$State) {
       this.deathTime = 3;
       this.timeToEnd = null;
       this.deathStateStatus = false;
+      this.endScreenStatus = false;
     }
   }, {
     key: 'shutdown',
@@ -4649,12 +4650,18 @@ var _class = function (_Phaser$State) {
   }, {
     key: 'update',
     value: function update() {
-      if (this.deathState.visible === false) this.game.canvas.style.cursor = 'crosshair';
-
       this.updateTimeToEnd();
-      this.updatePlayersPosition();
-      this.updateBullets();
-      this.updateTimer();
+
+      if (this.deathState.visible === false && this.timeToEnd > 0) this.game.canvas.style.cursor = 'crosshair';
+
+      if (this.timeToEnd > 0) {
+        this.updatePlayersPosition();
+        this.updateBullets();
+        this.updateTimer();
+      } else if (this.endScreenStatus === false) {
+        this.showEndScreen();
+        this.endScreenStatus = true;
+      }
     }
   }, {
     key: 'updateTimeToEnd',
@@ -4757,7 +4764,7 @@ var _class = function (_Phaser$State) {
         this.deathState.button.setFrames(0);
       }
 
-      if (player.hp <= 0 && this.deathStateStatus === false) {
+      if (player.hp <= 0 && this.deathStateStatus === false && this.timeToEnd > 1000) {
         this.deathStateStatus = true;
         this.deathState.visible = true;
         this.deathState.alpha = 0;
@@ -4812,6 +4819,7 @@ var _class = function (_Phaser$State) {
       var _this5 = this;
 
       this.endScreen = new _phaser2.default.Group(this.game);
+      this.endScreen.visible = false;
       this.endScreen.fixedToCamera = true;
 
       var background = new _phaser2.default.Graphics(this.game);
@@ -4828,8 +4836,6 @@ var _class = function (_Phaser$State) {
 
       this.endScreen.add(background);
       this.endScreen.add(menuButton);
-
-      this.game.add.existing(this.endScreen);
     }
   }, {
     key: 'addPlayersToEndScreen',
@@ -4935,6 +4941,24 @@ var _class = function (_Phaser$State) {
       });
 
       this.endScreen.add(ranking);
+    }
+  }, {
+    key: 'showEndScreen',
+    value: function showEndScreen() {
+      this.players.forEach(function (player) {
+        player.visible = false;
+      });
+
+      this.timer.visible = false;
+      this.deathState.visible = false;
+      this.endScreen.visible = true;
+
+      this.addPlayersToEndScreen();
+      this.endScreen.alpha = 0;
+      this.game.add.existing(this.endScreen);
+
+      this.game.add.tween(this.endScreen).to({ alpha: 1 }, 500, _phaser2.default.Easing.Linear.None, true);
+      console.log(this.endScreen);
     }
   }]);
 
@@ -6330,7 +6354,7 @@ var GameCreator = function () {
     this._db = _utils.database.ref('games');
 
     // TODO(Ivan): CHANGE IT!
-    this.gameLast = 35;
+    this.gameLast = 1;
 
     this.champions = ['ninja', 'kamil'];
   }
@@ -7140,7 +7164,8 @@ var Weapon = function () {
   }, {
     key: 'fire',
     value: function fire() {
-      if (this.owner.hp <= 0) return;
+      console.log(this.owner.visible);
+      if (this.owner.hp <= 0 || this.owner.visible === false) return;
 
       var angle = this.game.physics.arcade.angleToPointer(this.sprite);
 

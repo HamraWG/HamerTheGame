@@ -15,6 +15,7 @@ export default class extends Phaser.State
     this.deathTime = 3;
     this.timeToEnd = null;
     this.deathStateStatus = false;
+    this.endScreenStatus = false;
   }
 
   shutdown ()
@@ -82,12 +83,21 @@ export default class extends Phaser.State
 
   update ()
   {
-    if (this.deathState.visible === false) this.game.canvas.style.cursor = 'crosshair';
-
     this.updateTimeToEnd();
-    this.updatePlayersPosition();
-    this.updateBullets();
-    this.updateTimer();
+
+    if (this.deathState.visible === false && this.timeToEnd > 0) this.game.canvas.style.cursor = 'crosshair';
+
+    if (this.timeToEnd > 0)
+    {
+      this.updatePlayersPosition();
+      this.updateBullets();
+      this.updateTimer();
+    }
+    else if (this.endScreenStatus === false)
+    {
+      this.showEndScreen();
+      this.endScreenStatus = true;
+    }
   }
 
   updateTimeToEnd ()
@@ -198,7 +208,7 @@ export default class extends Phaser.State
       this.deathState.button.setFrames(0);
     }
 
-    if (player.hp <= 0 && this.deathStateStatus === false)
+    if (player.hp <= 0 && this.deathStateStatus === false && this.timeToEnd > 1000)
     {
       this.deathStateStatus = true;
       this.deathState.visible = true;
@@ -265,6 +275,7 @@ export default class extends Phaser.State
   createEndScreen ()
   {
     this.endScreen = new Phaser.Group(this.game);
+    this.endScreen.visible = false;
     this.endScreen.fixedToCamera = true;
 
     let background = new Phaser.Graphics(this.game);
@@ -291,8 +302,6 @@ export default class extends Phaser.State
 
     this.endScreen.add(background);
     this.endScreen.add(menuButton);
-
-    this.game.add.existing(this.endScreen);
   }
 
   addPlayersToEndScreen ()
@@ -372,5 +381,24 @@ export default class extends Phaser.State
     });
 
     this.endScreen.add(ranking);
+  }
+
+  showEndScreen ()
+  {
+    this.players.forEach((player) =>
+    {
+      player.visible = false;
+    });
+
+    this.timer.visible = false;
+    this.deathState.visible = false;
+    this.endScreen.visible = true;
+
+    this.addPlayersToEndScreen();
+    this.endScreen.alpha = 0;
+    this.game.add.existing(this.endScreen);
+
+    this.game.add.tween(this.endScreen).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
+    console.log(this.endScreen);
   }
 }

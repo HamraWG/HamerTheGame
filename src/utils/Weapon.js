@@ -60,7 +60,8 @@ class Weapon
 
   fire ()
   {
-    if (this.owner.hp <= 0) return;
+    console.log(this.owner.visible);
+    if (this.owner.hp <= 0 || this.owner.visible === false) return;
 
     let angle = this.game.physics.arcade.angleToPointer(this.sprite);
 
