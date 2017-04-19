@@ -27,8 +27,9 @@ class Player extends Phaser.Group
     this._hp = null;
     this._position = null;
     this._stats = null;
-    this.lastRespawn = 0;
+    this._cursor = null;
     this._respawn = 0;
+    this.lastRespawn = 0;
     this.created = false;
 
     this.velocity = 300;
@@ -89,6 +90,11 @@ class Player extends Phaser.Group
   get stats ()
   {
     return this._stats;
+  }
+
+  get cursor ()
+  {
+    return this._cursor;
   }
 
   addKill (key)
@@ -209,6 +215,7 @@ class Player extends Phaser.Group
       this._hp = data.hp;
       this._position = data.position;
       this._stats = data.stats;
+      this._cursor = data.cursor;
       this._respawn = data.respawn;
 
       if (connectState) this.eventEmitter.emitEvent('connection', [this]);
@@ -238,8 +245,8 @@ class Player extends Phaser.Group
 
   update ()
   {
-    let cursorX = this.game.input.worldX;
-    let cursorY = this.game.input.worldY;
+    let cursorX = this.isCP ? this.game.input.worldX : this.cursor.x;
+    let cursorY = this.isCP ? this.game.input.worldY : this.cursor.y;
 
     this.direction = this.countPlayerDirection(
       cursorX,
@@ -327,8 +334,10 @@ class Player extends Phaser.Group
 
   updatePlayerHandsPosition ()
   {
-    let angleRight = this.game.physics.arcade.angleToPointer(this.hands.right);
-    let angleLeft = this.game.physics.arcade.angleToPointer(this.hands.left);
+    let cursorX = this.isCP ? this.game.input.worldX : this.cursor.x;
+    let cursorY = this.isCP ? this.game.input.worldY : this.cursor.y;
+    let angleRight = this.game.physics.arcade.angleToXY(this.hands.right, cursorX, cursorY);
+    let angleLeft = this.game.physics.arcade.angleToXY(this.hands.left, cursorX, cursorY);
     switch (this.direction)
     {
       case 'up':
@@ -391,7 +400,9 @@ class Player extends Phaser.Group
 
   updatePlayerWeaponPosition ()
   {
-    let angle = this.game.physics.arcade.angleToPointer(this.weaponSprite);
+    let cursorX = this.isCP ? this.game.input.worldX : this.cursor.x;
+    let cursorY = this.isCP ? this.game.input.worldY : this.cursor.y;
+    let angle = this.game.physics.arcade.angleToXY(this.weaponSprite, cursorX, cursorY);
     switch (this.direction)
     {
       case 'right':

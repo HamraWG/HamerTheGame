@@ -80,6 +80,10 @@ class GameCreator
           x: 32,
           y: 32
         },
+        cursor: {
+          x: 32,
+          y: 32
+        },
         stats: {
           kills: 0,
           deaths: 0

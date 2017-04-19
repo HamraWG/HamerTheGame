@@ -145,10 +145,29 @@ class CurrentPlayer extends Player
     this.updateTime = this.updateIteration === this.updateEveryFrame;
 
     let playerPos = this.getPosition();
+    let cursorPos = this.cursor;
     if ((this.hitTestObject.body.x !== playerPos.x || this.hitTestObject.body.y !== playerPos.y) && this.updateTime === true)
     {
       this.updatePositionRelativeToTest();
     }
+
+    if ((cursorPos.x !== this.game.input.worldX || cursorPos.y !== this.game.input.worldY) && this.updateTime === true)
+    {
+      this.updateDbCursor();
+    }
+  }
+
+  updateDbCursor ()
+  {
+    let updateCursor = {
+    };
+
+    let cursorPos = this.cursor;
+
+    if (this.game.input.worldX !== cursorPos.x) updateCursor.x = this.game.input.worldX;
+    if (this.game.input.worldX !== cursorPos.y) updateCursor.y = this.game.input.worldY;
+
+    this._dbRef.child('cursor').update(updateCursor);
   }
 
   _onDisconnect ()
