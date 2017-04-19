@@ -6400,7 +6400,7 @@ var GameCreator = function () {
 
     this.gameLast = 5;
 
-    this.champions = ['ninja', 'kamil'];
+    this.champions = ['ninja', 'kamil', 'rambo'];
   }
 
   /**

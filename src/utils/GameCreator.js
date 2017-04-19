@@ -18,7 +18,8 @@ class GameCreator
 
     this.champions = [
       'ninja',
-      'kamil'
+      'kamil',
+      'rambo'
     ];
   }
 
