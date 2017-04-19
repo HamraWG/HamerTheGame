@@ -276,6 +276,8 @@ class Player extends Phaser.Group
       return;
     }
 
+    this.updateDesynchro();
+
     if (bodyPos.x !== playerPos.x)
     {
       bodyPos.velocity.x = playerPos.x > bodyPos.x ? this.velocity : -this.velocity;
@@ -283,6 +285,21 @@ class Player extends Phaser.Group
     if (bodyPos.y !== playerPos.y)
     {
       bodyPos.velocity.y = playerPos.y > bodyPos.y ? this.velocity : -this.velocity;
+    }
+  }
+
+  updateDesynchro ()
+  {
+    let playerPos = this.getPosition();
+    let bodyPos = this.champion.body;
+
+    let xDiff = Math.abs(playerPos.x) - Math.abs(bodyPos.x);
+    let yDiff = Math.abs(playerPos.y) - Math.abs(bodyPos.y);
+
+    if (Math.abs(xDiff) > 96 || Math.abs(yDiff) > 96)
+    {
+      this.instantlyPositionUpdate();
+      if (this.isCP) this.moveTestToPlayer();
     }
   }
 
