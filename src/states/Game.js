@@ -16,6 +16,8 @@ export default class extends Phaser.State
     this.timeToEnd = null;
     this.deathStateStatus = false;
     this.endScreenStatus = false;
+
+    this.currentPlayer = null;
   }
 
   shutdown ()
@@ -44,6 +46,7 @@ export default class extends Phaser.State
     this.bullets = new Bullets(this.game, this.dbGame.key);
 
     this.createTimer();
+    this.createAmmoInfo();
     this.createEndScreen();
     this.createDeathState();
   }
@@ -57,6 +60,7 @@ export default class extends Phaser.State
 
       if (player instanceof CurrentPlayer)
       {
+        this.currentPlayer = player;
         this.respawnPlayer(player);
       }
 
@@ -90,6 +94,7 @@ export default class extends Phaser.State
       this.updatePlayersPosition();
       this.updateBullets();
       this.updateTimer();
+      this.updateAmmoInfo();
     }
     else if (this.endScreenStatus === false)
     {
@@ -197,6 +202,46 @@ export default class extends Phaser.State
     this.timer.add(time);
 
     this.game.add.existing(this.timer);
+  }
+
+  updateAmmoInfo ()
+  {
+    let weapon = this.currentPlayer.weapon;
+
+    if (weapon.isReloading)
+    {
+      this.ammoInfo.ammo.setText('-/-');
+    }
+    else
+    {
+      this.ammoInfo.ammo.setText(`${padNumber(weapon.ammo, 2)}/${padNumber(weapon.getMaxAmmo(), 2)}`);
+    }
+  }
+
+  createAmmoInfo ()
+  {
+    this.ammoInfo = new Phaser.Group(this.game);
+    this.ammoInfo.fixedToCamera = true;
+
+    let background = new Phaser.Graphics(this.game);
+    background.beginFill(0x000000);
+    background.drawRect(this.game.width - 60, this.game.height - 40, 60, 40);
+
+    let ammo = new Phaser.Text(
+      this.game,
+      this.game.width - 30,
+      this.game.height - 30,
+      '0',
+      {
+        fill: '#fff',
+        font: '400 16px Exo'
+      }
+    );
+    ammo.anchor.x = 0.5;
+
+    this.ammoInfo.add(background);
+    this.ammoInfo.ammo = ammo;
+    this.ammoInfo.add(ammo);
   }
 
   updateDeathState (player)
@@ -391,6 +436,7 @@ export default class extends Phaser.State
     this.timer.visible = false;
     this.deathState.visible = false;
     this.endScreen.visible = true;
+    this.ammoInfo.visible = false;
 
     this.addPlayersToEndScreen();
     this.endScreen.alpha = 0;

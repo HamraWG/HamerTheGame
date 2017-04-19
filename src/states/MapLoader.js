@@ -11,7 +11,6 @@ export default class extends Phaser.State
 
   preload ()
   {
-    console.log(this);
     this.game.load.tilemap(`map-${this.dbGame.map}`, `assets/maps/${this.dbGame.map}/map.json`, null, Phaser.Tilemap.TILED_JSON);
     this.game.load.image(`tiles-${this.dbGame.map}`, `assets/maps/${this.dbGame.map}/tiles.png`);
 
