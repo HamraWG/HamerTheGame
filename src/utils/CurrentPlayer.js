@@ -23,11 +23,23 @@ class CurrentPlayer extends Player
     this.weapon = new Weapon(this, dbRef.parent.parent.child('bullets'));
 
     this.moveTestToPlayerAtStart();
-    this.addMovementKeyListeners();
 
     this.eventEmitter.once('value', () => this.firstUpdate(this));
     this.online = true;
     this._onDisconnect();
+
+    this.addMovementKeyListeners();
+  }
+
+  firstUpdate ()
+  {
+    super.firstUpdate();
+
+    if (this.isCP === true)
+    {
+      this.weapon.type = Weapon.getTypeByFrame(this.weaponSprite.defaultFrame);
+      this.weapon.ammo = this.weapon.getMaxAmmo();
+    }
   }
 
   createHitTestObject ()

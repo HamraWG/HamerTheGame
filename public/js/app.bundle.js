@@ -2702,13 +2702,6 @@ var Player = function (_Phaser$Group) {
       this.champion.visible = true;
       this.visible = this.online;
     }
-
-    /**
-     * Returns player's position.
-     *
-     * @returns {object}
-     */
-
   }, {
     key: 'getPosition',
     value: function getPosition() {
@@ -2759,9 +2752,11 @@ var Player = function (_Phaser$Group) {
   }, {
     key: 'createWeaponSprite',
     value: function createWeaponSprite() {
-      this.weaponSprite = new _phaser2.default.Sprite(this.game, 0, 0, 'weapons', 0);
+      var weaponFrame = this.getWeaponFrame();
+
+      this.weaponSprite = new _phaser2.default.Sprite(this.game, 0, 0, 'weapons', weaponFrame);
       this.weaponSprite.anchor.set(0, 0.5);
-      this.weaponSprite.defaultFrame = 0;
+      this.weaponSprite.defaultFrame = weaponFrame;
       this.addAt(this.weaponSprite, 0);
     }
 
@@ -3040,6 +3035,27 @@ var Player = function (_Phaser$Group) {
       this.game.onResume.add(function () {
         _this3.instantlyPositionUpdate();
       }, this);
+    }
+  }, {
+    key: 'getWeaponFrame',
+    value: function getWeaponFrame() {
+      if (this.skin === null) throw new Error('Skin is not loaded yet!');
+
+      var startFrame = null;
+
+      switch (this.skin) {
+        case 'kamil':
+          startFrame = 0;
+          break;
+        case 'ninja':
+          startFrame = 16;
+          break;
+        case 'rambo':
+          startFrame = 12;
+          break;
+      }
+
+      return startFrame;
     }
   }, {
     key: 'key',
@@ -4369,6 +4385,10 @@ var _GameLoader = __webpack_require__(128);
 
 var _GameLoader2 = _interopRequireDefault(_GameLoader);
 
+var _MapLoader = __webpack_require__(334);
+
+var _MapLoader2 = _interopRequireDefault(_MapLoader);
+
 var _Game = __webpack_require__(127);
 
 var _Game2 = _interopRequireDefault(_Game);
@@ -4402,6 +4422,7 @@ var Game = function (_Phaser$Game) {
         _this.state.add('Lobbies', _Lobbies2.default, false);
         _this.state.add('Lobby', _Lobby2.default, false);
         _this.state.add('GameLoader', _GameLoader2.default, false);
+        _this.state.add('MapLoader', _MapLoader2.default, false);
         _this.state.add('Game', _Game2.default, false);
 
         _this.currentUser = new _User2.default();
@@ -4676,15 +4697,15 @@ var _class = function (_Phaser$State) {
   }, {
     key: 'onConnectionPlayer',
     value: function onConnectionPlayer(player) {
-      if (player.online) player.visible = true;else player.visible = false;
+      player.visible = player.online;
     }
   }, {
     key: 'respawnPlayer',
     value: function respawnPlayer(player) {
-      var respawns = this.game.map.properties.respawn;
-      var randomIndex = Math.floor(Math.random() * respawns.length);
+      var respawn = this.game.map.properties.respawn;
+      var randomIndex = Math.floor(Math.random() * respawn.length);
 
-      var respawnTile = this.game.map.getTile(respawns[randomIndex][0], respawns[randomIndex][1], this.game.layers.layer);
+      var respawnTile = this.game.map.getTile(respawn[randomIndex][0], respawn[randomIndex][1], this.game.layers.layer);
 
       player.respawn(respawnTile.worldX, respawnTile.worldY);
     }
@@ -5048,15 +5069,7 @@ var _class = function (_Phaser$State) {
   _createClass(_class, [{
     key: 'init',
     value: function init(gameKey) {
-      var _this2 = this;
-
       this.dbGame = new _Game2.default(gameKey);
-
-      if (this.dbGame.name) this.loadMapInit(this);else this.dbGame.once('value', function () {
-        return _this2.loadMapInit(_this2);
-      });
-
-      this.allLoaded = false;
 
       localStorage.setItem('firebase:game:id', gameKey);
     }
@@ -5064,12 +5077,14 @@ var _class = function (_Phaser$State) {
     key: 'preload',
     value: function preload() {
       this.game.load.spritesheet('champ:kamil', 'assets/champions/kamil.png', 32, 64);
-      this.game.load.spritesheet('champ:kamil:hand', 'assets/champions/kamil-hand.png', 6, 16);
+      this.game.load.image('champ:kamil:hand', 'assets/champions/kamil-hand.png', 6, 16);
       this.game.load.spritesheet('champ:ninja', 'assets/champions/ninja.png', 32, 64);
-      this.game.load.spritesheet('champ:ninja:hand', 'assets/champions/ninja-hand.png', 6, 16);
+      this.game.load.image('champ:ninja:hand', 'assets/champions/ninja-hand.png', 6, 16);
+      this.game.load.spritesheet('champ:rambo', 'assets/champions/rambo.png', 32, 64);
+      this.game.load.image('champ:rambo:hand', 'assets/champions/rambo-hand.png', 6, 16);
       this.game.load.spritesheet('weapons', 'assets/champions/weapons.png', 32, 32);
-      this.game.load.spritesheet('respawn-button', 'assets/images/respawn-button.png', 240, 60);
       this.game.load.image('bullet', 'assets/bullet.png');
+      this.game.load.spritesheet('respawn-button', 'assets/images/respawn-button.png', 240, 60);
       this.game.load.spritesheet('menu-button', 'assets/images/menu-button.png', 200, 50);
 
       // Loading info
@@ -5081,19 +5096,11 @@ var _class = function (_Phaser$State) {
       loadingText.anchor.setTo(0.5, 0.5);
     }
   }, {
-    key: 'loadMapInit',
-    value: function loadMapInit() {
-      var _this3 = this;
-
-      var loader = this.game.load;
-      loader.tilemap('map-' + this.dbGame.map, 'assets/maps/' + this.dbGame.map + '/map.json', null, _phaser2.default.Tilemap.TILED_JSON);
-      loader.image('tiles-' + this.dbGame.map, 'assets/maps/' + this.dbGame.map + '/tiles.png');
-
-      loader.start();
-
-      loader.onLoadComplete.add(function () {
-        _this3.state.start('Game', true, false, _this3.dbGame);
-      });
+    key: 'update',
+    value: function update() {
+      if (this.game.load.isLoading === false && this.dbGame.name !== null) {
+        this.state.start('MapLoader', true, false, this.dbGame);
+      }
     }
   }]);
 
@@ -6096,17 +6103,28 @@ var CurrentPlayer = function (_Player) {
     _this.weapon = new _Weapon2.default(_this, dbRef.parent.parent.child('bullets'));
 
     _this.moveTestToPlayerAtStart();
-    _this.addMovementKeyListeners();
 
     _this.eventEmitter.once('value', function () {
       return _this.firstUpdate(_this);
     });
     _this.online = true;
     _this._onDisconnect();
+
+    _this.addMovementKeyListeners();
     return _this;
   }
 
   _createClass(CurrentPlayer, [{
+    key: 'firstUpdate',
+    value: function firstUpdate() {
+      _get(CurrentPlayer.prototype.__proto__ || Object.getPrototypeOf(CurrentPlayer.prototype), 'firstUpdate', this).call(this);
+
+      if (this.isCP === true) {
+        this.weapon.type = _Weapon2.default.getTypeByFrame(this.weaponSprite.defaultFrame);
+        this.weapon.ammo = this.weapon.getMaxAmmo();
+      }
+    }
+  }, {
     key: 'createHitTestObject',
     value: function createHitTestObject() {
       this.hitTestObject = new _phaser2.default.Sprite(this.game, this.champion.x, this.champion.y, 'champ:' + this.skin, 0);
@@ -7164,7 +7182,9 @@ var Weapon = function () {
     this.game = owner.game;
     this._bulletsRef = dbBulletsRef;
 
-    this.type = 'ak47';
+    this.type = null;
+    this.ammo = null;
+    this.isReloading = false;
 
     this.listenFireButton();
   }
@@ -7175,12 +7195,40 @@ var Weapon = function () {
       this.game.input.onDown.add(this.fire, this);
     }
   }, {
+    key: 'getWeaponReloadTime',
+    value: function getWeaponReloadTime(type) {
+      var time = 0;
+      switch (type || this.type) {
+        case 'ak47':
+          time = 1200;
+          break;
+
+        case 'awp':
+          time = 1500;
+          break;
+
+        case 'shotgun':
+          time = 600;
+          break;
+      }
+
+      return time;
+    }
+  }, {
     key: 'getBulletSize',
     value: function getBulletSize(type) {
       var size = null;
       switch (type || this.type) {
         case 'ak47':
           size = 3;
+          break;
+
+        case 'awp':
+          size = 5;
+          break;
+
+        case 'shotgun':
+          size = 2;
           break;
       }
 
@@ -7194,6 +7242,14 @@ var Weapon = function () {
         case 'ak47':
           velocity = 1000;
           break;
+
+        case 'awp':
+          velocity = 1500;
+          break;
+
+        case 'shotgun':
+          velocity = 1000;
+          break;
       }
 
       return velocity;
@@ -7204,28 +7260,149 @@ var Weapon = function () {
       var power = null;
       switch (type || this.type) {
         case 'ak47':
-          power = 20;
+          power = 15;
+          break;
+
+        case 'awp':
+          power = 90;
+          break;
+
+        case 'shotgun':
+          power = 10;
           break;
       }
 
       return power;
     }
   }, {
+    key: 'getWeaponFireBulletsAmount',
+    value: function getWeaponFireBulletsAmount(type) {
+      var amount = null;
+      switch (type || this.type) {
+        case 'shotgun':
+          amount = 4;
+          break;
+        default:
+          amount = 1;
+          break;
+      }
+
+      return amount;
+    }
+  }, {
+    key: 'getMaxAmmo',
+    value: function getMaxAmmo(type) {
+      var ammo = null;
+      switch (type || this.type) {
+        case 'ak47':
+          ammo = 20;
+          break;
+
+        case 'awp':
+          ammo = 1;
+          break;
+
+        case 'shotgun':
+          ammo = 4;
+          break;
+      }
+
+      return ammo;
+    }
+  }, {
+    key: 'getReloadTime',
+    value: function getReloadTime(type) {
+      var reload = null;
+      switch (type || this.type) {
+        case 'ak47':
+          reload = 650;
+          break;
+
+        case 'awp':
+          reload = 1500;
+          break;
+
+        case 'shotgun':
+          reload = 850;
+          break;
+      }
+
+      return reload;
+    }
+  }, {
+    key: 'canFire',
+    value: function canFire() {
+      return this.owner.hp > 0 && this.owner.visible !== false && this.type !== null && this.isReloading === false;
+    }
+  }, {
     key: 'fire',
     value: function fire() {
-      if (this.owner.hp <= 0 || this.owner.visible === false) return;
+      if (this.canFire() === false) return;
 
-      var angle = this.game.physics.arcade.angleToPointer(this.sprite);
+      var bulletsAmount = this.getWeaponFireBulletsAmount();
+      var pointerAngle = this.game.physics.arcade.angleToPointer(this.sprite);
+      var startAngle = pointerAngle;
+      var bulletAnglePerShot = Math.PI * 0.03;
 
-      this._bulletsRef.push({
-        x: this.sprite.x,
-        y: this.sprite.y,
-        size: this.getBulletSize(),
-        angle: angle,
-        velocity: this.getBulletVelocity(),
-        owner: this.game.currentUser.key,
-        power: this.getBulletPower()
+      if (bulletsAmount > 1) {
+        startAngle = startAngle - bulletsAmount / 2 * bulletAnglePerShot;
+      }
+
+      for (var i = 1; i <= bulletsAmount; i++) {
+        this._bulletsRef.push({
+          x: this.sprite.x,
+          y: this.sprite.y,
+          size: this.getBulletSize(),
+          angle: startAngle,
+          velocity: this.getBulletVelocity(),
+          owner: this.game.currentUser.key,
+          power: this.getBulletPower()
+        });
+
+        if (bulletsAmount > 1) startAngle += bulletAnglePerShot;
+
+        this.ammo--;
+      }
+
+      if (this.ammo <= 0) {
+        this.reload();
+      }
+    }
+  }, {
+    key: 'reload',
+    value: function reload() {
+      var _this = this;
+
+      this.isReloading = true;
+
+      this.game.time.events.add(this.getWeaponReloadTime(), function () {
+        _this.isReloading = false;
+        _this.ammo = _this.getMaxAmmo();
       });
+    }
+  }], [{
+    key: 'getTypeByFrame',
+    value: function getTypeByFrame(frame) {
+      var type = null;
+      switch (frame) {
+        case 0:
+          type = 'ak47';
+          break;
+        case 4:
+          type = 'pistol';
+          break;
+        case 8:
+          type = 'm4';
+          break;
+        case 12:
+          type = 'shotgun';
+          break;
+        case 16:
+          type = 'awp';
+          break;
+      }
+
+      return type;
     }
   }]);
 
@@ -12727,6 +12904,75 @@ module.exports = firebase.storage;
 __webpack_require__(125);
 module.exports = __webpack_require__(124);
 
+
+/***/ }),
+/* 333 */,
+/* 334 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _phaser = __webpack_require__(16);
+
+var _phaser2 = _interopRequireDefault(_phaser);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var _class = function (_Phaser$State) {
+  _inherits(_class, _Phaser$State);
+
+  function _class() {
+    _classCallCheck(this, _class);
+
+    return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+  }
+
+  _createClass(_class, [{
+    key: 'init',
+    value: function init(dbGame) {
+      this.dbGame = dbGame;
+    }
+  }, {
+    key: 'preload',
+    value: function preload() {
+      console.log(this);
+      this.game.load.tilemap('map-' + this.dbGame.map, 'assets/maps/' + this.dbGame.map + '/map.json', null, _phaser2.default.Tilemap.TILED_JSON);
+      this.game.load.image('tiles-' + this.dbGame.map, 'assets/maps/' + this.dbGame.map + '/tiles.png');
+
+      // Loading info
+      var loadingText = this.add.text(this.world.centerX, this.world.centerY, 'Wczytywanie tajemniczych danych...', {
+        font: '16px Arial',
+        fill: '#fff',
+        align: 'center'
+      });
+      loadingText.anchor.setTo(0.5, 0.5);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      if (this.game.load.isLoading === false && this.dbGame.name !== null) {
+        this.state.start('Game', true, false, this.dbGame);
+      }
+    }
+  }]);
+
+  return _class;
+}(_phaser2.default.State);
+
+exports.default = _class;
 
 /***/ })
 ],[332]);

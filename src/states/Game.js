@@ -52,7 +52,7 @@ export default class extends Phaser.State
   {
     for (let playerKey in this.dbGame.players)
     {
-      let player = playerKey === this.game.currentUser.key ? new CurrentPlayer(this.game, this.dbGame.getPlayerRef(playerKey)) : new Player(this.game, this.dbGame.getPlayerRef(playerKey))
+      let player = playerKey === this.game.currentUser.key ? new CurrentPlayer(this.game, this.dbGame.getPlayerRef(playerKey)) : new Player(this.game, this.dbGame.getPlayerRef(playerKey));
       player.eventEmitter.on('connection', this.onConnectionPlayer);
 
       if (player instanceof CurrentPlayer)
@@ -66,16 +66,15 @@ export default class extends Phaser.State
 
   onConnectionPlayer (player)
   {
-    if (player.online) player.visible = true;
-    else player.visible = false;
+    player.visible = player.online;
   }
 
   respawnPlayer (player)
   {
-    let respawns = this.game.map.properties.respawn;
-    let randomIndex = Math.floor(Math.random() * respawns.length);
+    let respawn = this.game.map.properties.respawn;
+    let randomIndex = Math.floor(Math.random() * respawn.length);
 
-    let respawnTile = this.game.map.getTile(respawns[randomIndex][0], respawns[randomIndex][1], this.game.layers.layer);
+    let respawnTile = this.game.map.getTile(respawn[randomIndex][0], respawn[randomIndex][1], this.game.layers.layer);
 
     player.respawn(respawnTile.worldX, respawnTile.worldY);
   }

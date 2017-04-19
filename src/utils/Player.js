@@ -132,11 +132,6 @@ class Player extends Phaser.Group
     this.visible = this.online;
   }
 
-  /**
-   * Returns player's position.
-   *
-   * @returns {object}
-   */
   getPosition ()
   {
     return this._position;
@@ -186,9 +181,11 @@ class Player extends Phaser.Group
 
   createWeaponSprite ()
   {
-    this.weaponSprite = new Phaser.Sprite(this.game, 0, 0, 'weapons', 0);
+    let weaponFrame = this.getWeaponFrame();
+
+    this.weaponSprite = new Phaser.Sprite(this.game, 0, 0, 'weapons', weaponFrame);
     this.weaponSprite.anchor.set(0, 0.5);
-    this.weaponSprite.defaultFrame = 0;
+    this.weaponSprite.defaultFrame = weaponFrame;
     this.addAt(this.weaponSprite, 0);
   }
 
@@ -480,6 +477,28 @@ class Player extends Phaser.Group
     {
       this.instantlyPositionUpdate();
     }, this);
+  }
+
+  getWeaponFrame ()
+  {
+    if (this.skin === null) throw new Error('Skin is not loaded yet!');
+
+    let startFrame = null;
+
+    switch (this.skin)
+    {
+      case 'kamil':
+        startFrame = 0;
+        break;
+      case 'ninja':
+        startFrame = 16;
+        break;
+      case 'rambo':
+        startFrame = 12;
+        break;
+    }
+
+    return startFrame;
   }
 }
 
