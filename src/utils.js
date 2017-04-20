@@ -18,3 +18,13 @@ export const padNumber = (n, pad) =>
 
   return number;
 };
+
+export const escapeSpecialChars = (text) =>
+{
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}

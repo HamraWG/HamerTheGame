@@ -1,6 +1,7 @@
 'use strict';
 
 import Phaser from 'phaser';
+import {escapeSpecialChars} from './../utils';
 import config from './../config';
 
 import Lobbies from './../utils/Lobbies';
@@ -157,7 +158,7 @@ export default class extends Phaser.State
     lobby.on('change', (data) =>
     {
       let lobbyName = lobbyElement.querySelector('.lobby-item__name');
-      lobbyName.innerHTML = data.name;
+      lobbyName.innerHTML = escapeSpecialChars(data.name);
 
       let lobbyPlayers = lobbyElement.querySelector('.lobby-item__players');
       while (lobbyPlayers.hasChildNodes()) lobbyPlayers.removeChild(lobbyPlayers.lastChild);
@@ -175,7 +176,7 @@ export default class extends Phaser.State
 
     let lobbyName = document.createElement('h3');
     lobbyName.classList.add('lobby-item__name');
-    lobbyName.innerHTML = name;
+    lobbyName.innerHTML = escapeSpecialChars(name);
 
     return lobbyName;
   }
@@ -200,7 +201,7 @@ export default class extends Phaser.State
     for (let key in players)
     {
       let player = document.createElement('li');
-      player.innerHTML = players[key];
+      player.innerHTML = escapeSpecialChars(players[key].name);
       player.classList.add('lobby-item__player');
       if (key === owner) player.classList.add('lobby-item__player--owner');
 
