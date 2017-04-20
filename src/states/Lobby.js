@@ -19,6 +19,11 @@ export default class extends Phaser.State
     this.isOwner = false;
   }
 
+  preload ()
+  {
+    this.load.spritesheet('avatars', 'assets/champions/avatars.png');
+  }
+
   create ()
   {
     this.game.add.image(60, 11, 'm-logo');
@@ -65,9 +70,7 @@ export default class extends Phaser.State
     button.style.right = '60px';
     button.style.top = '10px';
 
-    button.addEventListener('click', () => {
-      this.goToLobbies();
-    });
+    button.addEventListener('click', this.goToLobbies);
 
     document.querySelector('#game').appendChild(button);
   }
@@ -81,7 +84,9 @@ export default class extends Phaser.State
 
       if (!document.querySelector('#lobby-ui .owner-box'))
       {
-        this.lobbyUI.appendChild(this.createOwnerBox());
+        let manageBox = this.lobbyUI.querySelector('.management-box');
+        if (manageBox.childElementCount > 0) manageBox.insertBefore(this.createOwnerBox(), manageBox.firstChild);
+        else manageBox.appendChild(this.createOwnerBox());
       }
     }
     else
@@ -100,6 +105,9 @@ export default class extends Phaser.State
     this.lobbyUI.style.height = `${config.gameHeight - 80}px`;
 
     this.lobbyUI.appendChild(this.createPlayerBox());
+    this.lobbyUI.appendChild(this.createManagementBox());
+    this.isUserAnOwner(this.lobby.owner);
+
     document.querySelector('#game').appendChild(this.lobbyUI);
   }
 
@@ -128,8 +136,6 @@ export default class extends Phaser.State
     while (lobbyPlayers.hasChildNodes()) lobbyPlayers.removeChild(lobbyPlayers.lastChild);
     let playersItems = this.createPlayersItems(data.players, data.owner);
     playersItems.forEach((item) => lobbyPlayers.appendChild(item));
-
-    this.isUserAnOwner(data.owner);
   }
 
   _createLobbyName ()
@@ -159,7 +165,7 @@ export default class extends Phaser.State
     for (let key in players)
     {
       let player = document.createElement('li');
-      player.innerHTML = players[key];
+      player.innerHTML = players[key].name;
       player.classList.add('lobby__player');
       if (key === owner) player.classList.add('lobby__player--owner');
 
@@ -167,6 +173,65 @@ export default class extends Phaser.State
     }
 
     return playersSet;
+  }
+
+  createManagementBox ()
+  {
+    let managementBox = document.createElement('div');
+    managementBox.classList.add('management-box');
+
+    managementBox.appendChild(this._createChampionForm());
+
+    return managementBox;
+  }
+
+  _createChampionForm ()
+  {
+    let champForm = document.createElement('form');
+    champForm.classList.add('lobby-form', 'champion-form');
+
+    champForm.appendChild(this._createChampionInput('random'));
+    champForm.appendChild(this._createChampionInput('kamil'));
+    champForm.appendChild(this._createChampionInput('ninja'));
+    champForm.appendChild(this._createChampionInput('rambo'));
+
+    return champForm;
+  }
+
+  _createChampionInput (champion)
+  {
+    let label = document.createElement('label');
+
+    let input = document.createElement('input');
+    input.setAttribute('type', 'radio');
+    input.setAttribute('name', 'champion');
+    input.setAttribute('value', champion);
+    input.id = `champion-${champion}`;
+
+    label.appendChild(input);
+
+    label.addEventListener('click', (evt) =>
+    {
+      this._onChampionCheckInput(evt, this.lobby);
+    });
+
+    return label;
+  }
+
+  _onChampionCheckInput (evt, lobby)
+  {
+    let label = evt.currentTarget;
+
+    if (label.classList.contains('checked')) return;
+
+    label.closest('form').querySelectorAll('label').forEach((l) =>
+    {
+      l.classList.remove('checked');
+    });
+
+    label.classList.add('checked');
+
+    lobby.setPlayerChampion(this.game.currentUser.key, label.querySelector('input').value);
   }
 
   createOwnerBox ()

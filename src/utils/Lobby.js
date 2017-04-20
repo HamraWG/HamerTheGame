@@ -18,7 +18,7 @@ class Lobby
     this._key = this._dbRef.key;
     this._name = this._dbRef.name;
     this._owner = this._dbRef.owner;
-    this._players = this._dbRef.players;
+    this._players = {};
     this._map = this._dbRef.map;
     this._gameType = this._dbRef.gameType;
 
@@ -101,7 +101,12 @@ class Lobby
   addPlayer (player)
   {
     this._players[player.key] = player.name;
-    this._dbRef.child('players').update({[player.key]: player.name});
+    this._dbRef.child('players').update({
+      [player.key]: {
+        name: player.name,
+        skin: 'random'
+      }
+    });
 
     return this;
   }
@@ -206,7 +211,7 @@ class Lobby
       this._key = snapshot.key;
       this._name = data.name;
       this._owner = data.owner;
-      this._players = data.players;
+      this._players = data.players || {};
       this._map = data.map;
       this._gameType = data.gameType;
 
@@ -270,6 +275,13 @@ class Lobby
     this._eventsStorage = {};
 
     return this;
+  }
+
+  setPlayerChampion (key, champion)
+  {
+    this._dbRef.child(`players/${key}`).update({
+      skin: champion
+    });
   }
 }
 

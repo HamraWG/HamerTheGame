@@ -17,8 +17,8 @@ class GameCreator
     this.gameLast = 5;
 
     this.champions = [
-      'ninja',
       'kamil',
+      'ninja',
       'rambo'
     ];
   }
@@ -68,11 +68,11 @@ class GameCreator
     {
       if (players.hasOwnProperty(pKey) === false) continue;
 
-      let championIndex = Math.floor(Math.random() * this.champions.length);
+      if (this.champions.includes(players[pKey].skin) === false) players[pKey].skin = this.champions[0];
 
       playersConfig[pKey] = {
-        name: players[pKey],
-        skin: this.champions[championIndex],
+        name: players[pKey].name,
+        skin: players[pKey].skin,
         online: false,
         hp: 100,
         respawn: 0,

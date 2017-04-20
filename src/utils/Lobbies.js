@@ -41,9 +41,6 @@ class Lobbies
     let lobby = this._dbRef.push({
       name: name,
       owner: owner.key,
-      players: {
-        [owner.key]: owner.name
-      },
 
       gameType: 'deathmatch',
       map: maps[mapIndex]

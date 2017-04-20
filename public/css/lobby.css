@@ -54,11 +54,67 @@
   width: 100%;
 }
 
-.owner-box
+.management-box
 {
   box-sizing: border-box;
   width: 35%;
   padding: 26px 20px 20px 20px;
+  color: #fff;
+}
+
+.champion-form
+{
+  display: flex;
+  margin-top: 20px;
+}
+
+.champion-form label
+{
+  width: 32px;
+  height: 32px;
+  padding: 10px;
+  position: relative;
+}
+
+.champion-form label.checked
+{
+  background: #1d1b19;
+}
+
+.champion-form label:after
+{
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 32px;
+  height: 32px;
+  background: url(../assets/champions/avatars.png) no-repeat;
+}
+
+.champion-form label:nth-of-type(1):after
+{
+  background-position: 0 0;
+}
+
+.champion-form label:nth-of-type(2):after
+{
+  background-position: -32px 0;
+}
+
+.champion-form label:nth-of-type(3):after
+{
+  background-position: -64px 0;
+}
+
+.champion-form label:nth-of-type(4):after
+{
+  background-position: -96px 0;
+}
+
+.champion-form input[type=radio]
+{
+  display: none;
 }
 
 .back-button
@@ -72,10 +128,4 @@
   font: 400 16px 'Exo', sans-serif;
   cursor: pointer;
 }
-
-.back-button:hover
-{
-
-}
-
 

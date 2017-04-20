@@ -5492,6 +5492,11 @@ var _class = function (_Phaser$State) {
       this.isOwner = false;
     }
   }, {
+    key: 'preload',
+    value: function preload() {
+      this.load.spritesheet('avatars', 'assets/champions/avatars.png');
+    }
+  }, {
     key: 'create',
     value: function create() {
       this.game.add.image(60, 11, 'm-logo');
@@ -5528,8 +5533,6 @@ var _class = function (_Phaser$State) {
   }, {
     key: 'createBackToLobbiesButton',
     value: function createBackToLobbiesButton() {
-      var _this2 = this;
-
       var button = document.createElement('button');
       button.setAttribute('type', 'button');
       button.classList.add('back-button');
@@ -5539,9 +5542,7 @@ var _class = function (_Phaser$State) {
       button.style.right = '60px';
       button.style.top = '10px';
 
-      button.addEventListener('click', function () {
-        _this2.goToLobbies();
-      });
+      button.addEventListener('click', this.goToLobbies);
 
       document.querySelector('#game').appendChild(button);
     }
@@ -5553,7 +5554,8 @@ var _class = function (_Phaser$State) {
         this.gameCreator = new _GameCreator2.default();
 
         if (!document.querySelector('#lobby-ui .owner-box')) {
-          this.lobbyUI.appendChild(this.createOwnerBox());
+          var manageBox = this.lobbyUI.querySelector('.management-box');
+          if (manageBox.childElementCount > 0) manageBox.insertBefore(this.createOwnerBox(), manageBox.firstChild);else manageBox.appendChild(this.createOwnerBox());
         }
       } else {
         this.isOwner = false;
@@ -5570,12 +5572,15 @@ var _class = function (_Phaser$State) {
       this.lobbyUI.style.height = _config2.default.gameHeight - 80 + 'px';
 
       this.lobbyUI.appendChild(this.createPlayerBox());
+      this.lobbyUI.appendChild(this.createManagementBox());
+      this.isUserAnOwner(this.lobby.owner);
+
       document.querySelector('#game').appendChild(this.lobbyUI);
     }
   }, {
     key: 'createPlayerBox',
     value: function createPlayerBox() {
-      var _this3 = this;
+      var _this2 = this;
 
       var lobbyPlayerBox = document.createElement('div');
       lobbyPlayerBox.classList.add('lobby');
@@ -5584,7 +5589,7 @@ var _class = function (_Phaser$State) {
       lobbyPlayerBox.appendChild(this._createLobbyPlayersList());
 
       this.lobby.on('change', function (data) {
-        return _this3.updateLobby(data);
+        return _this2.updateLobby(data);
       });
 
       return lobbyPlayerBox;
@@ -5605,8 +5610,6 @@ var _class = function (_Phaser$State) {
       playersItems.forEach(function (item) {
         return lobbyPlayers.appendChild(item);
       });
-
-      this.isUserAnOwner(data.owner);
     }
   }, {
     key: '_createLobbyName',
@@ -5637,7 +5640,7 @@ var _class = function (_Phaser$State) {
 
       for (var key in players) {
         var player = document.createElement('li');
-        player.innerHTML = players[key];
+        player.innerHTML = players[key].name;
         player.classList.add('lobby__player');
         if (key === owner) player.classList.add('lobby__player--owner');
 
@@ -5645,6 +5648,65 @@ var _class = function (_Phaser$State) {
       }
 
       return playersSet;
+    }
+  }, {
+    key: 'createManagementBox',
+    value: function createManagementBox() {
+      var managementBox = document.createElement('div');
+      managementBox.classList.add('management-box');
+
+      managementBox.appendChild(this._createChampionForm());
+
+      return managementBox;
+    }
+  }, {
+    key: '_createChampionForm',
+    value: function _createChampionForm() {
+      var champForm = document.createElement('form');
+      champForm.classList.add('lobby-form', 'champion-form');
+
+      champForm.appendChild(this._createChampionInput('random'));
+      champForm.appendChild(this._createChampionInput('kamil'));
+      champForm.appendChild(this._createChampionInput('ninja'));
+      champForm.appendChild(this._createChampionInput('rambo'));
+
+      return champForm;
+    }
+  }, {
+    key: '_createChampionInput',
+    value: function _createChampionInput(champion) {
+      var _this3 = this;
+
+      var label = document.createElement('label');
+
+      var input = document.createElement('input');
+      input.setAttribute('type', 'radio');
+      input.setAttribute('name', 'champion');
+      input.setAttribute('value', champion);
+      input.id = 'champion-' + champion;
+
+      label.appendChild(input);
+
+      label.addEventListener('click', function (evt) {
+        _this3._onChampionCheckInput(evt, _this3.lobby);
+      });
+
+      return label;
+    }
+  }, {
+    key: '_onChampionCheckInput',
+    value: function _onChampionCheckInput(evt, lobby) {
+      var label = evt.currentTarget;
+
+      if (label.classList.contains('checked')) return;
+
+      label.closest('form').querySelectorAll('label').forEach(function (l) {
+        l.classList.remove('checked');
+      });
+
+      label.classList.add('checked');
+
+      lobby.setPlayerChampion(this.game.currentUser.key, label.querySelector('input').value);
     }
   }, {
     key: 'createOwnerBox',
@@ -6550,7 +6612,7 @@ var GameCreator = function () {
 
     this.gameLast = 5;
 
-    this.champions = ['ninja', 'kamil', 'rambo'];
+    this.champions = ['kamil', 'ninja', 'rambo'];
   }
 
   /**
@@ -6600,11 +6662,11 @@ var GameCreator = function () {
       for (var pKey in players) {
         if (players.hasOwnProperty(pKey) === false) continue;
 
-        var championIndex = Math.floor(Math.random() * this.champions.length);
+        if (this.champions.includes(players[pKey].skin) === false) players[pKey].skin = this.champions[0];
 
         playersConfig[pKey] = {
-          name: players[pKey],
-          skin: this.champions[championIndex],
+          name: players[pKey].name,
+          skin: players[pKey].skin,
           online: false,
           hp: 100,
           respawn: 0,
@@ -6653,8 +6715,6 @@ var _utils = __webpack_require__(30);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
@@ -6695,7 +6755,6 @@ var Lobbies = function () {
       var lobby = this._dbRef.push({
         name: name,
         owner: owner.key,
-        players: _defineProperty({}, owner.key, owner.name),
 
         gameType: 'deathmatch',
         map: maps[mapIndex]
@@ -6878,7 +6937,7 @@ var Lobby = function () {
     this._key = this._dbRef.key;
     this._name = this._dbRef.name;
     this._owner = this._dbRef.owner;
-    this._players = this._dbRef.players;
+    this._players = {};
     this._map = this._dbRef.map;
     this._gameType = this._dbRef.gameType;
 
@@ -6904,7 +6963,10 @@ var Lobby = function () {
      */
     value: function addPlayer(player) {
       this._players[player.key] = player.name;
-      this._dbRef.child('players').update(_defineProperty({}, player.key, player.name));
+      this._dbRef.child('players').update(_defineProperty({}, player.key, {
+        name: player.name,
+        skin: 'random'
+      }));
 
       return this;
     }
@@ -6978,7 +7040,7 @@ var Lobby = function () {
         _this._key = snapshot.key;
         _this._name = data.name;
         _this._owner = data.owner;
-        _this._players = data.players;
+        _this._players = data.players || {};
         _this._map = data.map;
         _this._gameType = data.gameType;
 
@@ -7048,6 +7110,13 @@ var Lobby = function () {
       this._eventsStorage = {};
 
       return this;
+    }
+  }, {
+    key: 'setPlayerChampion',
+    value: function setPlayerChampion(key, champion) {
+      this._dbRef.child('players/' + key).update({
+        skin: champion
+      });
     }
   }, {
     key: 'key',
