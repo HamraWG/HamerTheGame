@@ -20,7 +20,7 @@ class Game extends Phaser.Game
 {
   constructor ()
   {
-    super(config.gameWidth, config.gameHeight, Phaser.WEBGL, 'game', null);
+    super(config.gameWidth, config.gameHeight, Phaser.AUTO, 'game', null);
 
     this.state.add('Boot', BootState, false);
     this.state.add('Menu', MenuState, false);
