@@ -123,7 +123,7 @@ class Weapon
         break;
 
       case 'shotgun':
-        power = 10;
+        power = 15;
         break;
     }
 
