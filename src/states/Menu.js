@@ -32,12 +32,28 @@ export default class extends Phaser.State
     );
     joinBtn.anchor.setTo(0.5, 0.5);
 
+    this.createCredits();
+
     this.createNameField();
   }
 
   shutdown ()
   {
     this.nameField.parentNode.removeChild(this.nameField);
+  }
+
+  createCredits ()
+  {
+    let credits = this.game.add.text(
+      5,
+      this.game.height,
+      `Credits:\nProgramista: Tomasz 'Ivan' Kłusak\nGraficy: Bartek Wiercigroch, Grzesiu Witos, Kamil Glac\nMuzyka (soon): Radek Niemczycki`,
+      {
+        fill: '#fff',
+        font: '400 10px Exo'
+      }
+    );
+    credits.anchor.setTo(0, 1);
   }
 
   createNameField ()

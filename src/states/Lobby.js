@@ -71,7 +71,7 @@ export default class extends Phaser.State
     button.style.right = '60px';
     button.style.top = '10px';
 
-    button.addEventListener('click', this.goToLobbies);
+    button.addEventListener('click', () => this.goToLobbies());
 
     document.querySelector('#game').appendChild(button);
   }

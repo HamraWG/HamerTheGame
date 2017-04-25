@@ -315,7 +315,7 @@ class Player extends Phaser.Group
 
   updatePlayerHealth ()
   {
-    let healthAlpha = this._hp / 100;
+    let healthAlpha = this._hp > 0 ? this._hp / 100 : 0;
     this.alpha = healthAlpha;
   }
 
