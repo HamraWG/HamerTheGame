@@ -52,9 +52,12 @@ class User
     if (typeof name !== 'string') throw new TypeError('name must be a non-empty string.');
 
     this._name = name;
-    this._dbRef.child(this._key).update({
-      name: name.toString()
-    });
+    this._key = this._dbRef.push({
+      name: name.toString(),
+      createdAt: new Date().toISOString()
+    }).key;
+
+    localStorage.setItem(this._dbKeyStorageRef, this._key);
   }
 
   /**
@@ -70,34 +73,13 @@ class User
     {
       this._dbRef.child(storeKey).once('value').then(snapshot =>
       {
-        if (snapshot.exists() === false)
-        {
-          this.createNewKey();
-        }
-        else
+        if (snapshot.exists() === true)
         {
           this._key = snapshot.key;
           this._name = snapshot.val().name;
         }
       });
-
-      return;
     }
-
-    this.createNewKey();
-  }
-
-  /**
-   * Creates new user in database and push reference key into localStorage.
-   *
-   * @returns {User}
-   */
-  createNewKey ()
-  {
-    this._key = this._dbRef.push().key;
-    localStorage.setItem(this._dbKeyStorageRef, this._key);
-
-    return this;
   }
 }
 

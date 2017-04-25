@@ -18,6 +18,8 @@ export default class extends Phaser.State
     this.endScreenStatus = false;
 
     this.currentPlayer = null;
+
+    this.createQuitFunction();
   }
 
   shutdown ()
@@ -443,5 +445,14 @@ export default class extends Phaser.State
     this.game.add.existing(this.endScreen);
 
     this.game.add.tween(this.endScreen).to({alpha: 1}, 500, Phaser.Easing.Linear.None, true);
+  }
+
+  createQuitFunction ()
+  {
+    window.quit = () =>
+    {
+      localStorage.removeItem('firebase:game:id');
+      window.location.reload(true); 
+    };
   }
 }
