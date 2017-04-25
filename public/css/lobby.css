@@ -5,6 +5,11 @@
   font-family: 'Exo', sans-serif;
 }
 
+#create-lobby-form
+{
+  width: 35%;
+}
+
 .lobby__name:after
 {
   width: 100%;
