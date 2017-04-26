@@ -452,7 +452,7 @@ export default class extends Phaser.State
     window.quit = () =>
     {
       localStorage.removeItem('firebase:game:id');
-      window.location.reload(true); 
+      window.location.reload(true);
     };
   }
 }

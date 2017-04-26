@@ -70,8 +70,8 @@ class Bullet extends Phaser.Sprite
   {
     if (this.owner === this.game.currentUser.key)
     {
-      hittedPlayer.hp -= this.power;
       hittedPlayer.lastHit = bulletOwner;
+      hittedPlayer.hp -= this.power;
 
       this._removeDBData();
     }

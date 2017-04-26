@@ -4580,7 +4580,7 @@ var _class = function (_Phaser$State) {
     value: function checkIfUserIsInGame() {
       var _this2 = this;
 
-      var gameKey = localStorage.getItem('firebase:game:id');
+      var gameKey = localStorage.getItem('firebse:game:id');
       if (!gameKey) {
         this.inGame = false;
         return;
@@ -6090,8 +6090,8 @@ var Bullet = function (_Phaser$Sprite) {
     key: 'hit',
     value: function hit(bulletOwner, hittedPlayer) {
       if (this.owner === this.game.currentUser.key) {
-        hittedPlayer.hp -= this.power;
         hittedPlayer.lastHit = bulletOwner;
+        hittedPlayer.hp -= this.power;
 
         this._removeDBData();
       }
