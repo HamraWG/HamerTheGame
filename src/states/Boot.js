@@ -10,7 +10,7 @@ export default class extends Phaser.State
   {
     this.fontsLoaded = this.fontsLoaded.bind(this);
 
-    this.stage.backgroundColor = '#1d1b19';
+    this.stage.backgroundColor = '#191919';
     this.fontsReady = false;
     this.inGame = null;
   }
@@ -26,9 +26,9 @@ export default class extends Phaser.State
     });
 
     // Assets
-    this.load.image('m-logo', 'assets/images/m-logo.png');
-    this.load.image('logo', 'assets/images/logo.png');
-    this.load.spritesheet('menu__join-button', 'assets/images/menu/join-button.png', 318, 50);
+    this.load.image('logo', 'assets/logo.png');
+    this.load.image('menu.background_pixels', 'assets/menu/background_pixels.png');
+    this.load.image('menu.join_button', 'assets/menu/join_button.png');
 
     this.checkIfUserIsInGame();
 
@@ -36,7 +36,7 @@ export default class extends Phaser.State
     let loadingText = this.add.text(
       this.world.centerX,
       this.world.centerY,
-      'Wczytywanie tajemniczych danych.',
+      'Wczytywanie danych',
       {
         font: '16px Arial',
         fill: '#fff',
